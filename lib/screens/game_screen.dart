@@ -9,14 +9,15 @@ import 'package:team_hurricane_hockey/screens/widgets/center_circe.dart';
 import 'package:team_hurricane_hockey/screens/widgets/player.dart';
 import 'package:team_hurricane_hockey/screens/widgets/spaces.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+class GameScreen extends StatefulWidget {
+  const GameScreen({Key? key}) : super(key: key);
+static const routeName = 'gameScreen';
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<GameScreen> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<GameScreen> {
   // player 1 & 2 and ball variables
   Player player1 = Player(
     color: Colors.red,
