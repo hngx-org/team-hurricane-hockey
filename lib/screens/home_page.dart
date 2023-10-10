@@ -5,7 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:team_hurricane_hockey/constants.dart';
 import 'package:team_hurricane_hockey/models/player.dart';
 import 'package:team_hurricane_hockey/models/puck.dart';
+import 'package:team_hurricane_hockey/screens/widgets/center_circe.dart';
+import 'package:team_hurricane_hockey/screens/widgets/dotted_line.dart';
 import 'package:team_hurricane_hockey/screens/widgets/player.dart';
+import 'package:team_hurricane_hockey/screens/widgets/spaces.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -152,9 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Ensure player2 stays within the horizontal boundaries.
     player2.left = player2.left < 0 ? 0 : player2.left;
-    player2.left = player2.left > (tableWidth - player2.size)
-        ? (tableWidth - player2.size)
-        : player2.left;
+    player2.left = player2.left > (tableWidth - player2.size) ? (tableWidth - player2.size) : player2.left;
 
     setState(() {}); // Update the UI to reflect player2's new position.
   }
@@ -172,10 +173,10 @@ class _MyHomePageState extends State<MyHomePage> {
       player2.score = 0;
       tableWidth = sWidth - playerSize;
       tableHeight = sHeight - 4 * playerSize;
-      player1.left = tableWidth / 2 - playerRadius;
-      player1.top = 0;
-      player2.left = tableWidth /2 - playerRadius;
-      player2.top = tableHeight - playerSize;
+      player1.left = sWidth / 2 - playerRadius;
+      player1.top = playerSize * 3;
+      player2.left = sWidth / 2 - playerRadius;
+      player2.top = sHeight - (playerSize * 6);
       textStartLeft = tableWidth / 2 - textStartWidth / 2;
       textStartTop = tableHeight / 2 - textStartHeight / 2;
       ball.left = tableWidth / 2 - ballRadius;
@@ -186,31 +187,30 @@ class _MyHomePageState extends State<MyHomePage> {
       defendGoal();
     }
 
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(
+    return Scaffold(
+      backgroundColor: Colors.white.withOpacity(.8),
+      body: SafeArea(
+        child: Center(
           child: Container(
-            color: Colors.green,
-            width: tableWidth,
-            height: tableHeight,
+            color: Colors.white.withOpacity(.8),
+            width: sWidth,
+            height: sHeight,
             child: Stack(
               children: [
-                // The table which is stateless and does not move
-                const Positioned(
+                /**
+                 * The table which is stateless and does not move
+                 * This is the design of the board created by Tirioh, Abiodun and CCLeo
+                 */
+                Positioned(
                   child: Column(
                     children: [
-                      SizedBox(
-                        height: playerSize * 3,
-                      ),
-                      Divider(),
-                      Expanded(child: SizedBox()),
-                      Divider(color: Colors.white, thickness: 2),
-                      Expanded(child: SizedBox()),
-                      Divider(),
-                      SizedBox(
-                        height: playerSize * 3,
-                      ),
+                      const Expanded(child: TopSpace(playerSize: playerSize)),
+                      Divider(color: Colors.blue[800], thickness: 4),
+                      const SizedBox(height: playerSize * 2),
+                      const CenterLine(),
+                      const SizedBox(height: playerSize * 2),
+                      Divider(color: Colors.blue[800], thickness: 4),
+                      const Expanded(child: BottomSpace(playerSize: playerSize)),
                     ],
                   ),
                 ),
@@ -259,16 +259,11 @@ class _MyHomePageState extends State<MyHomePage> {
                           onPanUpdate: (details) {
                             player1.left += details.delta.dx;
                             player1.left = player1.left > 0 ? player1.left : 0;
-                            player1.left =
-                                player1.left < (tableWidth - playerSize)
-                                    ? player1.left
-                                    : (tableWidth - playerSize);
+                            player1.left = player1.left < (tableWidth - playerSize) ? player1.left : (tableWidth - playerSize);
                             player1.shotX = details.delta.dx;
                             player1.top += details.delta.dy;
                             player1.top = player1.top > 0 ? player1.top : 0;
-                            player1.top = player1.top < playerSize * 2
-                                ? player1.top
-                                : playerSize * 2;
+                            player1.top = player1.top < (sHeight / 2 - (kToolbarHeight - 20)) ? player1.top : playerSize * 2;
                             player1.shotY = details.delta.dy;
                             setState(() {});
                           },
@@ -287,9 +282,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ? Positioned(
                         left: player2.left,
                         top: player2.top,
-                        child: PlayerChip(
-                            player:
-                                player2), // Player2 is now controlled by AI.
+                        child: PlayerChip(player: player2), // Player2 is now controlled by AI.
                       )
                     : const SizedBox(),
 
@@ -307,8 +300,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             child: Visibility(
                               visible: showStartText,
                               child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
                                 children: [
                                   RotatedBox(
                                     quarterTurns: 2,
@@ -347,23 +339,15 @@ class _MyHomePageState extends State<MyHomePage> {
                           quarterTurns: turn == player1.name ? 2 : 0,
                           child: Text(
                             textStart,
-                            style: TextStyle(
-                                fontSize: textStartFontSize,
-                                color: turn == player1.name
-                                    ? player1.color
-                                    : player2.color),
+                            style: TextStyle(fontSize: textStartFontSize, color: turn == player1.name ? player1.color : player2.color),
                           ),
                         ),
                         onPressed: () async {
                           if (gameIsFinished) {
                             return;
                           }
-                          xSpeed = Random().nextBool()
-                              ? (Random().nextInt(2) + 1).toDouble()
-                              : -(Random().nextInt(2) + 1).toDouble();
-                          ySpeed = turn == player1.name
-                              ? (Random().nextInt(1) + 1).toDouble()
-                              : -(Random().nextInt(1) + 1).toDouble();
+                          xSpeed = Random().nextBool() ? (Random().nextInt(2) + 1).toDouble() : -(Random().nextInt(2) + 1).toDouble();
+                          ySpeed = turn == player1.name ? (Random().nextInt(1) + 1).toDouble() : -(Random().nextInt(1) + 1).toDouble();
                           showStartText = false;
                           do {
                             ball.left += xSpeed;
@@ -381,8 +365,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               break;
                             }
                             doTheMathWork();
-                            await Future.delayed(
-                                const Duration(milliseconds: 1));
+                            await Future.delayed(const Duration(milliseconds: 1));
                             setState(() {});
                           } while (true);
                         },
