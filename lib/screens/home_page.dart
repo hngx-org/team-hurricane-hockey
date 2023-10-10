@@ -6,7 +6,6 @@ import 'package:team_hurricane_hockey/constants.dart';
 import 'package:team_hurricane_hockey/models/player.dart';
 import 'package:team_hurricane_hockey/models/puck.dart';
 import 'package:team_hurricane_hockey/screens/widgets/center_circe.dart';
-import 'package:team_hurricane_hockey/screens/widgets/dotted_line.dart';
 import 'package:team_hurricane_hockey/screens/widgets/player.dart';
 import 'package:team_hurricane_hockey/screens/widgets/spaces.dart';
 
@@ -96,20 +95,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Check if the ball is inside the goalpost area.
     if ((ball.top <= 0 || ball.bottom >= tableHeight) &&
-        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) ||
-            (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
+        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) || (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
     } else if (ball.top <= 0 || ball.bottom >= tableHeight) {
       ySpeed = -ySpeed;
     } else {
-      distanceBall2P1 = pythagoras(
-          ball.centerX - player1.centerX, ball.centerY - player1.centerY);
-      distanceBall2P2 = pythagoras(
-          ball.centerX - player2.centerX, ball.centerY - player2.centerY);
+      distanceBall2P1 = pythagoras(ball.centerX - player1.centerX, ball.centerY - player1.centerY);
+      distanceBall2P2 = pythagoras(ball.centerX - player2.centerX, ball.centerY - player2.centerY);
 
       // Player1 (top player) calculations
       if (distanceBall2P1 <= playerRadius + ballRadius) {
-        xSpeed =
-            (ball.centerX - player1.centerX) / (ball.centerY - player1.centerY);
+        xSpeed = (ball.centerX - player1.centerX) / (ball.centerY - player1.centerY);
         if (player1.shotX != 0) {
           xSpeed = 5 * player1.shotX;
           ySpeed = 5 * player1.shotY;
@@ -121,8 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
       // Player2 (bottom player) calculations
       else if (distanceBall2P2 <= playerRadius + ballRadius) {
-        xSpeed = -(ball.centerX - player2.centerX) /
-            (ball.centerY - player2.centerY);
+        xSpeed = -(ball.centerX - player2.centerX) / (ball.centerY - player2.centerY);
         if (player2.shotX != 0) {
           xSpeed = 5 * player2.shotX;
           ySpeed = 5 * player2.shotY;
@@ -188,13 +182,14 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white.withOpacity(.8),
+      backgroundColor: Colors.black,
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: Center(
           child: Container(
-            color: Colors.white.withOpacity(.8),
+            color: Colors.white.withOpacity(.9),
             width: sWidth,
-            height: sHeight,
+            height: sHeight - 100,
             child: Stack(
               children: [
                 /**
@@ -220,33 +215,36 @@ class _MyHomePageState extends State<MyHomePage> {
                   left: 0, // Align to the left edge of the table
                   top: 0, // Align to the top edge of the table
                   child: Container(
-                    width: tableWidth,
-                    height: tableHeight,
+                    width: sWidth,
+                    height: sHeight - 100,
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.red, width: 2.0),
+                      border: Border.all(
+                        color: Colors.black,
+                        width: 7,
+                      ),
                     ),
                   ),
                 ),
 
                 // Goalpost 1
                 Positioned(
-                  left: (tableWidth - goalWidth) / 2, // Centered
+                  left: (sWidth - goalWidth) / 2, // Centered
                   top: 0, // Align to the top
                   child: Container(
                     width: goalWidth,
-                    height: 2,
-                    color: Colors.yellow, // Transparent background
+                    height: 5,
+                    color: Colors.red.shade800,
                   ),
                 ),
 
                 // Goalpost 2
                 Positioned(
-                  left: (tableWidth - goalWidth) / 2, // Centered
+                  left: (sWidth - goalWidth) / 2, // Centered
                   bottom: 0, // Align to the top
                   child: Container(
                     width: goalWidth,
-                    height: 2,
-                    color: Colors.yellow, // Transparent background
+                    height: 5,
+                    color: Colors.red.shade800, // Transparent background
                   ),
                 ),
 
