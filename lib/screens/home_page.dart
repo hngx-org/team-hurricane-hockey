@@ -104,7 +104,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Check if the ball is inside the goalpost area.
     if ((ball.top <= 0 || ball.bottom >= tableHeight) &&
-        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) || (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
+        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) ||
+            (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
     } else if (ball.top <= 0 || ball.bottom >= tableHeight) {
       ySpeed = -ySpeed;
     } else {
@@ -119,52 +120,91 @@ class _MyHomePageState extends State<MyHomePage> {
 
       // Player1 (top player) calculations
       if (distanceBall2P1 <= playerRadius + ballRadius) {
-        xSpeed = (ball.centerX - player1.centerX) / (ball.centerY - player1.centerY);
-        if (player1.shotX != 0) {
-          xSpeed = 5 * player1.shotX;
-          ySpeed = 5 * player1.shotY;
-        }
-        xSpeed = xSpeed > 10 ? 10 : xSpeed;
-        ySpeed = 1 / xSpeed.abs();
-        ySpeed = ySpeed > 5 ? 5 : ySpeed;
+        handlePaddleCollision(player1);
       }
 
       // Player2 (bottom player) calculations
       else if (distanceBall2P2 <= playerRadius + ballRadius) {
-        xSpeed = -(ball.centerX - player2.centerX) / (ball.centerY - player2.centerY);
-        if (player2.shotX != 0) {
-          xSpeed = 5 * player2.shotX;
-          ySpeed = 5 * player2.shotY;
-        }
-        xSpeed = xSpeed < -10 ? -10 : xSpeed;
-        ySpeed = -1 / xSpeed.abs();
-        ySpeed = ySpeed < (-5) ? (-5) : ySpeed;
+        handlePaddleCollision(player2);
       }
     }
   }
 
   // AI Logic for player2 (defending its house)
   void defendGoal() {
-    // Calculate the desired defensive position for player2.
+    // Calculate the desired defensive position for the computer player based on the ball's position.
     double desiredX = ball.centerX;
-    // Adjust desiredX to stay within the game table boundaries.
-    desiredX = desiredX < player1.size / 2
-        ? player1.size / 2
-        : desiredX > tableWidth - player1.size / 2
-            ? tableWidth - player1.size / 2
-            : desiredX;
-    // Move player2 towards the desiredX position.
+    double desiredY = ball.centerY;
+
+    // Adjust desiredX to stay within the computer player's half of the field horizontally.
+    double minX = 0;
+    double maxX = tableWidth - (player1.size + ball.size);
+    desiredX = desiredX.clamp(minX, maxX);
+
+    // Adjust desiredY to stay within the computer player's half of the field vertically.
+    double minY = 0; // Adjust this value as needed.
+    double maxY = tableHeight / 2 -100;
+    desiredY = desiredY.clamp(minY, maxY);
+
+    // Move the computer player's paddle towards the desired position.
     if (player1.centerX < desiredX) {
-      player1.left += 1.0; // Adjust the speed of player2's movement.
+      player1.left +=
+          3.0; // Adjust the speed of the computer player's horizontal movement.
     } else if (player1.centerX > desiredX) {
-      player1.left -= 1.0; // Adjust the speed of player2's movement.
+      player1.left -=
+          3.0; // Adjust the speed of the computer player's horizontal movement.
     }
 
-    // Ensure player2 stays within the horizontal boundaries.
-    player1.left = player1.left < 0 ? 0 : player1.left;
-    player1.left = player1.left > (tableWidth - player1.size) ? (tableWidth - player1.size) : player1.left;
+    if (player1.centerY < desiredY) {
+      player1.top +=
+          3.0; // Adjust the speed of the computer player's vertical movement.
+    } else if (player1.centerY > desiredY) {
+      player1.top -=
+          3.0; // Adjust the speed of the computer player's vertical movement.
+    }
 
-    setState(() {}); // Update the UI to reflect player2's new position.
+    // Ensure the computer player's paddle stays within its half of the field horizontally and vertically.
+    player1.top = player1.top.clamp(minY, maxY);
+
+    // Update the UI to reflect the computer player's new position.
+    setState(() {});
+  }
+
+  void handlePaddleCollision(Player player) {
+    // Calculate the horizontal and vertical distances between the ball and the player's center
+    double horizontalDistance = ball.centerX - player.centerX;
+    double verticalDistance = ball.centerY - player.centerY;
+
+    // Calculate the horizontal and vertical speed components
+    double horizontalSpeed = horizontalDistance / playerRadius;
+    double verticalSpeed = verticalDistance / playerRadius;
+
+    // Adjust the speed factors (make the ball move faster or slower)
+    double speedFactor = 2.0;
+
+    // Limit the maximum speed
+    double maxSpeed = 5.0;
+    horizontalSpeed = horizontalSpeed.clamp(-maxSpeed, maxSpeed);
+    verticalSpeed = verticalSpeed.clamp(-maxSpeed, maxSpeed);
+
+    // Calculate the new x and y speeds based on the direction of collision
+    if (horizontalDistance.abs() > verticalDistance.abs()) {
+      // Horizontal collision
+      xSpeed = horizontalSpeed * speedFactor;
+      ySpeed = verticalSpeed / horizontalSpeed.abs();
+      ySpeed *= speedFactor;
+    } else {
+      // Vertical collision
+      xSpeed = horizontalSpeed / verticalSpeed.abs();
+      xSpeed *= speedFactor;
+      ySpeed = verticalSpeed * speedFactor;
+    }
+
+    // Check for player's shot and adjust the speed if needed
+    if (player.shotX != 0) {
+      xSpeed = player.shotX * speedFactor;
+      ySpeed = player.shotY * speedFactor;
+    }
   }
 
   @override
@@ -197,201 +237,216 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       backgroundColor: Colors.black,
       resizeToAvoidBottomInset: true,
-      body: SafeArea(
-        child: Center(
-          child: Container(
-            color: Colors.white.withOpacity(.9),
-            width: sWidth,
-            height: sHeight - 100,
-            child: Stack(
-              children: [
-                /**
-                 * The table which is stateless and does not move
-                 * This is the design of the board created by Tirioh, Abiodun and CCLeo
-                 */
-                Positioned(
-                  child: Column(
-                    children: [
-                      const Expanded(child: TopSpace(playerSize: playerSize)),
-                      Divider(color: Colors.blue[800], thickness: 4),
-                      const SizedBox(height: playerSize * 2),
-                      const CenterLine(),
-                      const SizedBox(height: playerSize * 2),
-                      Divider(color: Colors.blue[800], thickness: 4),
-                      const Expanded(child: BottomSpace(playerSize: playerSize)),
-                    ],
-                  ),
+      body: Center(
+        child: Container(
+          color: Colors.white.withOpacity(.9),
+          width: sWidth,
+          height: sHeight - 100,
+          child: Stack(
+            children: [
+              /**
+               * The table which is stateless and does not move
+               * This is the design of the board created by Tirioh, Abiodun and CCLeo
+               */
+              Positioned(
+                child: Column(
+                  children: [
+                    const Expanded(child: TopSpace(playerSize: playerSize)),
+                    Divider(color: Colors.blue[800], thickness: 4),
+                    const SizedBox(height: playerSize * 2),
+                    const CenterLine(),
+                    const SizedBox(height: playerSize * 2),
+                    Divider(color: Colors.blue[800], thickness: 4),
+                    const Expanded(child: BottomSpace(playerSize: playerSize)),
+                  ],
                 ),
+              ),
 
-                // Goal Area Container with Borders
-                Positioned(
-                  left: 0, // Align to the left edge of the table
-                  top: 0, // Align to the top edge of the table
-                  child: Container(
-                    width: sWidth,
-                    height: sHeight - 100,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.black,
-                        width: 7,
-                      ),
+              // Goal Area Container with Borders
+              Positioned(
+                left: 0, // Align to the left edge of the table
+                top: 0, // Align to the top edge of the table
+                child: Container(
+                  width: sWidth,
+                  height: sHeight - 100,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.black,
+                      width: 7,
                     ),
                   ),
                 ),
-                // Goalpost 1
-                Positioned(
-                  left: (sWidth - goalWidth) / 2, // Centered
-                  top: 0, // Align to the top
-                  child: Container(
-                    width: goalWidth,
-                    height: 5,
-                    color: Colors.red.shade800,
-                  ),
+              ),
+              // Goalpost 1
+              Positioned(
+                left: (sWidth - goalWidth) / 2, // Centered
+                top: 0, // Align to the top
+                child: Container(
+                  width: goalWidth,
+                  height: 5,
+                  color: Colors.red.shade800,
                 ),
-                // Goalpost 2
-                Positioned(
-                  left: (sWidth - goalWidth) / 2, // Centered
-                  bottom: 0, // Align to the top
-                  child: Container(
-                    width: goalWidth,
-                    height: 5,
-                    color: Colors.red.shade800, // Transparent background
-                  ),
+              ),
+              // Goalpost 2
+              Positioned(
+                left: (sWidth - goalWidth) / 2, // Centered
+                bottom: 0, // Align to the top
+                child: Container(
+                  width: goalWidth,
+                  height: 5,
+                  color: Colors.red.shade800, // Transparent background
                 ),
-                // player1 (top player)
-                !gameIsFinished
-                    ? Positioned(
-                        left: player2.left,
-                        top: player2.top,
-                        child: GestureDetector(
-                          onPanUpdate: (details) {
-                            player2.left += details.delta.dx;
-                            player2.left = player2.left > 0 ? player2.left : 0;
-                            player2.left = player2.left < (tableWidth - playerSize) ? player2.left : (tableWidth - playerSize);
-                            player2.shotX = details.delta.dx;
-                            player2.top += details.delta.dy;
-                            player2.top = player2.top > 0 ? player2.top : 0;
-                            player2.top = player2.top > (sHeight / 2 - (kToolbarHeight - 20)) ? player2.top : (sHeight / 2 - (kToolbarHeight - 20));
-                            player2.top = player2.top >= (sHeight - (kToolbarHeight + 100)) ? sHeight - (kToolbarHeight + 100) : player2.top;
-                            player2.shotY = details.delta.dy;
-                            setState(() {});
-                          },
-                          onPanEnd: (details) {
-                            player2.shotX = 0;
-                            player2.shotY = 0;
-                            setState(() {});
-                          },
-                          child: PlayerChip(
-                            player: player2,
-                          ),
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-
-                // player2 (bottom player)
-                !gameIsFinished
-                    ? Positioned(
-                        left: player1.left,
-                        top: player1.top,
-                        child: PlayerChip(
-                          player: player1,
-                        ), // Player2 is now controlled by AI.
-                      )
-                    : const SizedBox.shrink(),
-                // ball and score text
-                Positioned(
-                  right: 48,
-                  top: (MediaQuery.of(context).size.height / 2) - 100,
-                  child: Column(
-                    children: [
-                      RotatedBox(
-                        quarterTurns: 1,
-                        child: Text(
-                          player1.score.toString(),
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 100),
-                      RotatedBox(
-                        quarterTurns: 1,
-                        child: Text(
-                          player2.score.toString(),
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                !gameIsFinished
-                    ? Positioned(
-                        left: ball.left,
-                        top: ball.top,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(ballRadius),
-                          child: Container(
-                            width: ballSize,
-                            height: ballSize,
-                            color: ball.color,
-                          ),
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-
-                Positioned(
-                  width: textStartWidth,
-                  height: textStartHeight,
-                  left: textStartLeft,
-                  top: textStartTop,
-                  child: Center(
-                    child: Visibility(
-                      visible: showStartText,
-                      child: TextButton(
-                        child: RotatedBox(
-                          quarterTurns: turn == player1.name ? 2 : 0,
-                          child: Text(
-                            textStart,
-                            style: TextStyle(fontSize: textStartFontSize, color: turn == player1.name ? player1.color : player2.color),
-                          ),
-                        ),
-                        onPressed: () async {
-                          if (gameIsFinished) {
-                            return;
-                          }
-                          xSpeed = Random().nextBool() ? (Random().nextInt(2) + 1).toDouble() : -(Random().nextInt(2) + 1).toDouble();
-                          ySpeed = turn == player1.name ? (Random().nextInt(1) + 1).toDouble() : -(Random().nextInt(1) + 1).toDouble();
-                          showStartText = false;
-                          do {
-                            ball.left += xSpeed;
-                            ball.top += ySpeed;
-                            if (ball.left > tableWidth - ballSize) {
-                              xSpeed = (-1) * (xSpeed.abs());
-                            } else if (ball.left <= 0) {
-                              xSpeed = xSpeed.abs();
-                            }
-                            if (ball.top > tableHeight - ballSize / 3) {
-                              nextRound(player1.name);
-                              break;
-                            } else if (ball.top <= 0 - ballSize * 2 / 3) {
-                              nextRound(player2.name);
-                              break;
-                            }
-                            doTheMathWork();
-                            await Future.delayed(const Duration(milliseconds: 1));
-                            setState(() {});
-                          } while (true);
+              ),
+              // player1 (top player)
+              !gameIsFinished
+                  ? Positioned(
+                      left: player2.left,
+                      top: player2.top,
+                      child: GestureDetector(
+                        onPanUpdate: (details) {
+                          player2.left += details.delta.dx;
+                          player2.left = player2.left > 0 ? player2.left : 0;
+                          player2.left =
+                              player2.left < (tableWidth - playerSize)
+                                  ? player2.left
+                                  : (tableWidth - playerSize);
+                          player2.shotX = details.delta.dx;
+                          player2.top += details.delta.dy;
+                          player2.top = player2.top > 0 ? player2.top : 0;
+                          player2.top = player2.top >
+                                  (sHeight / 2 - (kToolbarHeight - 20))
+                              ? player2.top
+                              : (sHeight / 2 - (kToolbarHeight - 20));
+                          player2.top =
+                              player2.top >= (sHeight - (kToolbarHeight + 100))
+                                  ? sHeight - (kToolbarHeight + 100)
+                                  : player2.top;
+                          player2.shotY = details.delta.dy;
+                          setState(() {});
                         },
+                        onPanEnd: (details) {
+                          player2.shotX = 0;
+                          player2.shotY = 0;
+                          setState(() {});
+                        },
+                        child: PlayerChip(
+                          player: player2,
+                        ),
                       ),
+                    )
+                  : const SizedBox.shrink(),
+
+              // player2 (bottom player)
+              !gameIsFinished
+                  ? Positioned(
+                      left: player1.left,
+                      top: player1.top,
+                      child: PlayerChip(
+                        player: player1,
+                      ), // Player2 is now controlled by AI.
+                    )
+                  : const SizedBox.shrink(),
+              // ball and score text
+              Positioned(
+                right: 48,
+                top: (MediaQuery.of(context).size.height / 2) - 100,
+                child: Column(
+                  children: [
+                    RotatedBox(
+                      quarterTurns: 1,
+                      child: Text(
+                        player1.score.toString(),
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 100),
+                    RotatedBox(
+                      quarterTurns: 1,
+                      child: Text(
+                        player2.score.toString(),
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              !gameIsFinished
+                  ? Positioned(
+                      left: ball.left,
+                      top: ball.top,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(ballRadius),
+                        child: Container(
+                          width: ballSize,
+                          height: ballSize,
+                          color: ball.color,
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+
+              Positioned(
+                width: textStartWidth,
+                height: textStartHeight,
+                left: textStartLeft,
+                top: textStartTop,
+                child: Center(
+                  child: Visibility(
+                    visible: showStartText,
+                    child: TextButton(
+                      child: RotatedBox(
+                        quarterTurns: turn == player1.name ? 2 : 0,
+                        child: Text(
+                          textStart,
+                          style: TextStyle(
+                              fontSize: textStartFontSize,
+                              color: turn == player1.name
+                                  ? player1.color
+                                  : player2.color),
+                        ),
+                      ),
+                      onPressed: () async {
+                        if (gameIsFinished) {
+                          return;
+                        }
+                        xSpeed = Random().nextBool()
+                            ? (Random().nextInt(2) + 1).toDouble()
+                            : -(Random().nextInt(2) + 1).toDouble();
+                        ySpeed = turn == player1.name
+                            ? (Random().nextInt(1) + 1).toDouble()
+                            : -(Random().nextInt(1) + 1).toDouble();
+                        showStartText = false;
+                        do {
+                          ball.left += xSpeed;
+                          ball.top += ySpeed;
+                          if (ball.left > tableWidth - ballSize) {
+                            xSpeed = (-1) * (xSpeed.abs());
+                          } else if (ball.left <= 0) {
+                            xSpeed = xSpeed.abs();
+                          }
+                          if (ball.top > tableHeight - ballSize / 3) {
+                            nextRound(player1.name);
+                            break;
+                          } else if (ball.top <= 0 - ballSize * 2 / 3) {
+                            nextRound(player2.name);
+                            break;
+                          }
+                          doTheMathWork();
+                          await Future.delayed(const Duration(milliseconds: 1));
+                          setState(() {});
+                        } while (true);
+                      },
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
