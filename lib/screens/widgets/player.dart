@@ -8,13 +8,13 @@ class PlayerChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(playerRadius),
-      child: Container(
-        width: player.size,
-        height: player.size,
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
         color: player.color,
       ),
+      width: player.size,
+      height: player.size,
     );
   }
 }
