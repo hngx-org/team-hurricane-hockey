@@ -189,7 +189,7 @@ class _MyHomePageState extends State<MyHomePage> {
     double speedFactor = 2.0;
 
     // Limit the maximum speed
-    double maxSpeed = 3.0;
+    double maxSpeed = 2.0;
     horizontalSpeed = horizontalSpeed.clamp(-maxSpeed, maxSpeed);
     verticalSpeed = verticalSpeed.clamp(-maxSpeed, maxSpeed);
 
