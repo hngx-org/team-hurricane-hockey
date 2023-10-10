@@ -12,7 +12,7 @@ class Puck {
   double shotY = 0;
   int score = 0;
   final String name;
-  final double size = playerSize;
+  final double size = ballSize;
   final Color color;
 
   Puck({
