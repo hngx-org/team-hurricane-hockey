@@ -70,6 +70,14 @@ class _MyHomePageState extends State<MyHomePage> {
       textStart = "${player1.name} Wins";
       textStartFontSize *= 2;
       turn = player1.name;
+      // player1.left = MediaQuery.of(context).size.width / 2 - playerRadius;
+      // player1.top = playerSize * 3;
+      // player2.left = MediaQuery.of(context).size.width / 2 - playerRadius;
+      // player2.top = MediaQuery.of(context).size.height - (playerSize * 6);
+      // textStartLeft = tableWidth / 2 - textStartWidth / 2;
+      // textStartTop = tableHeight / 2 - textStartHeight / 2;
+      // ball.left = MediaQuery.of(context).size.width / 2 - ballRadius;
+      // ball.top = (MediaQuery.of(context).size.height / 2) - ballRadius - 50;
       gameIsFinished = true;
     } else if (player2.score == gameEndsAt) {
       textStart = "${player2.name} Wins";
@@ -82,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   final goalWidth = 100.0;
-  void doTheMathWork() {
+  void doTheMathWork() async {
     player1.right = player1.left + playerSize;
     player1.bottom = player1.top + playerSize;
     player1.centerX = player1.left + playerRadius;
@@ -104,8 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Check if the ball is inside the goalpost area.
     if ((ball.top <= 0 || ball.bottom >= tableHeight) &&
-        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) ||
-            (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
+        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) || (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
     } else if (ball.top <= 0 || ball.bottom >= tableHeight) {
       ySpeed = -ySpeed;
     } else {
@@ -138,29 +145,31 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Adjust desiredX to stay within the computer player's half of the field horizontally.
     double minX = 0;
-    double maxX = tableWidth - (player1.size + ball.size);
-    desiredX = desiredX.clamp(minX, maxX);
+    double maxX = tableWidth - (player1.size);
 
+    desiredX = desiredX.clamp(minX, maxX);
     // Adjust desiredY to stay within the computer player's half of the field vertically.
     double minY = 0; // Adjust this value as needed.
-    double maxY = tableHeight / 2 -100;
+    double maxY = (tableHeight - 100) / 2;
     desiredY = desiredY.clamp(minY, maxY);
 
     // Move the computer player's paddle towards the desired position.
     if (player1.centerX < desiredX) {
-      player1.left +=
-          3.0; // Adjust the speed of the computer player's horizontal movement.
+      if (player1.left < maxX) {
+        player1.left += 2.0; // Adjust the speed of the computer player's horizontal movement.
+      }
     } else if (player1.centerX > desiredX) {
-      player1.left -=
-          3.0; // Adjust the speed of the computer player's horizontal movement.
+      if (player1.left < 8) {
+        return;
+      }
+
+      player1.left -= 2.0; // Adjust the speed of the computer player's horizontal movement.
     }
 
     if (player1.centerY < desiredY) {
-      player1.top +=
-          3.0; // Adjust the speed of the computer player's vertical movement.
+      player1.top += 1.0; // Adjust the speed of the computer player's vertical movement.
     } else if (player1.centerY > desiredY) {
-      player1.top -=
-          3.0; // Adjust the speed of the computer player's vertical movement.
+      player1.top -= 1.0; // Adjust the speed of the computer player's vertical movement.
     }
 
     // Ensure the computer player's paddle stays within its half of the field horizontally and vertically.
@@ -306,21 +315,12 @@ class _MyHomePageState extends State<MyHomePage> {
                         onPanUpdate: (details) {
                           player2.left += details.delta.dx;
                           player2.left = player2.left > 0 ? player2.left : 0;
-                          player2.left =
-                              player2.left < (tableWidth - playerSize)
-                                  ? player2.left
-                                  : (tableWidth - playerSize);
+                          player2.left = player2.left < (tableWidth - playerSize) ? player2.left : (tableWidth - playerSize);
                           player2.shotX = details.delta.dx;
                           player2.top += details.delta.dy;
                           player2.top = player2.top > 0 ? player2.top : 0;
-                          player2.top = player2.top >
-                                  (sHeight / 2 - (kToolbarHeight - 20))
-                              ? player2.top
-                              : (sHeight / 2 - (kToolbarHeight - 20));
-                          player2.top =
-                              player2.top >= (sHeight - (kToolbarHeight + 100))
-                                  ? sHeight - (kToolbarHeight + 100)
-                                  : player2.top;
+                          player2.top = player2.top > (sHeight / 2 - (kToolbarHeight - 20)) ? player2.top : (sHeight / 2 - (kToolbarHeight - 20));
+                          player2.top = player2.top >= (sHeight - (kToolbarHeight + 100)) ? sHeight - (kToolbarHeight + 100) : player2.top;
                           player2.shotY = details.delta.dy;
                           setState(() {});
                         },
@@ -404,23 +404,15 @@ class _MyHomePageState extends State<MyHomePage> {
                         quarterTurns: turn == player1.name ? 2 : 0,
                         child: Text(
                           textStart,
-                          style: TextStyle(
-                              fontSize: textStartFontSize,
-                              color: turn == player1.name
-                                  ? player1.color
-                                  : player2.color),
+                          style: TextStyle(fontSize: textStartFontSize, color: turn == player1.name ? player1.color : player2.color),
                         ),
                       ),
                       onPressed: () async {
                         if (gameIsFinished) {
                           return;
                         }
-                        xSpeed = Random().nextBool()
-                            ? (Random().nextInt(2) + 1).toDouble()
-                            : -(Random().nextInt(2) + 1).toDouble();
-                        ySpeed = turn == player1.name
-                            ? (Random().nextInt(1) + 1).toDouble()
-                            : -(Random().nextInt(1) + 1).toDouble();
+                        xSpeed = Random().nextBool() ? (Random().nextInt(2) + 1).toDouble() : -(Random().nextInt(2) + 1).toDouble();
+                        ySpeed = turn == player1.name ? (Random().nextInt(1) + 1).toDouble() : -(Random().nextInt(1) + 1).toDouble();
                         showStartText = false;
                         do {
                           ball.left += xSpeed;
@@ -431,9 +423,22 @@ class _MyHomePageState extends State<MyHomePage> {
                             xSpeed = xSpeed.abs();
                           }
                           if (ball.top > tableHeight - ballSize / 3) {
+                            player1.left = sWidth / 2 - playerRadius;
+                            player1.top = playerSize * 3;
+                            player2.left = sWidth / 2 - playerRadius;
+                            player2.top = sHeight - (playerSize * 6);
+                            ball.left = sWidth / 2 - ballRadius;
+                            ball.top = (sHeight / 2) - ballRadius - 50;
+                            setState(() {});
                             nextRound(player1.name);
                             break;
                           } else if (ball.top <= 0 - ballSize * 2 / 3) {
+                            player1.left = sWidth / 2 - playerRadius;
+                            player1.top = playerSize * 3;
+                            player2.left = sWidth / 2 - playerRadius;
+                            player2.top = sHeight - (playerSize * 6);
+                            ball.left = sWidth / 2 - ballRadius;
+                            ball.top = (sHeight / 2) - ballRadius - 50;
                             nextRound(player2.name);
                             break;
                           }
