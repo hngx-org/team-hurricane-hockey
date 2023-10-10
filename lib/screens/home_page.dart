@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -55,9 +55,10 @@ class _MyHomePageState extends State<MyHomePage> {
   late double distanceBall2P1;
   late double distanceBall2P2;
   int gameEndsAt = 10;
+  Offset? previousPoint;
 
   double pythagoras(double a, double b) {
-    return sqrt(pow(a, 2).toDouble() + pow(b, 2).toDouble());
+    return math.sqrt(math.pow(a, 2).toDouble() + math.pow(b, 2).toDouble());
   }
 
   void nextRound(String player) {
@@ -158,11 +159,15 @@ class _MyHomePageState extends State<MyHomePage> {
       player1.left -= 2.0; // Adjust the speed of the computer player's horizontal movement.
     }
 
+    previousPoint = Offset(player1.left, 0);
+
     if (player1.centerY < desiredY) {
       player1.top += 1.0; // Adjust the speed of the computer player's vertical movement.
     } else if (player1.centerY > desiredY) {
       player1.top -= 1.0; // Adjust the speed of the computer player's vertical movement.
     }
+
+    previousPoint = Offset(player1.left, player1.top);
 
     // Ensure the computer player's paddle stays within its half of the field horizontally and vertically.
     player1.top = player1.top.clamp(minY, maxY);
@@ -184,7 +189,7 @@ class _MyHomePageState extends State<MyHomePage> {
     double speedFactor = 2.0;
 
     // Limit the maximum speed
-    double maxSpeed = 5.0;
+    double maxSpeed = 3.0;
     horizontalSpeed = horizontalSpeed.clamp(-maxSpeed, maxSpeed);
     verticalSpeed = verticalSpeed.clamp(-maxSpeed, maxSpeed);
 
@@ -229,7 +234,7 @@ class _MyHomePageState extends State<MyHomePage> {
       textStartTop = tableHeight / 2 - textStartHeight / 2;
       ball.left = sWidth / 2 - ballRadius;
       ball.top = (sHeight / 2) - ballRadius - 50;
-      turn = Random().nextBool() ? player1.name : player2.name;
+      turn = math.Random().nextBool() ? player1.name : player2.name;
       gameIsStarted = true;
     } else {
       defendGoal();
@@ -340,8 +345,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   : const SizedBox.shrink(),
               // ball and score text
               Positioned(
-                right: 48,
-                top: (MediaQuery.of(context).size.height / 2) - 100,
+                right: 24,
+                top: (MediaQuery.of(context).size.height / 2) - 156,
                 child: Column(
                   children: [
                     RotatedBox(
@@ -349,18 +354,39 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: Text(
                         player1.score.toString(),
                         style: const TextStyle(
-                          fontSize: 24,
+                          fontSize: 48,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 100),
+                    const SizedBox(height: 51),
+                    InkWell(
+                      onTap: () {},
+                      child: Container(
+                        height: 48,
+                        width: 48,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(width: 4),
+                        ),
+                        child: Center(
+                          child: Transform.rotate(
+                            angle: math.pi / 2,
+                            child: const Icon(
+                              Icons.pause,
+                              size: 30,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 51),
                     RotatedBox(
                       quarterTurns: 1,
                       child: Text(
                         player2.score.toString(),
                         style: const TextStyle(
-                          fontSize: 24,
+                          fontSize: 48,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -410,8 +436,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         if (gameIsFinished) {
                           return;
                         }
-                        xSpeed = Random().nextBool() ? (Random().nextInt(2) + 1).toDouble() : -(Random().nextInt(2) + 1).toDouble();
-                        ySpeed = turn == player1.name ? (Random().nextInt(1) + 1).toDouble() : -(Random().nextInt(1) + 1).toDouble();
+                        xSpeed = math.Random().nextBool() ? (math.Random().nextInt(2) + 1).toDouble() : -(math.Random().nextInt(2) + 1).toDouble();
+                        ySpeed = turn == player1.name ? (math.Random().nextInt(1) + 1).toDouble() : -(math.Random().nextInt(1) + 1).toDouble();
                         showStartText = false;
                         do {
                           ball.left += xSpeed;
