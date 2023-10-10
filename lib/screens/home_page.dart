@@ -82,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   final goalWidth = 100.0;
-  void doTheMathWork() {
+  void doTheMathWork() async {
     player1.right = player1.left + playerSize;
     player1.bottom = player1.top + playerSize;
     player1.centerX = player1.left + playerRadius;
