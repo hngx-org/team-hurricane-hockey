@@ -70,14 +70,6 @@ class _MyHomePageState extends State<MyHomePage> {
       textStart = "${player1.name} Wins";
       textStartFontSize *= 2;
       turn = player1.name;
-      // player1.left = MediaQuery.of(context).size.width / 2 - playerRadius;
-      // player1.top = playerSize * 3;
-      // player2.left = MediaQuery.of(context).size.width / 2 - playerRadius;
-      // player2.top = MediaQuery.of(context).size.height - (playerSize * 6);
-      // textStartLeft = tableWidth / 2 - textStartWidth / 2;
-      // textStartTop = tableHeight / 2 - textStartHeight / 2;
-      // ball.left = MediaQuery.of(context).size.width / 2 - ballRadius;
-      // ball.top = (MediaQuery.of(context).size.height / 2) - ballRadius - 50;
       gameIsFinished = true;
     } else if (player2.score == gameEndsAt) {
       textStart = "${player2.name} Wins";
@@ -230,9 +222,9 @@ class _MyHomePageState extends State<MyHomePage> {
       tableWidth = sWidth;
       tableHeight = sHeight - 100;
       player1.left = sWidth / 2 - playerRadius;
-      player1.top = playerSize * 3;
+      player1.top = playerSize * 1.2;
       player2.left = sWidth / 2 - playerRadius;
-      player2.top = sHeight - (playerSize * 6);
+      player2.top = sHeight - (playerSize * 3.5);
       textStartLeft = tableWidth / 2 - textStartWidth / 2;
       textStartTop = tableHeight / 2 - textStartHeight / 2;
       ball.left = sWidth / 2 - ballRadius;
@@ -380,12 +372,19 @@ class _MyHomePageState extends State<MyHomePage> {
                   ? Positioned(
                       left: ball.left,
                       top: ball.top,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(ballRadius),
-                        child: Container(
-                          width: ballSize,
-                          height: ballSize,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        width: ballSize,
+                        height: ballSize,
+                        decoration: BoxDecoration(
                           color: ball.color,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(.3),
+                            shape: BoxShape.circle,
+                          ),
                         ),
                       ),
                     )
@@ -424,9 +423,9 @@ class _MyHomePageState extends State<MyHomePage> {
                           }
                           if (ball.top > tableHeight - ballSize / 3) {
                             player1.left = sWidth / 2 - playerRadius;
-                            player1.top = playerSize * 3;
+                            player1.top = playerSize * 1.2;
                             player2.left = sWidth / 2 - playerRadius;
-                            player2.top = sHeight - (playerSize * 6);
+                            player2.top = sHeight - (playerSize * 3.5);
                             ball.left = sWidth / 2 - ballRadius;
                             ball.top = (sHeight / 2) - ballRadius - 50;
                             setState(() {});
@@ -434,9 +433,9 @@ class _MyHomePageState extends State<MyHomePage> {
                             break;
                           } else if (ball.top <= 0 - ballSize * 2 / 3) {
                             player1.left = sWidth / 2 - playerRadius;
-                            player1.top = playerSize * 3;
+                            player1.top = playerSize * 1.2;
                             player2.left = sWidth / 2 - playerRadius;
-                            player2.top = sHeight - (playerSize * 6);
+                            player2.top = sHeight - (playerSize * 3.5);
                             ball.left = sWidth / 2 - ballRadius;
                             ball.top = (sHeight / 2) - ballRadius - 50;
                             nextRound(player2.name);
