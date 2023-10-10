@@ -27,7 +27,7 @@ class TopSpace extends StatelessWidget {
           ),
           Column(
             children: [
-              SizedBox(height: playerSize * 2),
+              const SizedBox(height: 100),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * .1),
                 child: Row(
@@ -45,8 +45,8 @@ class TopSpace extends StatelessWidget {
                       ),
                       child: Center(
                         child: Container(
-                          height: 20,
-                          width: 20,
+                          height: 10,
+                          width: 10,
                           decoration: BoxDecoration(
                             color: Colors.red.shade800,
                             shape: BoxShape.circle,
@@ -68,8 +68,8 @@ class TopSpace extends StatelessWidget {
                       ),
                       child: Center(
                         child: Container(
-                          height: 20,
-                          width: 20,
+                          height: 10,
+                          width: 10,
                           decoration: BoxDecoration(
                             color: Colors.red.shade800,
                             shape: BoxShape.circle,
@@ -157,8 +157,8 @@ class BottomSpace extends StatelessWidget {
                       ),
                       child: Center(
                         child: Container(
-                          height: 20,
-                          width: 20,
+                          height: 10,
+                          width: 10,
                           decoration: BoxDecoration(
                             color: Colors.red.shade800,
                             shape: BoxShape.circle,
@@ -169,7 +169,7 @@ class BottomSpace extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: playerSize * 2),
+              const SizedBox(height: 100),
             ],
           ),
         ],
