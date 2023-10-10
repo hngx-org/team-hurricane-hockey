@@ -178,7 +178,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (!gameIsStarted) {
       player1.score = 0;
       player2.score = 0;
-      tableWidth = sWidth - playerSize;
+      tableWidth = sWidth;
       tableHeight = sHeight - 100;
       player1.left = sWidth / 2 - playerRadius;
       player1.top = playerSize * 3;
@@ -272,6 +272,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             player2.top += details.delta.dy;
                             player2.top = player2.top > 0 ? player2.top : 0;
                             player2.top = player2.top > (sHeight / 2 - (kToolbarHeight - 20)) ? player2.top : (sHeight / 2 - (kToolbarHeight - 20));
+                            player2.top = player2.top >= (sHeight - (kToolbarHeight + 100)) ? sHeight - (kToolbarHeight + 100) : player2.top;
                             player2.shotY = details.delta.dy;
                             setState(() {});
                           },
