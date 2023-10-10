@@ -51,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void nextRound(String player) {
     player == player1.name ? player1.score++ : player2.score++;
-    turn = player == player1.name ? player2.name : player1.name;
+    turn = player;
     xSpeed = 0;
     ySpeed = 0;
     showStartText = true;
@@ -70,6 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ball.top = (tableHeight / 2) - ballRadius;
   }
 
+  final goalWidth = 100.0;
   void doTheMathWork() {
     player1.right = player1.left + playerSize;
     player1.bottom = player1.top + playerSize;
@@ -83,35 +84,50 @@ class _MyHomePageState extends State<MyHomePage> {
     ball.bottom = ball.top + ball.size;
     ball.centerX = ball.left + ballRadius;
     ball.centerY = ball.top + ballRadius;
-    distanceBall2P1 = pythagoras(
-        ball.centerX - player1.centerX, ball.centerY - player1.centerY);
-    distanceBall2P2 = pythagoras(
-        ball.centerX - player2.centerX, ball.centerY - player2.centerY);
 
-    // Player1 (top player) calculations
-    if (distanceBall2P1 <= playerRadius + ballRadius) {
-      xSpeed =
-          (ball.centerX - player1.centerX) / (ball.centerY - player1.centerY);
-      if (player1.shotX != 0) {
-        xSpeed = 5 * player1.shotX;
-        ySpeed = 5 * player1.shotY;
-      }
-      xSpeed = xSpeed > 10 ? 10 : xSpeed;
-      ySpeed = 1 / xSpeed.abs();
-      ySpeed = ySpeed > 5 ? 5 : ySpeed;
-    }
+    // Calculate the left and right bounds of the goalpost.
+    double goalLeft1 = (tableWidth - goalWidth) / 2;
+    double goalRight1 = goalLeft1 + goalWidth;
+    double goalLeft2 = tableWidth / 2 - goalWidth / 2;
+    double goalRight2 = goalLeft2 + goalWidth;
 
-    // Player2 (bottom player) calculations
-    else if (distanceBall2P2 <= playerRadius + ballRadius) {
-      xSpeed =
-          -(ball.centerX - player2.centerX) / (ball.centerY - player2.centerY);
-      if (player2.shotX != 0) {
-        xSpeed = 5 * player2.shotX;
-        ySpeed = 5 * player2.shotY;
+    // Check if the ball is inside the goalpost area.
+    if ((ball.top <= 0 || ball.bottom >= tableHeight) &&
+        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) ||
+            (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
+    } else if (ball.top <= 0 || ball.bottom >= tableHeight) {
+      ySpeed = -ySpeed;
+    } else {
+      distanceBall2P1 = pythagoras(
+          ball.centerX - player1.centerX, ball.centerY - player1.centerY);
+      distanceBall2P2 = pythagoras(
+          ball.centerX - player2.centerX, ball.centerY - player2.centerY);
+
+      // Player1 (top player) calculations
+      if (distanceBall2P1 <= playerRadius + ballRadius) {
+        xSpeed =
+            (ball.centerX - player1.centerX) / (ball.centerY - player1.centerY);
+        if (player1.shotX != 0) {
+          xSpeed = 5 * player1.shotX;
+          ySpeed = 5 * player1.shotY;
+        }
+        xSpeed = xSpeed > 10 ? 10 : xSpeed;
+        ySpeed = 1 / xSpeed.abs();
+        ySpeed = ySpeed > 5 ? 5 : ySpeed;
       }
-      xSpeed = xSpeed < -10 ? -10 : xSpeed;
-      ySpeed = -1 / xSpeed.abs();
-      ySpeed = ySpeed < (-5) ? (-5) : ySpeed;
+
+      // Player2 (bottom player) calculations
+      else if (distanceBall2P2 <= playerRadius + ballRadius) {
+        xSpeed = -(ball.centerX - player2.centerX) /
+            (ball.centerY - player2.centerY);
+        if (player2.shotX != 0) {
+          xSpeed = 5 * player2.shotX;
+          ySpeed = 5 * player2.shotY;
+        }
+        xSpeed = xSpeed < -10 ? -10 : xSpeed;
+        ySpeed = -1 / xSpeed.abs();
+        ySpeed = ySpeed < (-5) ? (-5) : ySpeed;
+      }
     }
   }
 
@@ -129,9 +145,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Move player2 towards the desiredX position.
     if (player2.centerX < desiredX) {
-      player2.left += 3.0; // Adjust the speed of player2's movement.
+      player2.left += 1.0; // Adjust the speed of player2's movement.
     } else if (player2.centerX > desiredX) {
-      player2.left -= 3.0; // Adjust the speed of player2's movement.
+      player2.left -= 1.0; // Adjust the speed of player2's movement.
     }
 
     // Ensure player2 stays within the horizontal boundaries.
@@ -158,7 +174,7 @@ class _MyHomePageState extends State<MyHomePage> {
       tableHeight = sHeight - 4 * playerSize;
       player1.left = tableWidth / 2 - playerRadius;
       player1.top = 0;
-      player2.left = tableWidth / 2 - playerRadius;
+      player2.left = tableWidth /2 - playerRadius;
       player2.top = tableHeight - playerSize;
       textStartLeft = tableWidth / 2 - textStartWidth / 2;
       textStartTop = tableHeight / 2 - textStartHeight / 2;
@@ -196,6 +212,41 @@ class _MyHomePageState extends State<MyHomePage> {
                         height: playerSize * 3,
                       ),
                     ],
+                  ),
+                ),
+
+                // Goal Area Container with Borders
+                Positioned(
+                  left: 0, // Align to the left edge of the table
+                  top: 0, // Align to the top edge of the table
+                  child: Container(
+                    width: tableWidth,
+                    height: tableHeight,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.red, width: 2.0),
+                    ),
+                  ),
+                ),
+
+                // Goalpost 1
+                Positioned(
+                  left: (tableWidth - goalWidth) / 2, // Centered
+                  top: 0, // Align to the top
+                  child: Container(
+                    width: goalWidth,
+                    height: 2,
+                    color: Colors.yellow, // Transparent background
+                  ),
+                ),
+
+                // Goalpost 2
+                Positioned(
+                  left: (tableWidth - goalWidth) / 2, // Centered
+                  bottom: 0, // Align to the top
+                  child: Container(
+                    width: goalWidth,
+                    height: 2,
+                    color: Colors.yellow, // Transparent background
                   ),
                 ),
 
