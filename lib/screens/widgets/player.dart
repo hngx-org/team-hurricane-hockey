@@ -26,7 +26,9 @@ class PlayerChip extends StatelessWidget {
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: player.name == "blue" ? Colors.blue.shade900 : Colors.red.shade900,
+          color: player.name == "blue"
+              ? Colors.blue.shade900
+              : Colors.red.shade900,
         ),
         child: Container(
           decoration: BoxDecoration(
