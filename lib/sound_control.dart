@@ -5,6 +5,7 @@ import 'package:team_hurricane_hockey/providers/my_provider.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
 
 final bgMusic = AudioPlayer();
+final sfx = AudioPlayer();
 
 class SoundControl {
   final p = Provider.of<MyProvider>(BaseNavigator.currentContext);
@@ -33,6 +34,30 @@ class SoundControl {
       stopBgMusic();
     } else {
       resumeBgMusic();
+    }
+  }
+
+  Future<void> initSfx() async {
+    await sfx.setSource(AssetSource('sounds/menu_select.mp3'));
+    await sfx.setVolume(1.0);
+    p.updateSfxState(true, Icons.music_note_sharp, 1.0);
+  }
+
+  double? volume;
+
+  Future<void> playSfx() async {
+    await sfx.play(AssetSource('sounds/menu_select.mp3'), volume: volume);
+  }
+
+  Future<void> toggleSfx() async {
+    if (!p.isSfxOn) {
+      await sfx.setVolume(1.0);
+      volume = 1.0;
+      p.updateSfxState(true, Icons.music_note_sharp, volume!);
+    } else {
+      await sfx.setVolume(0.0);
+      volume = 0.0;
+      p.updateSfxState(false, Icons.music_off_sharp, volume!);
     }
   }
 }

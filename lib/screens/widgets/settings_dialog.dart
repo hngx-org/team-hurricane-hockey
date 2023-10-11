@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:team_hurricane_hockey/bg_music_functions.dart';
+import 'package:team_hurricane_hockey/sound_control.dart';
 import 'package:team_hurricane_hockey/providers/my_provider.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
 
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({super.key});
@@ -46,9 +45,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
               ),
             ),
             onPressed: () async {
-              setState(() {
-                controller.toggleBgMusic();
-              });
+              controller.playSfx();
+              controller.toggleBgMusic();
             },
             label: Text(
               'BG MUSIC',
@@ -75,14 +73,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
               ),
             ),
             onPressed: () {
-              setState(() {});
+              controller.playSfx();
+              controller.toggleSfx();
             },
             label: Text(
               'SFX',
               style: Theme.of(context).textTheme.labelMedium,
             ),
-            icon: const Icon(
-              Icons.music_note_sharp,
+            icon: Icon(
+              p.sfxIcon,
               color: Colors.white,
             ),
           ),
@@ -135,6 +134,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               ),
             ),
             onPressed: () {
+              controller.playSfx();
               BaseNavigator.pop();
             },
             label: Text(
