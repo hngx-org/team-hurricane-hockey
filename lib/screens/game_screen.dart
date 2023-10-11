@@ -200,7 +200,7 @@ class _MyHomePageState extends State<GameScreen> {
     double speedFactor = 2.0;
 
     // Limit the maximum speed
-    double maxSpeed = 2.0;
+    double maxSpeed = 4.0;
     horizontalSpeed = horizontalSpeed.clamp(-maxSpeed, maxSpeed);
     verticalSpeed = verticalSpeed.clamp(-maxSpeed, maxSpeed);
 
@@ -219,8 +219,11 @@ class _MyHomePageState extends State<GameScreen> {
 
     // Check for player's shot and adjust the speed if needed
     if (player.shotX != 0) {
-      xSpeed = player.shotX * speedFactor;
-      ySpeed = player.shotY * speedFactor;
+      xSpeed = (player.shotX) / speedFactor;
+    }
+
+    if (player.shotY != 0) {
+      ySpeed = (player.shotY) / speedFactor;
     }
   }
 
@@ -287,7 +290,7 @@ class _MyHomePageState extends State<GameScreen> {
                 top: 0, // Align to the top edge of the table
                 child: Container(
                   width: sWidth,
-                  height: sHeight,
+                  height: sHeight - 100,
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: Colors.blue.shade900,
@@ -330,7 +333,7 @@ class _MyHomePageState extends State<GameScreen> {
                           player2.top += details.delta.dy;
                           player2.top = player2.top > 0 ? player2.top : 0;
                           player2.top = player2.top > (sHeight / 2 - (kToolbarHeight - 20)) ? player2.top : (sHeight / 2 - (kToolbarHeight - 20));
-                          player2.top = player2.top >= (sHeight - (kToolbarHeight + 100)) ? sHeight - (kToolbarHeight + 100) : player2.top;
+                          player2.top = player2.top >= (sHeight - (kToolbarHeight + 120)) ? sHeight - (kToolbarHeight + 120) : player2.top;
                           player2.shotY = details.delta.dy;
                           setState(() {});
                         },
@@ -470,7 +473,10 @@ class _MyHomePageState extends State<GameScreen> {
                         quarterTurns: turn == player1.name ? 2 : 0,
                         child: Text(
                           textStart,
-                          style: TextStyle(fontSize: textStartFontSize, color: turn == player1.name ? player1.color : player2.color),
+                          style: TextStyle(
+                            fontSize: textStartFontSize,
+                            color: turn == player1.name ? player1.color : player2.color,
+                          ),
                         ),
                       ),
                       onPressed: () async {

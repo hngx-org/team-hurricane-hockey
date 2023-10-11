@@ -41,6 +41,8 @@ dependencies:
   audioplayers: ^5.2.0
   font_awesome_flutter: ^10.5.0
   provider: ^6.0.5
+  firebase_core: ^2.17.0
+
 
 dev_dependencies:
   flutter_test:

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "297476355910",
+    "project_id": "hurricane-air-hockey",
+    "storage_bucket": "hurricane-air-hockey.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:297476355910:android:c45b3e2d0eb8311fdc1747",
+        "android_client_info": {
+          "package_name": "com.example.team_hurricane_hockey"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVV8UEyRvwBq4WZOmbeGwnXMRAkHtMFYM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
