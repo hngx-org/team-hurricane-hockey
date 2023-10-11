@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:team_hurricane_hockey/constants.dart';
+import 'package:team_hurricane_hockey/enums.dart';
 import 'package:team_hurricane_hockey/models/player.dart';
 import 'package:team_hurricane_hockey/models/puck.dart';
 import 'package:team_hurricane_hockey/screens/widgets/center_circe.dart';
@@ -10,7 +11,11 @@ import 'package:team_hurricane_hockey/screens/widgets/player.dart';
 import 'package:team_hurricane_hockey/screens/widgets/spaces.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({Key? key}) : super(key: key);
+  final GameMode gameMode;
+  const GameScreen({
+    Key? key,
+    required this.gameMode,
+  }) : super(key: key);
   static const routeName = 'gameScreen';
 
   @override
@@ -18,6 +23,11 @@ class GameScreen extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<GameScreen> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   // player 1 & 2 and ball variables
   Player player1 = Player(
     color: Colors.red,
@@ -238,7 +248,9 @@ class _MyHomePageState extends State<GameScreen> {
       turn = math.Random().nextBool() ? player1.name : player2.name;
       gameIsStarted = true;
     } else {
-      defendGoal();
+      if (widget.gameMode == GameMode.ai) {
+        defendGoal();
+      }
     }
 
     return Scaffold(
@@ -304,7 +316,7 @@ class _MyHomePageState extends State<GameScreen> {
                   color: Colors.red.shade800, // Transparent background
                 ),
               ),
-              // player1 (top player)
+              // player2 (bottom player)
               !gameIsFinished
                   ? Positioned(
                       left: player2.left,
@@ -334,14 +346,22 @@ class _MyHomePageState extends State<GameScreen> {
                     )
                   : const SizedBox.shrink(),
 
-              // player2 (bottom player)
+              // player1 (top player)
               !gameIsFinished
                   ? Positioned(
                       left: player1.left,
                       top: player1.top,
-                      child: PlayerChip(
-                        player: player1,
-                      ), // Player2 is now controlled by AI.
+                      child: Builder(builder: (context) {
+                        if (widget.gameMode == GameMode.player2) {
+                          return PlayerChip(
+                            player: player1,
+                          );
+                        }
+                        if (widget.gameMode == GameMode.multiplayer) {}
+                        return PlayerChip(
+                          player: player1,
+                        );
+                      }), // Player2 is now controlled by AI.
                     )
                   : const SizedBox.shrink(),
               // ball and score text
