@@ -134,8 +134,8 @@ class BottomSpace extends StatelessWidget {
                       ),
                       child: Center(
                         child: Container(
-                          height: 20,
-                          width: 20,
+                          height: 10,
+                          width: 10,
                           decoration: BoxDecoration(
                             color: Colors.red.shade800,
                             shape: BoxShape.circle,
