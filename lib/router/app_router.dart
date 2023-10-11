@@ -47,7 +47,7 @@ class AppRouter {
         ));
 
       case HomeMenu.routeName:
-        return _getPageRoute(const HomeMenu());
+        return _getPageRoute( const HomeMenu());
 
       default:
         return _getPageRoute(const SplashScreen());
