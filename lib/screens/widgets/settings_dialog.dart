@@ -1,7 +1,8 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:team_hurricane_hockey/bg_music_functions.dart';
+// import 'package:team_hurricane_hockey/screens/home_menu.dart';
 
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({super.key});
@@ -11,22 +12,7 @@ class SettingsDialog extends StatefulWidget {
 }
 
 class _SettingsDialogState extends State<SettingsDialog> {
-  AudioPlayer bgMusic = AudioPlayer();
-  IconData bgMusicIcon = Icons.volume_up_sharp;
-  IconData? sfxIcon = Icons.music_note_sharp;
-  Function setIconState({
-    required bool soundState,
-    required IconData iconOn,
-    required IconData iconOff,
-  }) {
-    return () {
-      soundState = !soundState;
-      return soundState ? iconOn : iconOff;
-    };
-  }
-
-  bool isBgMusicOn = true;
-  bool isSoundOn = true;
+  SoundControl controller = SoundControl();
 
   @override
   Widget build(BuildContext context) {
@@ -56,15 +42,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 ),
               ),
             ),
-            onPressed: () {
+            onPressed: () async {
               setState(() {
-                final toggleState = setIconState(
-                    soundState: isBgMusicOn,
-                    iconOn: Icons.volume_up_sharp,
-                    iconOff: Icons.volume_off_sharp);
-                isBgMusicOn = !isBgMusicOn;
-                final newIconData = toggleState();
-                bgMusicIcon = newIconData;
+                controller.toggleBgMusic();
               });
             },
             label: Text(
@@ -72,7 +52,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
               style: Theme.of(context).textTheme.labelMedium,
             ),
             icon: Icon(
-              bgMusicIcon,
+              controller.isMusicPlaying
+                  ? Icons.volume_up_sharp
+                  : Icons.volume_off_sharp,
               color: Colors.white,
             ),
           ),
@@ -92,17 +74,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
               ),
             ),
             onPressed: () {
-              setState(() {
-                isSoundOn = !isSoundOn;
-                sfxIcon = isSoundOn ? Icons.music_note_sharp : Icons.music_off;
-              });
+              setState(() {});
             },
             label: Text(
               'SFX',
               style: Theme.of(context).textTheme.labelMedium,
             ),
-            icon: Icon(
-              sfxIcon,
+            icon: const Icon(
+              Icons.music_note_sharp,
               color: Colors.white,
             ),
           ),

@@ -1,8 +1,8 @@
 import 'package:animate_do/animate_do.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:team_hurricane_hockey/bg_music_functions.dart';
 import 'package:team_hurricane_hockey/enums.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
 import 'package:team_hurricane_hockey/screens/game_screen.dart';
@@ -18,16 +18,19 @@ class HomeMenu extends StatefulWidget {
 }
 
 class _HomeMenuState extends State<HomeMenu> {
-  final bgMusic = AudioPlayer();
-
-  Future<void> startBGMusic() async {
-    await bgMusic.play(AssetSource('sounds/bg_music.mp3'));
-  }
+  SoundControl controller = SoundControl();
 
   @override
   void initState() {
-    startBGMusic();
+    controller.startBgMusic();
     super.initState();
+  }
+
+  @override
+  void dispose() async {
+    await controller.bgMusic.stop();
+    controller.bgMusic.dispose();
+    super.dispose();
   }
 
   @override
@@ -108,10 +111,11 @@ class _HomeMenuState extends State<HomeMenu> {
                           child: TextButton(
                             onPressed: () {
                               showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return SettingsDialog();
-                                  });
+                                context: context,
+                                builder: (context) {
+                                  return const SettingsDialog();
+                                },
+                              );
                             },
                             child: Text(
                               'Settings',
@@ -120,6 +124,17 @@ class _HomeMenuState extends State<HomeMenu> {
                           ),
                         ),
                         SizedBox(height: 100.0.h),
+                        TextButton(
+                          onPressed: () async {
+                           
+                              controller.toggleBgMusic();
+                            
+                          },
+                          child: Text(
+                            'STOP',
+                            style: Theme.of(context).textTheme.labelMedium,
+                          ),
+                        ),
                       ],
                     ),
                   ),
