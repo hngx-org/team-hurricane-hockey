@@ -2,7 +2,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:team_hurricane_hockey/bg_music_functions.dart';
+import 'package:team_hurricane_hockey/sound_control.dart';
 import 'package:team_hurricane_hockey/enums.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
 import 'package:team_hurricane_hockey/screens/game_screen.dart';
@@ -23,6 +23,7 @@ class _HomeMenuState extends State<HomeMenu> {
   @override
   void initState() {
     controller.startBgMusic();
+    controller.initSfx();
     super.initState();
   }
 
@@ -78,6 +79,7 @@ class _HomeMenuState extends State<HomeMenu> {
                           duration: const Duration(milliseconds: 200),
                           child: TextButton(
                             onPressed: () {
+                              controller.playSfx();
                               BaseNavigator.pushNamed(
                                 GameScreen.routeName,
                                 args: GameMode.ai,
@@ -94,6 +96,7 @@ class _HomeMenuState extends State<HomeMenu> {
                           duration: const Duration(milliseconds: 400),
                           child: TextButton(
                             onPressed: () {
+                              controller.playSfx();
                               BaseNavigator.pushNamed(
                                 GameScreen.routeName,
                                 args: GameMode.player2,
@@ -110,6 +113,7 @@ class _HomeMenuState extends State<HomeMenu> {
                           duration: const Duration(milliseconds: 800),
                           child: TextButton(
                             onPressed: () {
+                              controller.playSfx();
                               showDialog(
                                 context: context,
                                 builder: (context) {
