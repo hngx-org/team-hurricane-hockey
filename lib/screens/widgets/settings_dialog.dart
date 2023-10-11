@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:team_hurricane_hockey/bg_music_functions.dart';
-// import 'package:team_hurricane_hockey/screens/home_menu.dart';
 
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({super.key});
@@ -43,9 +42,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
               ),
             ),
             onPressed: () async {
-              setState(() {
-                controller.toggleBgMusic();
-              });
+              controller.toggleBgMusic();
+              setState(() {});
             },
             label: Text(
               'BG MUSIC',
