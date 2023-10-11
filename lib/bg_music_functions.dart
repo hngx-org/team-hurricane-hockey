@@ -1,33 +1,35 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:team_hurricane_hockey/providers/my_provider.dart';
+import 'package:team_hurricane_hockey/router/base_navigator.dart';
+
+final bgMusic = AudioPlayer();
 
 class SoundControl {
-  final bgMusic = AudioPlayer();
-
-  MyProvider p = MyProvider();
-  bool isMusicPlaying = true;
+  final p = Provider.of<MyProvider>(BaseNavigator.currentContext);
 
   Future<void> startBgMusic() async {
     await bgMusic.play(AssetSource('sounds/bg_music.mp3'));
     bgMusic.setReleaseMode(ReleaseMode.loop);
-    isMusicPlaying = true;
-    p.updateBgMusicState(isMusicPlaying);
+
+    p.updateBgMusicState(true, Icons.volume_up_sharp);
   }
 
   Future<void> resumeBgMusic() async {
     await bgMusic.resume();
-    isMusicPlaying = true;
-    p.updateBgMusicState(isMusicPlaying);
+
+    p.updateBgMusicState(true, Icons.volume_up_sharp);
   }
 
   Future<void> stopBgMusic() async {
     await bgMusic.stop();
-    isMusicPlaying = false;
-    p.updateBgMusicState(isMusicPlaying);
+
+    p.updateBgMusicState(false, Icons.volume_off_sharp);
   }
 
   Future<void> toggleBgMusic() async {
-    if (isMusicPlaying) {
+    if (p.isMusicPlaying) {
       stopBgMusic();
     } else {
       resumeBgMusic();

@@ -28,8 +28,8 @@ class _HomeMenuState extends State<HomeMenu> {
 
   @override
   void dispose() async {
-    await controller.bgMusic.stop();
-    controller.bgMusic.dispose();
+    await bgMusic.stop();
+    bgMusic.dispose();
     super.dispose();
   }
 
@@ -124,17 +124,6 @@ class _HomeMenuState extends State<HomeMenu> {
                           ),
                         ),
                         SizedBox(height: 100.0.h),
-                        TextButton(
-                          onPressed: () async {
-                           
-                              controller.toggleBgMusic();
-                            
-                          },
-                          child: Text(
-                            'STOP',
-                            style: Theme.of(context).textTheme.labelMedium,
-                          ),
-                        ),
                       ],
                     ),
                   ),

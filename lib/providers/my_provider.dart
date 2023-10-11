@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 class MyProvider extends ChangeNotifier {
-  bool _isMusicPlaying = true;
+  bool isMusicPlaying = true;
+  IconData bgMusicIcon = Icons.volume_up_sharp;
 
-  bool get isMusicPlaying => _isMusicPlaying;
 
-  void updateBgMusicState(bool newPlayState) {
-    _isMusicPlaying = newPlayState;
+
+  void updateBgMusicState(bool newPlayState, IconData newIcon) {
+    isMusicPlaying = newPlayState;
+    bgMusicIcon = newIcon;
     notifyListeners();
   }
 }

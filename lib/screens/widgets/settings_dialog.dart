@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:team_hurricane_hockey/bg_music_functions.dart';
+import 'package:team_hurricane_hockey/providers/my_provider.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:team_hurricane_hockey/bg_music_functions.dart';
+
 
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({super.key});
@@ -15,6 +18,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final p = Provider.of<MyProvider>(context);
     return AlertDialog(
       backgroundColor: const Color(0xFF150337),
       shape: const BeveledRectangleBorder(
@@ -42,17 +46,16 @@ class _SettingsDialogState extends State<SettingsDialog> {
               ),
             ),
             onPressed: () async {
-              controller.toggleBgMusic();
-              setState(() {});
+              setState(() {
+                controller.toggleBgMusic();
+              });
             },
             label: Text(
               'BG MUSIC',
               style: Theme.of(context).textTheme.labelMedium,
             ),
             icon: Icon(
-              controller.isMusicPlaying
-                  ? Icons.volume_up_sharp
-                  : Icons.volume_off_sharp,
+              p.bgMusicIcon,
               color: Colors.white,
             ),
           ),
