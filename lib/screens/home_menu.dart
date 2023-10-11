@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:team_hurricane_hockey/enums.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
 import 'package:team_hurricane_hockey/screens/game_screen.dart';
@@ -28,16 +29,16 @@ class HomeMenu extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
-            padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
+            padding:  EdgeInsets.fromLTRB(24.0.w, 24.0.h, 24.0.w, 0.0),
             child: Center(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Container(
-                    // color: Colors.black,
-                    alignment: Alignment.center,
-                    height: 170.0,
+                 SizedBox(
+                    height: 100.h,
+                  ),
+                  FittedBox(
                     child: Text(
                       'HOCKEY\n\nCHALLENGE',
                       style: Theme.of(context).textTheme.headlineLarge,
@@ -64,7 +65,7 @@ class HomeMenu extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 24.0),
+                         SizedBox(height: 24.0.h),
                         FadeInRightBig(
                           duration: const Duration(milliseconds: 400),
                           child: TextButton(
@@ -80,7 +81,7 @@ class HomeMenu extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 24.0),
+                       SizedBox(height: 24.0.h),
                         FadeInRightBig(
                           duration: const Duration(milliseconds: 800),
                           child: TextButton(
@@ -91,7 +92,7 @@ class HomeMenu extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 100.0),
+                      SizedBox(height: 100.0.h),
                       ],
                     ),
                   ),

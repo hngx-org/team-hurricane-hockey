@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:team_hurricane_hockey/models/player.dart';
 
 class PlayerChip extends StatelessWidget {
@@ -11,19 +12,19 @@ class PlayerChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(2),
+      padding: EdgeInsets.all(2.w),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: player.name == "blue" ? Colors.blue : Colors.red,
         border: Border.all(
           color: player.name == "blue" ? Colors.blue : Colors.red,
-          width: 3,
+          width: 3.w,
         ),
       ),
-      width: player.size,
-      height: player.size,
+      width: player.size.w,
+      height: player.size.w,
       child: Container(
-        padding: const EdgeInsets.all(15),
+        padding: EdgeInsets.all(15.w),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: player.name == "blue"

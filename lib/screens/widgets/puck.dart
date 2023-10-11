@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:team_hurricane_hockey/constants.dart';
 import 'package:team_hurricane_hockey/models/puck.dart';
 
@@ -11,8 +12,8 @@ class PuckChip extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(playerRadius),
       child: Container(
-        width: puck.size,
-        height: puck.size,
+        width: puck.size.w,
+        height: puck.size.w,
         color: puck.color,
       ),
     );

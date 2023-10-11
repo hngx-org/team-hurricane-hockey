@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:team_hurricane_hockey/constants.dart';
 import 'package:team_hurricane_hockey/enums.dart';
 import 'package:team_hurricane_hockey/models/player.dart';
@@ -52,9 +53,9 @@ class _MyHomePageState extends State<GameScreen> {
 
   // Start text attributes
   String textStart = 'Tap to start!';
-  final textStartHeight = 120.0;
-  final textStartWidth = 480.0;
-  double textStartFontSize = 30.0;
+  final textStartHeight = 120.0.h;
+  final textStartWidth = 480.0.w;
+  double textStartFontSize = 30.0.sp;
   late final double textStartTop;
   late final double textStartLeft;
 
@@ -274,13 +275,13 @@ class _MyHomePageState extends State<GameScreen> {
               Positioned(
                 child: Column(
                   children: [
-                    const Expanded(child: TopSpace(playerSize: playerSize)),
-                    Divider(color: Colors.blue[800], thickness: 4),
-                    const SizedBox(height: playerSize * 2),
+                    Expanded(child: TopSpace(playerSize: playerSize.w)),
+                    Divider(color: Colors.blue[800], thickness: 3.w),
+                    SizedBox(height: playerSize.w * 2),
                     const CenterLine(),
-                    const SizedBox(height: playerSize * 2),
-                    Divider(color: Colors.blue[800], thickness: 4),
-                    const Expanded(child: BottomSpace(playerSize: playerSize)),
+                    SizedBox(height: playerSize.w * 2),
+                    Divider(color: Colors.blue[800], thickness: 3.w),
+                    Expanded(child: BottomSpace(playerSize: playerSize.w)),
                   ],
                 ),
               ),
@@ -291,11 +292,11 @@ class _MyHomePageState extends State<GameScreen> {
                 top: 0, // Align to the top edge of the table
                 child: Container(
                   width: sWidth,
-                  height: sHeight - 100,
+                  height: sHeight,
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: Colors.black,
-                      width: 7,
+                      color: Colors.blue.shade900,
+                      width: 7.w,
                     ),
                   ),
                 ),
@@ -306,7 +307,7 @@ class _MyHomePageState extends State<GameScreen> {
                 top: 0, // Align to the top
                 child: Container(
                   width: goalWidth,
-                  height: 5,
+                  height: 7.w,
                   color: Colors.red.shade800,
                 ),
               ),
@@ -316,7 +317,7 @@ class _MyHomePageState extends State<GameScreen> {
                 bottom: 0, // Align to the top
                 child: Container(
                   width: goalWidth,
-                  height: 5,
+                  height: 7.w,
                   color: Colors.red.shade800, // Transparent background
                 ),
               ),
@@ -379,48 +380,48 @@ class _MyHomePageState extends State<GameScreen> {
                   : const SizedBox.shrink(),
               // ball and score text
               Positioned(
-                right: 24,
-                top: (MediaQuery.of(context).size.height / 2) - 156,
+                top: sHeight / 2 - 166.h,
+                right: 24.w,
                 child: Column(
                   children: [
                     RotatedBox(
                       quarterTurns: 1,
                       child: Text(
                         player1.score.toString(),
-                        style: const TextStyle(
-                          fontSize: 48,
+                        style: TextStyle(
+                          fontSize: 48.sp,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 51),
+                    SizedBox(height: 51.h),
                     InkWell(
                       onTap: () {},
                       child: Container(
-                        height: 48,
-                        width: 48,
+                        height: 48.h,
+                        width: 48.h,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(width: 4),
+                          border: Border.all(width: 4.w),
                         ),
                         child: Center(
                           child: Transform.rotate(
                             angle: math.pi / 2,
-                            child: const Icon(
+                            child: Icon(
                               Icons.pause,
-                              size: 30,
+                              size: 30.h,
                             ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 51),
+                    SizedBox(height: 51.h),
                     RotatedBox(
                       quarterTurns: 1,
                       child: Text(
                         player2.score.toString(),
-                        style: const TextStyle(
-                          fontSize: 48,
+                        style: TextStyle(
+                          fontSize: 48.sp,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -437,7 +438,7 @@ class _MyHomePageState extends State<GameScreen> {
                         width: ballSize,
                         height: ballSize,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(.3),
+                          color: Colors.orange,
                           shape: BoxShape.circle,
                         ),
                       ),
