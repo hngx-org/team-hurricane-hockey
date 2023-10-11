@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:team_hurricane_hockey/enums.dart';
 import 'package:team_hurricane_hockey/screens/game_screen.dart';
 import 'package:team_hurricane_hockey/screens/home_menu.dart';
 import 'package:team_hurricane_hockey/screens/splash_screen.dart';
@@ -40,7 +41,10 @@ class AppRouter {
         return _getPageRoute(const SplashScreen());
 
       case GameScreen.routeName:
-        return _getPageRoute(const GameScreen());
+        final mode = settings.arguments as GameMode;
+        return _getPageRoute(GameScreen(
+          gameMode: mode,
+        ));
 
       case HomeMenu.routeName:
         return _getPageRoute(const HomeMenu());
