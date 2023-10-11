@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DottedLinePainter extends CustomPainter {
   @override
@@ -7,7 +8,7 @@ class DottedLinePainter extends CustomPainter {
       ..color = Colors.red.shade800
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3;
+      ..strokeWidth = 2.w;
 
     const dashWidth = 5;
     const dashSpace = 6;
