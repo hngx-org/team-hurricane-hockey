@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SemiCirclePainter extends CustomPainter {
   final Color color;
@@ -11,7 +12,7 @@ class SemiCirclePainter extends CustomPainter {
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 4;
+      ..strokeWidth = 3.w;
 
     final centerX = size.width / 2;
     final centerY = size.height / 2;
