@@ -3,10 +3,12 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:team_hurricane_hockey/constants.dart';
 import 'package:team_hurricane_hockey/enums.dart';
 import 'package:team_hurricane_hockey/models/player.dart';
 import 'package:team_hurricane_hockey/models/puck.dart';
+import 'package:team_hurricane_hockey/providers/my_provider.dart';
 import 'package:team_hurricane_hockey/screens/widgets/center_circe.dart';
 import 'package:team_hurricane_hockey/screens/widgets/player.dart';
 import 'package:team_hurricane_hockey/screens/widgets/spaces.dart';
@@ -24,28 +26,33 @@ class GameScreen extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<GameScreen> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
   // player 1 & 2 and ball variables
-  Player player1 = Player(
-    color: Colors.red,
-    name: "red",
-  );
-  Player player2 = Player(
-    name: "blue",
-    color: Colors.blue,
-  );
-  Puck ball = Puck(
-    name: "ball",
-    color: Colors.black,
-  );
+  late Player player1;
+  late Player player2;
+
+  late Puck ball;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final paddleColorProvider = Provider.of<PaddleColorProvider>(context);
+    player1 = Player(
+        name: paddleColorProvider.player1Color.toString(),
+        color: paddleColorProvider.player1Color);
+    player2 = Player(
+        name: paddleColorProvider.player2Color.toString(),
+        color: paddleColorProvider.player2Color);
+    ball = Puck(
+        name: paddleColorProvider.puckColor.toString(),
+        color: paddleColorProvider.puckColor);
+  }
 
   // ball attributes
   late double xSpeed;
   late double ySpeed;
+
+  late double temporaryXSpeed;
+  late double temporaryYSpeed;
 
   // table attributes
   late final double tableHeight;
@@ -117,7 +124,8 @@ class _MyHomePageState extends State<GameScreen> {
 
     // Check if the ball is inside the goalpost area.
     if ((ball.top <= 0 || ball.bottom >= tableHeight) &&
-        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) || (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
+        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) ||
+            (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
     } else if (ball.top <= 0 || ball.bottom >= tableHeight) {
       ySpeed = -ySpeed;
     } else {
@@ -161,23 +169,27 @@ class _MyHomePageState extends State<GameScreen> {
     // Move the computer player's paddle towards the desired position.
     if (player1.centerX < desiredX) {
       if (player1.left < maxX) {
-        player1.left += 2.0; // Adjust the speed of the computer player's horizontal movement.
+        player1.left +=
+            2.0; // Adjust the speed of the computer player's horizontal movement.
       }
     } else if (player1.centerX > desiredX) {
       if (player1.left < 8) {
         return;
       }
 
-      player1.left -= 2.0; // Adjust the speed of the computer player's horizontal movement.
+      player1.left -=
+          2.0; // Adjust the speed of the computer player's horizontal movement.
     }
     previousPoint = Offset(player1.left, 0);
 
     previousPoint = Offset(player1.left, 0);
 
     if (player1.centerY < desiredY) {
-      player1.top += 1.0; // Adjust the speed of the computer player's vertical movement.
+      player1.top +=
+          1.0; // Adjust the speed of the computer player's vertical movement.
     } else if (player1.centerY > desiredY) {
-      player1.top -= 1.0; // Adjust the speed of the computer player's vertical movement.
+      player1.top -=
+          1.0; // Adjust the speed of the computer player's vertical movement.
     }
     previousPoint = Offset(player1.left, player1.top);
     // Ensure the computer player's paddle stays within its half of the field horizontally and vertically.
@@ -328,12 +340,21 @@ class _MyHomePageState extends State<GameScreen> {
                         onPanUpdate: (details) {
                           player2.left += details.delta.dx;
                           player2.left = player2.left > 0 ? player2.left : 0;
-                          player2.left = player2.left < (tableWidth - playerSize) ? player2.left : (tableWidth - playerSize);
+                          player2.left =
+                              player2.left < (tableWidth - playerSize)
+                                  ? player2.left
+                                  : (tableWidth - playerSize);
                           player2.shotX = details.delta.dx;
                           player2.top += details.delta.dy;
                           player2.top = player2.top > 0 ? player2.top : 0;
-                          player2.top = player2.top > (sHeight / 2 - (kToolbarHeight - 20)) ? player2.top : (sHeight / 2 - (kToolbarHeight - 20));
-                          player2.top = player2.top >= (sHeight - (kToolbarHeight + 120)) ? sHeight - (kToolbarHeight + 120) : player2.top;
+                          player2.top = player2.top >
+                                  (sHeight / 2 - (kToolbarHeight - 20))
+                              ? player2.top
+                              : (sHeight / 2 - (kToolbarHeight - 20));
+                          player2.top =
+                              player2.top >= (sHeight - (kToolbarHeight + 120))
+                                  ? sHeight - (kToolbarHeight + 120)
+                                  : player2.top;
                           player2.shotY = details.delta.dy;
                           setState(() {});
                         },
@@ -359,12 +380,19 @@ class _MyHomePageState extends State<GameScreen> {
                           return GestureDetector(
                             onPanUpdate: (details) {
                               player1.left += details.delta.dx;
-                              player1.left = player1.left > 0 ? player1.left : 0;
-                              player1.left = player1.left < (tableWidth - playerSize) ? player1.left : (tableWidth - playerSize);
+                              player1.left =
+                                  player1.left > 0 ? player1.left : 0;
+                              player1.left =
+                                  player1.left < (tableWidth - playerSize)
+                                      ? player1.left
+                                      : (tableWidth - playerSize);
                               player1.shotX = details.delta.dx;
                               player1.top += details.delta.dy;
                               player1.top = player1.top > 0 ? player1.top : 0;
-                              player1.top = player1.top > (sHeight / 2 - (kToolbarHeight + 90)) ? (sHeight / 2 - (kToolbarHeight + 90)) : player1.top;
+                              player1.top = player1.top >
+                                      (sHeight / 2 - (kToolbarHeight + 90))
+                                  ? (sHeight / 2 - (kToolbarHeight + 90))
+                                  : player1.top;
                               player2.shotY = details.delta.dy;
                               setState(() {});
                             },
@@ -403,7 +431,21 @@ class _MyHomePageState extends State<GameScreen> {
                     ),
                     SizedBox(height: 51.h),
                     InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        if (xSpeed != 0 && ySpeed != 0) {
+                          temporaryXSpeed = xSpeed;
+                          temporaryYSpeed = ySpeed;
+                          setState(() {
+                            xSpeed = 0;
+                            ySpeed = 0;
+                          });
+                        } else {
+                          setState(() {
+                            xSpeed = temporaryXSpeed;
+                            ySpeed = temporaryYSpeed;
+                          });
+                        }
+                      },
                       child: Container(
                         height: 48.h,
                         width: 48.h,
@@ -444,8 +486,8 @@ class _MyHomePageState extends State<GameScreen> {
                         padding: const EdgeInsets.all(7.0),
                         width: ballSize,
                         height: ballSize,
-                        decoration: const BoxDecoration(
-                          color: Colors.black,
+                        decoration: BoxDecoration(
+                          color: ball.color,
                           shape: BoxShape.circle,
                         ),
                         child: Container(
@@ -475,7 +517,9 @@ class _MyHomePageState extends State<GameScreen> {
                           textStart,
                           style: TextStyle(
                             fontSize: textStartFontSize,
-                            color: turn == player1.name ? player1.color : player2.color,
+                            color: turn == player1.name
+                                ? player1.color
+                                : player2.color,
                           ),
                         ),
                       ),
@@ -483,8 +527,12 @@ class _MyHomePageState extends State<GameScreen> {
                         if (gameIsFinished) {
                           return;
                         }
-                        xSpeed = math.Random().nextBool() ? (math.Random().nextInt(2) + 1).toDouble() : -(math.Random().nextInt(2) + 1).toDouble();
-                        ySpeed = turn == player1.name ? (math.Random().nextInt(1) + 1).toDouble() : -(math.Random().nextInt(1) + 1).toDouble();
+                        xSpeed = math.Random().nextBool()
+                            ? (math.Random().nextInt(2) + 1).toDouble()
+                            : -(math.Random().nextInt(2) + 1).toDouble();
+                        ySpeed = turn == player1.name
+                            ? (math.Random().nextInt(1) + 1).toDouble()
+                            : -(math.Random().nextInt(1) + 1).toDouble();
                         showStartText = false;
                         do {
                           ball.left += xSpeed;

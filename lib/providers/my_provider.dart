@@ -21,3 +21,24 @@ class MyProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+class PaddleColorProvider extends ChangeNotifier {
+  Color player1Color = Colors.red;
+  Color puckColor = Colors.blue;
+  Color player2Color = Colors.blue;
+
+  setPlayer1Color(Color color) {
+    player1Color = color;
+    notifyListeners();
+  }
+
+  setPuckColor(Color color) {
+    puckColor = color;
+    notifyListeners();
+  }
+
+  setPlayer2Color(Color color) {
+    player2Color = color;
+    notifyListeners();
+  }
+}
