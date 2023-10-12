@@ -15,6 +15,13 @@ import 'package:team_hurricane_hockey/screens/widgets/player.dart';
 import 'package:team_hurricane_hockey/screens/widgets/spaces.dart';
 import 'package:team_hurricane_hockey/services/firebase/game_service.dart';
 
+class GridCell {
+  bool isOccupied = false;
+  String objectId = "";
+
+  GridCell(this.isOccupied, this.objectId);
+}
+
 class GameScreen extends StatefulWidget {
   final GameMode gameMode;
   final String? gameId;
@@ -85,7 +92,47 @@ class _MyHomePageState extends State<GameScreen> {
   late double xSpeed;
   late double ySpeed;
 
-  final goalWidth = 100.0;
+  // last known grid positions
+  double lastKnownX = 0;
+  double lastKnownY = 0;
+
+  double lastKnownOppX = 0;
+  double lastKnownOppY = 0;
+
+  final goalWidth = 200.0.w;
+
+  gridSizingFunction({
+    required double left,
+    required double top,
+    required double minY,
+    required double maxY,
+  }) async {
+    final gridX = ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
+    final gridY = ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
+    /**
+     * Get grid to send to DB 
+     */
+    final verticalGrid = (top / gridY).ceilToDouble();
+    final horizontalGrid = (left / gridX).ceilToDouble();
+
+    if (!(lastKnownX == horizontalGrid.toDouble() && lastKnownY == verticalGrid.toDouble())) {
+      if (widget.gameId != null && widget.gameMode == GameMode.multiplayer) {
+        GameService.instance.updatePaddleMovement(
+          widget.gameId!,
+          widget.playerId!,
+          horizontalGrid,
+          verticalGrid,
+        );
+      }
+    }
+    lastKnownX = horizontalGrid.toDouble();
+    lastKnownY = verticalGrid.toDouble();
+    /**
+     * On getting the grid, multiply the (phoneWidth -14.w / 5).toCeiling on X and (phoneHeight -14.w / 11).toCeiling on Y
+     * On getting on other phone
+     * 11 - verticalGrid
+     * */
+  }
 
   // table attributes
   late final double tableHeight;
@@ -104,43 +151,54 @@ class _MyHomePageState extends State<GameScreen> {
     double dx,
     double dy,
   ) async {
-    dx *= player2FrictionX;
-    dy *= player2FrictionY;
+    if (mounted) {
+      player.left += dx;
+      if (player.left <= 7.w) {
+        player.left = 7.w;
+      } else {
+        player.left = player.left;
+      }
+      player.left = player.left < (tableWidth - (playerSize.w + 7.w)) ? player.left : (tableWidth - (playerSize.w + 7.w));
+      player.top += dy;
+      if (player.top <= 7.w) {
+        player.top = 7.w;
+      } else {
+        player.top = player.top;
+      }
 
-    player.left += dx;
-    player.left = player.left > 0 ? player.left : 0;
-    player.left = player.left < (tableWidth - playerSize.w) ? player.left : (tableWidth - playerSize.w);
-
-    player.top += dy;
-    player.top = player.top > 0 ? player.top : 0;
-    player.top = player.top > (MediaQuery.of(context).size.height / 2 - (kToolbarHeight + 70.h))
-        ? (MediaQuery.of(context).size.height / 2 - (kToolbarHeight + 70.h))
-        : player1.top;
+      if (player.top > MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w)) {
+        player.top = MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w);
+      } else {
+        player.top = player.top;
+      }
+    }
   }
-
-  double previousPlayer2X = 0;
-  double previousPlayer2Y = 0;
 
   movePlayer1Multiplayer(
     Player player,
     double dx,
     double dy,
   ) async {
-    dx *= player2FrictionX;
-    dy *= player2FrictionY;
+    if (lastKnownOppX == dx && lastKnownOppY == dy) {
+      return;
+    }
 
-    player.left += dx;
-    player.left = player.left > 0 ? player.left : 0;
-    player.left = player.left < (tableWidth - playerSize.w) ? player.left : (tableWidth - playerSize.w);
+    final gridX = ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
+    final gridY = ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
+    const xGrids = 6;
+    const yGrids = 12;
+    lastKnownOppX = dx;
+    lastKnownOppY = dy;
 
-    player.top += dy;
-    player.top = player.top > 0 ? player.top : 0;
-    player.top = player.top > (MediaQuery.of(context).size.height / 2 - (kToolbarHeight + 70.h))
-        ? (MediaQuery.of(context).size.height / 2 - (kToolbarHeight + 70.h))
+    player.left = gridX * (xGrids - dx);
+    player.left = player.left <= 7.w ? 7.w : player.left;
+    player.left = player.left < (tableWidth - playerSize.w + 7.w) ? player.left : (tableWidth - playerSize.w + 7.w);
+
+    player.left = gridY * (yGrids - dy);
+    player.top = player.top > 7.w ? player.top : 7.w;
+    player.top = player.top > (MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w))
+        ? (MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w))
         : player1.top;
-
-    previousPlayer2X = dx;
-    previousPlayer2Y = dy;
   }
 
   movePlayer2(
@@ -148,29 +206,33 @@ class _MyHomePageState extends State<GameScreen> {
     double dx,
     double dy,
   ) async {
-    dx *= player2FrictionX;
-    dy *= player2FrictionY;
-
     if (mounted) {
       player.left += dx;
-      player.left = player.left > 0 ? player.left : 0;
-      player.left = player.left < (tableWidth - playerSize.w) ? player.left : (tableWidth - playerSize.w);
-
+      if (player.left <= 7.w) {
+        player.left = 7.w;
+      } else {
+        player.left = player.left;
+      }
+      player.left = player.left < (tableWidth - (playerSize.w + 7.w)) ? player.left : (tableWidth - (playerSize.w + 7.w));
       player.top += dy;
-      player.top = player.top > 0 ? player.top : 0;
-      player.top =
-          player.top > (MediaQuery.of(context).size.height / 2 - (kToolbarHeight)) ? player2.top : (MediaQuery.of(context).size.height / 2 - (kToolbarHeight));
-      player.top = player.top >= (MediaQuery.of(context).size.height - (kToolbarHeight + 120.h))
-          ? MediaQuery.of(context).size.height - (kToolbarHeight + 120.h)
-          : player2.top;
-    }
+      if (player.top <= 7.w) {
+        player.top = 7.w;
+      } else {
+        player.top = player.top;
+      }
+      if (player.top > MediaQuery.of(context).size.height / 2 && player.top >= MediaQuery.of(context).size.height - (playerSize.w + 7.w)) {
+        player.top = MediaQuery.of(context).size.height - (playerSize.w + 7.w);
+      } else if (player.top > MediaQuery.of(context).size.height / 2) {
+        player.top = player2.top;
+      } else {
+        player.top = MediaQuery.of(context).size.height / 2;
+      }
 
-    if (widget.gameId != null && widget.gameMode == GameMode.multiplayer) {
-      GameService.instance.updatePaddleMovement(
-        widget.gameId!,
-        widget.playerId!,
-        dx,
-        dy,
+      gridSizingFunction(
+        left: player.left,
+        top: player.top,
+        minY: MediaQuery.of(context).size.height / 2,
+        maxY: MediaQuery.of(context).size.height - (playerSize.h + 7.w),
       );
     }
   }
@@ -203,7 +265,7 @@ class _MyHomePageState extends State<GameScreen> {
       gameIsFinished = true;
     }
     ball.left = (MediaQuery.of(context).size.width / 2) - ballRadius;
-    ball.top = (MediaQuery.of(context).size.height / 2) - ballRadius - 50;
+    ball.top = (MediaQuery.of(context).size.height / 2) - ballRadius;
   }
 
   double pythagoras(double a, double b) {
@@ -341,9 +403,8 @@ class _MyHomePageState extends State<GameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
     double sWidth = MediaQuery.of(context).size.width;
     double sHeight = MediaQuery.of(context).size.height;
 
@@ -351,15 +412,15 @@ class _MyHomePageState extends State<GameScreen> {
       player1.score = 0;
       player2.score = 0;
       tableWidth = sWidth;
-      tableHeight = sHeight - 100;
+      tableHeight = sHeight;
       player1.left = sWidth / 2 - playerRadius;
       player1.top = playerSize * 1.2;
       player2.left = sWidth / 2 - playerRadius;
-      player2.top = sHeight - (playerSize * 3.5);
+      player2.top = sHeight - (playerSize * 2.5);
       textStartLeft = tableWidth / 2 - textStartWidth / 2;
       textStartTop = tableHeight / 2 - textStartHeight / 2;
       ball.left = sWidth / 2 - ballRadius;
-      ball.top = (sHeight / 2) - ballRadius - 50;
+      ball.top = sHeight / 2 - ballRadius;
       turn = math.Random().nextBool() ? player1.name : player2.name;
       gameIsStarted = true;
     } else {
@@ -375,7 +436,7 @@ class _MyHomePageState extends State<GameScreen> {
         child: Container(
           color: Colors.white.withOpacity(.9),
           width: sWidth,
-          height: sHeight - 100,
+          height: sHeight,
           child: Stack(
             children: [
               /**
@@ -384,12 +445,13 @@ class _MyHomePageState extends State<GameScreen> {
                */
               Positioned(
                 child: Column(
+                  mainAxisSize: MainAxisSize.max,
                   children: [
                     Expanded(child: TopSpace(playerSize: playerSize.w)),
                     Divider(color: Colors.blue[800], thickness: 3.w),
-                    SizedBox(height: playerSize.w),
+                    SizedBox(height: playerSize.h),
                     const CenterLine(),
-                    SizedBox(height: playerSize.w),
+                    SizedBox(height: playerSize.h),
                     Divider(color: Colors.blue[800], thickness: 3.w),
                     Expanded(child: BottomSpace(playerSize: playerSize.w)),
                   ],
@@ -402,7 +464,7 @@ class _MyHomePageState extends State<GameScreen> {
                 top: 0, // Align to the top edge of the table
                 child: Container(
                   width: sWidth,
-                  height: sHeight - 100,
+                  height: sHeight,
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: Colors.blue.shade900,
@@ -433,7 +495,8 @@ class _MyHomePageState extends State<GameScreen> {
               ),
               // player2 (bottom player)
               !gameIsFinished
-                  ? Positioned(
+                  ? AnimatedPositioned(
+                      duration: const Duration(milliseconds: 80),
                       left: player2.left,
                       top: player2.top,
                       child: GestureDetector(
@@ -459,7 +522,8 @@ class _MyHomePageState extends State<GameScreen> {
 
               // player1 (top player)
               !gameIsFinished
-                  ? Positioned(
+                  ? AnimatedPositioned(
+                      duration: const Duration(milliseconds: 80),
                       left: player1.left,
                       top: player1.top,
                       child: Builder(
@@ -526,7 +590,7 @@ class _MyHomePageState extends State<GameScreen> {
                   : const SizedBox.shrink(),
               // ball and score text
               Positioned(
-                top: sHeight / 2 - 166.h,
+                top: (sHeight / 2 - 14.w) - (playerSize.w),
                 right: 24.w,
                 child: Column(
                   children: [
@@ -578,7 +642,8 @@ class _MyHomePageState extends State<GameScreen> {
                 ),
               ),
               !gameIsFinished
-                  ? Positioned(
+                  ? AnimatedPositioned(
+                      duration: const Duration(milliseconds: 15),
                       left: ball.left,
                       top: ball.top,
                       child: Container(
@@ -624,12 +689,17 @@ class _MyHomePageState extends State<GameScreen> {
                         if (gameIsFinished) {
                           return;
                         }
-                        xSpeed = 0.2;
+
+                        // if (widget.gameMode == GameMode.multiplayer) {
+
+                        // }
+
+                        xSpeed = 0.6;
                         // math.Random().nextBool() ? (math.Random().nextInt(2) + 1).toDouble() : -(math.Random().nextInt(2) + 1).toDouble();
                         ySpeed = turn == player1.name
-                            ? 0.2
+                            ? 0.6
                             // (math.Random().nextInt(1) + 1).toDouble()
-                            : -0.2;
+                            : -0.6;
                         // -(math.Random().nextInt(1) + 1).toDouble();
                         showStartText = false;
                         do {
@@ -644,7 +714,7 @@ class _MyHomePageState extends State<GameScreen> {
                             player1.left = sWidth / 2 - playerRadius;
                             player1.top = playerSize * 1.2;
                             player2.left = sWidth / 2 - playerRadius;
-                            player2.top = sHeight - (playerSize * 3.5);
+                            player2.top = sHeight - (playerSize * 2.5);
                             ball.left = sWidth / 2 - ballRadius;
                             ball.top = (sHeight / 2) - ballRadius - 50;
                             setState(() {});
@@ -654,7 +724,7 @@ class _MyHomePageState extends State<GameScreen> {
                             player1.left = sWidth / 2 - playerRadius;
                             player1.top = playerSize * 1.2;
                             player2.left = sWidth / 2 - playerRadius;
-                            player2.top = sHeight - (playerSize * 3.5);
+                            player2.top = sHeight - (playerSize * 2.5);
                             ball.left = sWidth / 2 - ballRadius;
                             ball.top = (sHeight / 2) - ballRadius - 50;
                             nextRound(player2.name);

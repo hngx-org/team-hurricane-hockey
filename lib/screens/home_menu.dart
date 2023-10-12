@@ -247,6 +247,8 @@ class _HomeMenuState extends State<HomeMenu> {
     } catch (e) {
       return null;
     }
+  }
+
   SoundControl controller = SoundControl();
 
   @override
@@ -347,8 +349,8 @@ class _HomeMenuState extends State<HomeMenu> {
                                 );
                                 if (s) {
                                   final s = await wailistDialog();
+                                  WaitlistQuery.instance.deleteUserOnWaitlist(user!.id!);
                                   if (s != null) {
-                                    await WaitlistQuery.instance.deleteUserOnWaitlist(user!.id!);
                                     final gameCreation = await GameService.instance.createGame(
                                       s["gameId"],
                                       s["opponentId"],
