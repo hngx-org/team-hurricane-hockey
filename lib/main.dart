@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
+import 'package:team_hurricane_hockey/data/shared_prefences.dart';
 import 'package:team_hurricane_hockey/providers/my_provider.dart';
 import 'package:team_hurricane_hockey/router/app_router.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
@@ -16,6 +17,7 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   AppStorage.instance.initialize();
+  await AppSharedPreferences.instance.initialize();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -30,9 +32,9 @@ final _providers = <SingleChildWidget>[
   ChangeNotifierProvider<GameProvider>(
     create: (_) => GameProvider.instance,
   ),
-  ChangeNotifierProvider<MyProvider>(
-    create: (_) => MyProvider(),
-  ),
+ ChangeNotifierProvider(create: (context) => MyProvider()..initialize()),
+ ChangeNotifierProvider(
+            create: (context) => PaddleColorProvider()..initialize()),
 ];
 
 class MyApp extends StatelessWidget {

@@ -17,6 +17,7 @@ import 'package:team_hurricane_hockey/services/google_service.dart';
 import 'package:team_hurricane_hockey/services/local_storage.dart';
 import 'package:uuid/uuid.dart';
 import 'package:team_hurricane_hockey/screens/widgets/settings_dialog.dart';
+import 'package:team_hurricane_hockey/sound_control.dart';
 
 class HomeMenu extends StatefulWidget {
   const HomeMenu({super.key});
@@ -250,11 +251,12 @@ class _HomeMenuState extends State<HomeMenu> {
   }
 
   SoundControl controller = SoundControl();
+  final p = Provider.of<MyProvider>(BaseNavigator.currentContext);
 
   @override
   void initState() {
-    controller.startBgMusic();
-    controller.initSfx();
+    if (p.isMusicPlaying) controller.startBgMusic();
+    if (p.isSfxOn) controller.initSfx();
     super.initState();
   }
 

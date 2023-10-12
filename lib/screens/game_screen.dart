@@ -4,12 +4,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:team_hurricane_hockey/constants.dart';
 import 'package:team_hurricane_hockey/enums.dart';
 import 'package:team_hurricane_hockey/models/game.dart';
 import 'package:team_hurricane_hockey/models/player.dart';
 import 'package:team_hurricane_hockey/models/puck.dart';
+import 'package:team_hurricane_hockey/providers/my_provider.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
+import 'package:team_hurricane_hockey/screens/widgets/button.dart';
 import 'package:team_hurricane_hockey/screens/widgets/center_circe.dart';
 import 'package:team_hurricane_hockey/screens/widgets/player.dart';
 import 'package:team_hurricane_hockey/screens/widgets/spaces.dart';
@@ -43,6 +46,7 @@ class GameScreen extends StatefulWidget {
 
 class _MyHomePageState extends State<GameScreen> {
   Game? game;
+  
   @override
   void initState() {
     super.initState();
@@ -72,25 +76,33 @@ class _MyHomePageState extends State<GameScreen> {
   double player2FrictionX = 0.997;
   double player2FrictionY = 0.997;
 
-  //Puck
-  Puck ball = Puck(
-    color: Colors.black,
-  );
-
   // player 1 & 2 and ball variables
-  Player player1 = Player(
-    color: Colors.red,
-    name: "red",
-  );
+  late Player player1;
+  late Player player2;
 
-  Player player2 = Player(
-    name: "blue",
-    color: Colors.blue,
-  );
+  late Puck ball;
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final paddleColorProvider = Provider.of<PaddleColorProvider>(context);
+    player1 = Player(
+        name: paddleColorProvider.player1Color.toString(),
+        color: paddleColorProvider.player1Color);
+    player2 = Player(
+        name: paddleColorProvider.player2Color.toString(),
+        color: paddleColorProvider.player2Color);
+    ball = Puck(
+        name: paddleColorProvider.puckColor.toString(),
+        color: paddleColorProvider.puckColor);
+  }
+  
   // ball attributes
-  late double xSpeed;
-  late double ySpeed;
+  late double xSpeed = 0;
+  late double ySpeed = 0;
+
+  late double temporaryXSpeed;
+  late double temporaryYSpeed;
 
   // last known grid positions
   double lastKnownX = 0;
@@ -294,7 +306,8 @@ class _MyHomePageState extends State<GameScreen> {
 
     // Check if the ball is inside the goalpost area.
     if ((ball.top <= 0 || ball.bottom >= tableHeight) &&
-        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) || (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
+        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) ||
+            (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
     } else if (ball.top <= 0 || ball.bottom >= tableHeight) {
       ySpeed = -ySpeed;
     } else {
@@ -338,30 +351,36 @@ class _MyHomePageState extends State<GameScreen> {
     // Move the computer player's paddle towards the desired position.
     if (player1.centerX < desiredX) {
       if (player1.left < maxX) {
-        player1.left += 2.0; // Adjust the speed of the computer player's horizontal movement.
+        player1.left +=
+            2.0; // Adjust the speed of the computer player's horizontal movement.
       }
     } else if (player1.centerX > desiredX) {
       if (player1.left < 8) {
         return;
       }
 
-      player1.left -= 2.0; // Adjust the speed of the computer player's horizontal movement.
+      player1.left -=
+          2.0; // Adjust the speed of the computer player's horizontal movement.
     }
     previousPoint = Offset(player1.left, 0);
 
     previousPoint = Offset(player1.left, 0);
 
     if (player1.centerY < desiredY) {
-      player1.top += 1.0; // Adjust the speed of the computer player's vertical movement.
+      player1.top +=
+          1.0; // Adjust the speed of the computer player's vertical movement.
     } else if (player1.centerY > desiredY) {
-      player1.top -= 1.0; // Adjust the speed of the computer player's vertical movement.
+      player1.top -=
+          1.0; // Adjust the speed of the computer player's vertical movement.
     }
     previousPoint = Offset(player1.left, player1.top);
     // Ensure the computer player's paddle stays within its half of the field horizontally and vertically.
     player1.top = player1.top.clamp(minY, maxY);
 
     // Update the UI to reflect the computer player's new position.
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void handlePaddleCollision(Player player) {
@@ -401,6 +420,13 @@ class _MyHomePageState extends State<GameScreen> {
     }
   }
 
+  bool isPaused = false;
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -424,7 +450,7 @@ class _MyHomePageState extends State<GameScreen> {
       turn = math.Random().nextBool() ? player1.name : player2.name;
       gameIsStarted = true;
     } else {
-      if (widget.gameMode == GameMode.ai) {
+      if (widget.gameMode == GameMode.ai && !isPaused) {
         defendGoal();
       }
     }
@@ -605,23 +631,35 @@ class _MyHomePageState extends State<GameScreen> {
                       ),
                     ),
                     SizedBox(height: 51.h),
-                    InkWell(
-                      onTap: () {
-                        BaseNavigator.pop();
-                      },
-                      child: Container(
-                        height: 48.h,
-                        width: 48.h,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(width: 4.w),
-                        ),
-                        child: Center(
-                          child: Transform.rotate(
-                            angle: math.pi / 2,
-                            child: Icon(
-                              Icons.pause,
-                              size: 30.h,
+                    Visibility(
+                      visible: (xSpeed != 0 && ySpeed != 0),
+                      maintainAnimation: true,
+                      maintainSize: true,
+                      maintainState: true,
+                      child: InkWell(
+                        onTap: () {
+                          temporaryXSpeed = xSpeed;
+                          temporaryYSpeed = ySpeed;
+                          setState(() {
+                            xSpeed = 0;
+                            ySpeed = 0;
+                            isPaused = true;
+                          });
+                        },
+                        child: Container(
+                          height: 48.h,
+                          width: 48.h,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(width: 4.w),
+                          ),
+                          child: Center(
+                            child: Transform.rotate(
+                              angle: math.pi / 2,
+                              child: Icon(
+                                Icons.pause,
+                                size: 30.h,
+                              ),
                             ),
                           ),
                         ),
@@ -650,8 +688,8 @@ class _MyHomePageState extends State<GameScreen> {
                         padding: const EdgeInsets.all(7.0),
                         width: ballSize,
                         height: ballSize,
-                        decoration: const BoxDecoration(
-                          color: Colors.black,
+                        decoration: BoxDecoration(
+                          color: ball.color,
                           shape: BoxShape.circle,
                         ),
                         child: Container(
@@ -681,7 +719,9 @@ class _MyHomePageState extends State<GameScreen> {
                           textStart,
                           style: TextStyle(
                             fontSize: textStartFontSize,
-                            color: turn == player1.name ? player1.color : player2.color,
+                            color: turn == player1.name
+                                ? player1.color
+                                : player2.color,
                           ),
                         ),
                       ),
@@ -689,20 +729,14 @@ class _MyHomePageState extends State<GameScreen> {
                         if (gameIsFinished) {
                           return;
                         }
-
-                        // if (widget.gameMode == GameMode.multiplayer) {
-
-                        // }
-
-                        xSpeed = 0.6;
-                        // math.Random().nextBool() ? (math.Random().nextInt(2) + 1).toDouble() : -(math.Random().nextInt(2) + 1).toDouble();
+                        xSpeed = math.Random().nextBool()
+                            ? 0.6
+                            : -0.6;
                         ySpeed = turn == player1.name
                             ? 0.6
-                            // (math.Random().nextInt(1) + 1).toDouble()
                             : -0.6;
-                        // -(math.Random().nextInt(1) + 1).toDouble();
                         showStartText = false;
-                        do {
+                        while (mounted) {
                           ball.left += xSpeed;
                           ball.top += ySpeed;
                           if (ball.left > tableWidth - ballSize) {
@@ -730,15 +764,75 @@ class _MyHomePageState extends State<GameScreen> {
                             nextRound(player2.name);
                             break;
                           }
+
                           doTheMathWork();
                           await Future.delayed(const Duration(milliseconds: 1));
-                          setState(() {});
-                        } while (true);
+                          if (mounted) {
+                            setState(() {});
+                          }
+                        }
                       },
                     ),
                   ),
                 ),
               ),
+              Visibility(
+                visible: isPaused,
+                child: Container(
+                  height: sHeight,
+                  width: sWidth,
+                  color: Colors.black.withOpacity(0.8),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "PAUSED",
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelMedium!
+                              .copyWith(
+                                  fontSize: 36.sp,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.blue),
+                        ),
+                        SizedBox(
+                          height: 24.h,
+                        ),
+                        Button(
+                          child: Text("RESUME",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium!
+                                  .copyWith(fontSize: 18.sp)),
+                          onTap: () {
+                            setState(() {
+                              xSpeed = temporaryXSpeed;
+                              ySpeed = temporaryYSpeed;
+                              isPaused = false;
+                            });
+                          },
+                        ),
+                        SizedBox(
+                          height: 16.h,
+                        ),
+                        Button(
+                          child: Text(
+                            "QUIT",
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium!
+                                .copyWith(fontSize: 18.sp),
+                          ),
+                          onTap: () {
+                            BaseNavigator.pop();
+                          },
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              )
             ],
           ),
         ),
