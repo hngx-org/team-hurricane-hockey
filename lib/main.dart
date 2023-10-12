@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:team_hurricane_hockey/providers/my_provider.dart';
 import 'package:team_hurricane_hockey/router/app_router.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
 import 'package:team_hurricane_hockey/screens/splash_screen.dart';
-import 'package:provider/provider.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => MyProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => MyProvider()),
+        ChangeNotifierProvider(create: (context) => PaddleColorProvider()),
+      ],
       child: const MyApp(),
     ),
   );
@@ -57,7 +60,7 @@ class MyApp extends StatelessWidget {
                   // fontWeight: FontWeight.w900,
                 ),
                 labelMedium: GoogleFonts.tektur(
-                  fontSize: 32.0.sp,
+                  fontSize: 26.0.sp,
                   color: Colors.white,
                 ),
               ),

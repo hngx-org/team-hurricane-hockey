@@ -15,9 +15,9 @@ class PlayerChip extends StatelessWidget {
       padding: EdgeInsets.all(2.w),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: player.name == "blue" ? Colors.blue : Colors.red,
+        color: player.color,
         border: Border.all(
-          color: player.name == "blue" ? Colors.blue : Colors.red,
+          color: player.color,
           width: 3.w,
         ),
       ),
@@ -26,16 +26,12 @@ class PlayerChip extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(15.w),
         decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: player.name == "blue"
-              ? Colors.blue.shade900
-              : Colors.red.shade900,
-        ),
-        child: Container(
-          decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: player.name == "blue" ? Colors.blue : Colors.red,
-          ),
+            color:
+                HSLColor.fromColor(player.color).withLightness(0.3).toColor()),
+        child: Container(
+          decoration:
+              BoxDecoration(shape: BoxShape.circle, color: player.color),
         ),
       ),
     );
