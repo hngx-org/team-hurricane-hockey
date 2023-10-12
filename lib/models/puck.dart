@@ -15,11 +15,12 @@ class Puck {
   double frictionX = 0.997;
   double frictionY = 0.997;
   double acceleration = 1;
+  final String name;
   final double size = ballSize;
-  final double radius = ballRadius;
   final Color color;
 
   Puck({
+    required this.name,
     required this.color,
   });
 }
