@@ -42,6 +42,7 @@ dependencies:
   font_awesome_flutter: ^10.5.0
   provider: ^6.0.5
   firebase_core: ^2.17.0
+  shared_preferences: ^2.2.2
 
 
 dev_dependencies:
