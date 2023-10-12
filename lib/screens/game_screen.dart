@@ -9,6 +9,8 @@ import 'package:team_hurricane_hockey/enums.dart';
 import 'package:team_hurricane_hockey/models/player.dart';
 import 'package:team_hurricane_hockey/models/puck.dart';
 import 'package:team_hurricane_hockey/providers/my_provider.dart';
+import 'package:team_hurricane_hockey/router/base_navigator.dart';
+import 'package:team_hurricane_hockey/screens/widgets/button.dart';
 import 'package:team_hurricane_hockey/screens/widgets/center_circe.dart';
 import 'package:team_hurricane_hockey/screens/widgets/player.dart';
 import 'package:team_hurricane_hockey/screens/widgets/spaces.dart';
@@ -48,8 +50,8 @@ class _MyHomePageState extends State<GameScreen> {
   }
 
   // ball attributes
-  late double xSpeed;
-  late double ySpeed;
+  late double xSpeed = 0;
+  late double ySpeed = 0;
 
   late double temporaryXSpeed;
   late double temporaryYSpeed;
@@ -237,6 +239,13 @@ class _MyHomePageState extends State<GameScreen> {
     if (player.shotY != 0) {
       ySpeed = (player.shotY) / speedFactor;
     }
+  }
+
+  bool isPaused = false;
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -430,35 +439,35 @@ class _MyHomePageState extends State<GameScreen> {
                       ),
                     ),
                     SizedBox(height: 51.h),
-                    InkWell(
-                      onTap: () {
-                        if (xSpeed != 0 && ySpeed != 0) {
+                    Visibility(
+                      visible: (xSpeed != 0 && ySpeed != 0),
+                      maintainAnimation: true,
+                      maintainSize: true,
+                      maintainState: true,
+                      child: InkWell(
+                        onTap: () {
                           temporaryXSpeed = xSpeed;
                           temporaryYSpeed = ySpeed;
                           setState(() {
                             xSpeed = 0;
                             ySpeed = 0;
+                            isPaused = true;
                           });
-                        } else {
-                          setState(() {
-                            xSpeed = temporaryXSpeed;
-                            ySpeed = temporaryYSpeed;
-                          });
-                        }
-                      },
-                      child: Container(
-                        height: 48.h,
-                        width: 48.h,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(width: 4.w),
-                        ),
-                        child: Center(
-                          child: Transform.rotate(
-                            angle: math.pi / 2,
-                            child: Icon(
-                              Icons.pause,
-                              size: 30.h,
+                        },
+                        child: Container(
+                          height: 48.h,
+                          width: 48.h,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(width: 4.w),
+                          ),
+                          child: Center(
+                            child: Transform.rotate(
+                              angle: math.pi / 2,
+                              child: Icon(
+                                Icons.pause,
+                                size: 30.h,
+                              ),
                             ),
                           ),
                         ),
@@ -562,15 +571,76 @@ class _MyHomePageState extends State<GameScreen> {
                             nextRound(player2.name);
                             break;
                           }
-                          doTheMathWork();
-                          await Future.delayed(const Duration(milliseconds: 1));
-                          setState(() {});
+
+                          if (mounted) {
+                            doTheMathWork();
+                            await Future.delayed(
+                                const Duration(milliseconds: 1));
+                            setState(() {});
+                          }
                         } while (true);
                       },
                     ),
                   ),
                 ),
               ),
+              Visibility(
+                visible: isPaused,
+                child: Container(
+                  height: sHeight,
+                  width: sWidth,
+                  color: Colors.black.withOpacity(0.8),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "PAUSED",
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelMedium!
+                              .copyWith(
+                                  fontSize: 36.sp,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.blue),
+                        ),
+                        SizedBox(
+                          height: 24.h,
+                        ),
+                        Button(
+                          child: Text("RESUME",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium!
+                                  .copyWith(fontSize: 18.sp)),
+                          onTap: () {
+                            setState(() {
+                              xSpeed = temporaryXSpeed;
+                              ySpeed = temporaryYSpeed;
+                              isPaused = false;
+                            });
+                          },
+                        ),
+                        SizedBox(
+                          height: 16.h,
+                        ),
+                        Button(
+                          child: Text(
+                            "QUIT",
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium!
+                                .copyWith(fontSize: 18.sp),
+                          ),
+                          onTap: () {
+                            BaseNavigator.pop();
+                          },
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              )
             ],
           ),
         ),
