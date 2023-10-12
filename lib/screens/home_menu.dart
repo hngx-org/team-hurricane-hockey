@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:team_hurricane_hockey/sound_control.dart';
 import 'package:team_hurricane_hockey/enums.dart';
 import 'package:team_hurricane_hockey/models/user.dart';
 import 'package:team_hurricane_hockey/models/waitlist_req.dart';
@@ -15,9 +16,11 @@ import 'package:team_hurricane_hockey/services/firebase/waitlist_query.dart';
 import 'package:team_hurricane_hockey/services/google_service.dart';
 import 'package:team_hurricane_hockey/services/local_storage.dart';
 import 'package:uuid/uuid.dart';
+import 'package:team_hurricane_hockey/screens/widgets/settings_dialog.dart';
 
 class HomeMenu extends StatefulWidget {
   const HomeMenu({super.key});
+
   static const routeName = 'home';
 
   @override
@@ -244,6 +247,21 @@ class _HomeMenuState extends State<HomeMenu> {
     } catch (e) {
       return null;
     }
+  SoundControl controller = SoundControl();
+
+  @override
+  void initState() {
+    controller.startBgMusic();
+    controller.initSfx();
+    super.initState();
+  }
+
+  @override
+  void dispose() async {
+    await bgMusic.stop();
+    bgMusic.dispose();
+    sfx.dispose();
+    super.dispose();
   }
 
   @override
@@ -291,6 +309,7 @@ class _HomeMenuState extends State<HomeMenu> {
                           duration: const Duration(milliseconds: 200),
                           child: TextButton(
                             onPressed: () {
+                              controller.playSfx();
                               BaseNavigator.pushNamed(
                                 GameScreen.routeName,
                                 args: {
@@ -364,6 +383,7 @@ class _HomeMenuState extends State<HomeMenu> {
                           duration: const Duration(milliseconds: 400),
                           child: TextButton(
                             onPressed: () {
+                              controller.playSfx();
                               BaseNavigator.pushNamed(
                                 GameScreen.routeName,
                                 args: {
@@ -381,7 +401,15 @@ class _HomeMenuState extends State<HomeMenu> {
                         FadeInRightBig(
                           duration: const Duration(milliseconds: 800),
                           child: TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              controller.playSfx();
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return const SettingsDialog();
+                                },
+                              );
+                            },
                             child: Text(
                               'Settings',
                               style: Theme.of(context).textTheme.labelMedium,
