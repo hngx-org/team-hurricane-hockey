@@ -2,8 +2,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:provider/single_child_widget.dart';
 import 'package:team_hurricane_hockey/router/app_router.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
+import 'package:team_hurricane_hockey/screens/provider/game_provider.dart';
 import 'package:team_hurricane_hockey/screens/splash_screen.dart';
 import 'package:team_hurricane_hockey/services/local_storage.dart';
 
@@ -16,8 +19,17 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(const MyApp());
+  runApp(MultiProvider(
+    providers: _providers,
+    child: const MyApp(),
+  ));
 }
+
+final _providers = <SingleChildWidget>[
+  ChangeNotifierProvider<GameProvider>(
+    create: (_) => GameProvider.instance,
+  ),
+];
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -60,6 +72,10 @@ class MyApp extends StatelessWidget {
               ),
               labelMedium: GoogleFonts.tektur(
                 fontSize: 32.0.sp,
+                color: Colors.white,
+              ),
+              titleMedium: GoogleFonts.tektur(
+                fontSize: 24.0.sp,
                 color: Colors.white,
               ),
             ),

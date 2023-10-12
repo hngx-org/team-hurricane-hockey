@@ -5,7 +5,6 @@ import 'package:tuple/tuple.dart';
 class UserQuery {
   UserQuery._();
   static final UserQuery instance = UserQuery._();
-
   final firestore = FirebaseFirestore.instance;
 
   Future<Tuple2<UserData?, String?>> getUser(String userId) async {

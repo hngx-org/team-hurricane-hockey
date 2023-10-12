@@ -1,14 +1,20 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:team_hurricane_hockey/enums.dart';
 import 'package:team_hurricane_hockey/models/user.dart';
+import 'package:team_hurricane_hockey/models/waitlist_req.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
 import 'package:team_hurricane_hockey/screens/game_screen.dart';
+import 'package:team_hurricane_hockey/services/firebase/game_service.dart';
 import 'package:team_hurricane_hockey/services/firebase/user_query.dart';
+import 'package:team_hurricane_hockey/services/firebase/waitlist_query.dart';
 import 'package:team_hurricane_hockey/services/google_service.dart';
 import 'package:team_hurricane_hockey/services/local_storage.dart';
+import 'package:uuid/uuid.dart';
 
 class HomeMenu extends StatefulWidget {
   const HomeMenu({super.key});
@@ -19,6 +25,193 @@ class HomeMenu extends StatefulWidget {
 }
 
 class _HomeMenuState extends State<HomeMenu> {
+  final user = AppStorage.instance.getUserData();
+  loadingDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  height: 30,
+                  width: 30,
+                  child: CircularProgressIndicator(),
+                ),
+                const SizedBox(height: 30),
+                Text(
+                  'LOOKING FOR PLAYERS ONLINE',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.black),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<dynamic> wailistDialog() async {
+    final s = await showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'ONLINE PLAYERS',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.black),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  height: 500.h,
+                  child: StreamBuilder(
+                    stream: FirebaseFirestore.instance.collection("waitlist").snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: SizedBox(
+                            height: 30,
+                            width: 30,
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+
+                      if (!snapshot.hasData) {
+                        return Container(
+                          height: 30,
+                          color: Colors.red,
+                        );
+                      }
+
+                      if (snapshot.hasData) {
+                        Waitlist? userWaitlist;
+                        for (var element in snapshot.data?.docs ?? []) {
+                          final data = Waitlist.fromJson(element.data());
+
+                          if (data.id == user?.id) {
+                            userWaitlist = data;
+                          }
+                        }
+                        return ListView.builder(
+                          itemCount: snapshot.data?.size,
+                          itemBuilder: (context, index) {
+                            final snapData = snapshot.data?.docs[index].data();
+                            final data = Waitlist.fromJson(snapData!);
+
+                            if (data.id == user?.id) {
+                              userWaitlist = data;
+                            }
+
+                            if (data.id == user?.id) {
+                              userWaitlist = data;
+                              return const SizedBox.shrink();
+                            }
+
+                            if (userWaitlist != null) {
+                              if (userWaitlist!.gameId != null) {
+                                if (userWaitlist?.gameId == data.gameId) {
+                                  BaseNavigator.pop({
+                                    "status": true,
+                                    "gameId": data.gameId,
+                                    "opponentId": data.id,
+                                    "opponentName": data.name,
+                                  });
+                                }
+                              }
+                            }
+
+                            return ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              onTap: () async {
+                                final id = const Uuid().v1();
+                                await WaitlistQuery.instance.sendRequest(user!.id!, data.id!, id);
+                              },
+                              leading: ClipRRect(
+                                borderRadius: BorderRadius.circular(1000),
+                                child: Image.network(
+                                  data.image ?? "",
+                                  height: 36,
+                                  width: 36,
+                                ),
+                              ),
+                              title: Text(
+                                data.name ?? "",
+                                style: GoogleFonts.tektur(
+                                  fontSize: 20.0.sp,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              subtitle: Builder(builder: (context) {
+                                if (data.accepterId == user?.id) {
+                                  return Text(
+                                    "You have a game request from this user",
+                                    style: GoogleFonts.tektur(
+                                      fontSize: 14.0.sp,
+                                      color: Colors.black,
+                                    ),
+                                  );
+                                }
+
+                                return Text(
+                                  data.isReady == true ? "Ready" : "Not ready",
+                                  style: GoogleFonts.tektur(
+                                    fontSize: 14.0.sp,
+                                    color: Colors.black,
+                                  ),
+                                );
+                              }),
+                              trailing: Builder(builder: (context) {
+                                if (data.accepterId == user?.id) {
+                                  return IconButton(
+                                    onPressed: () async {
+                                      await WaitlistQuery.instance.sendRequest(
+                                        user!.id!,
+                                        data.id!,
+                                        data.gameId!,
+                                      );
+                                    },
+                                    icon: const Icon(
+                                      Icons.check_circle,
+                                      color: Colors.green,
+                                    ),
+                                  );
+                                }
+
+                                return const SizedBox.shrink();
+                              }),
+                            );
+                          },
+                        );
+                      }
+
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (s != null) {
+      return s;
+    }
+
+    return null;
+  }
+
+  ValueNotifier searchingOnline = ValueNotifier(false);
+
   Future<UserData?> googleLogin() async {
     try {
       await AuthRepository.instance.logOut();
@@ -100,7 +293,9 @@ class _HomeMenuState extends State<HomeMenu> {
                             onPressed: () {
                               BaseNavigator.pushNamed(
                                 GameScreen.routeName,
-                                args: GameMode.ai,
+                                args: {
+                                  "mode": GameMode.ai,
+                                },
                               );
                             },
                             child: Text(
@@ -114,10 +309,48 @@ class _HomeMenuState extends State<HomeMenu> {
                           duration: const Duration(milliseconds: 400),
                           child: TextButton(
                             onPressed: () async {
-                              final user = AppStorage.instance.getUserData();
+                              // AppStorage.instance.clearUser();
+
                               if (user == null) {
                                 final data = await googleLogin();
                                 if (data != null) {}
+                              } else {
+                                Waitlist waitlist = Waitlist(
+                                  name: user?.name,
+                                  id: user?.id,
+                                  image: user?.image,
+                                  email: user?.email,
+                                  isReady: true,
+                                );
+                                final s = await WaitlistQuery.instance.checkIntoWaitlist(
+                                  waitlist,
+                                  user!.id!,
+                                );
+                                if (s) {
+                                  final s = await wailistDialog();
+                                  if (s != null) {
+                                    await WaitlistQuery.instance.deleteUserOnWaitlist(user!.id!);
+                                    final gameCreation = await GameService.instance.createGame(
+                                      s["gameId"],
+                                      s["opponentId"],
+                                      s["opponentName"],
+                                      user!.id!,
+                                      user!.name!,
+                                    );
+
+                                    if (gameCreation) {
+                                      BaseNavigator.pushNamed(
+                                        GameScreen.routeName,
+                                        args: {
+                                          "gameId": s["gameId"],
+                                          "mode": GameMode.multiplayer,
+                                          "opponentId": s["opponentId"],
+                                          "playerId": user!.id!,
+                                        },
+                                      );
+                                    }
+                                  }
+                                }
                               }
                             },
                             child: Text(
@@ -133,7 +366,9 @@ class _HomeMenuState extends State<HomeMenu> {
                             onPressed: () {
                               BaseNavigator.pushNamed(
                                 GameScreen.routeName,
-                                args: GameMode.player2,
+                                args: {
+                                  "mode": GameMode.player2,
+                                },
                               );
                             },
                             child: Text(

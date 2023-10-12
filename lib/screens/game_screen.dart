@@ -1,21 +1,32 @@
 import 'dart:math' as math;
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:team_hurricane_hockey/constants.dart';
 import 'package:team_hurricane_hockey/enums.dart';
+import 'package:team_hurricane_hockey/models/game.dart';
 import 'package:team_hurricane_hockey/models/player.dart';
 import 'package:team_hurricane_hockey/models/puck.dart';
+import 'package:team_hurricane_hockey/router/base_navigator.dart';
 import 'package:team_hurricane_hockey/screens/widgets/center_circe.dart';
 import 'package:team_hurricane_hockey/screens/widgets/player.dart';
 import 'package:team_hurricane_hockey/screens/widgets/spaces.dart';
+import 'package:team_hurricane_hockey/services/firebase/game_service.dart';
 
 class GameScreen extends StatefulWidget {
   final GameMode gameMode;
+  final String? gameId;
+  final String? playerId;
+  final String? opponentId;
+
   const GameScreen({
     Key? key,
     required this.gameMode,
+    this.gameId,
+    this.playerId,
+    this.opponentId,
   }) : super(key: key);
   static const routeName = 'gameScreen';
 
@@ -24,28 +35,57 @@ class GameScreen extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<GameScreen> {
+  Game? game;
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      getGameDetails();
+    });
   }
+
+  getGameDetails() async {
+    if (widget.gameId == null) {
+      return;
+    }
+    if (widget.gameMode == GameMode.multiplayer) {
+      final serverGame = await GameService.instance.getGame(widget.gameId!);
+
+      if (serverGame != null) {
+        game = serverGame;
+      } else {
+        game = Game(
+          players: Players(),
+        );
+      }
+    }
+  }
+
+  // Paddle 2 (Player 2) attribute
+  double player2FrictionX = 0.997;
+  double player2FrictionY = 0.997;
+
+  //Puck
+  Puck ball = Puck(
+    color: Colors.black,
+  );
 
   // player 1 & 2 and ball variables
   Player player1 = Player(
     color: Colors.red,
     name: "red",
   );
+
   Player player2 = Player(
     name: "blue",
     color: Colors.blue,
-  );
-  Puck ball = Puck(
-    name: "ball",
-    color: Colors.black,
   );
 
   // ball attributes
   late double xSpeed;
   late double ySpeed;
+
+  final goalWidth = 100.0;
 
   // table attributes
   late final double tableHeight;
@@ -59,6 +99,82 @@ class _MyHomePageState extends State<GameScreen> {
   late final double textStartTop;
   late final double textStartLeft;
 
+  movePlayer1(
+    Player player,
+    double dx,
+    double dy,
+  ) async {
+    dx *= player2FrictionX;
+    dy *= player2FrictionY;
+
+    player.left += dx;
+    player.left = player.left > 0 ? player.left : 0;
+    player.left = player.left < (tableWidth - playerSize.w) ? player.left : (tableWidth - playerSize.w);
+
+    player.top += dy;
+    player.top = player.top > 0 ? player.top : 0;
+    player.top = player.top > (MediaQuery.of(context).size.height / 2 - (kToolbarHeight + 70.h))
+        ? (MediaQuery.of(context).size.height / 2 - (kToolbarHeight + 70.h))
+        : player1.top;
+  }
+
+  double previousPlayer2X = 0;
+  double previousPlayer2Y = 0;
+
+  movePlayer1Multiplayer(
+    Player player,
+    double dx,
+    double dy,
+  ) async {
+    dx *= player2FrictionX;
+    dy *= player2FrictionY;
+
+    player.left += dx;
+    player.left = player.left > 0 ? player.left : 0;
+    player.left = player.left < (tableWidth - playerSize.w) ? player.left : (tableWidth - playerSize.w);
+
+    player.top += dy;
+    player.top = player.top > 0 ? player.top : 0;
+    player.top = player.top > (MediaQuery.of(context).size.height / 2 - (kToolbarHeight + 70.h))
+        ? (MediaQuery.of(context).size.height / 2 - (kToolbarHeight + 70.h))
+        : player1.top;
+
+    previousPlayer2X = dx;
+    previousPlayer2Y = dy;
+  }
+
+  movePlayer2(
+    Player player,
+    double dx,
+    double dy,
+  ) async {
+    dx *= player2FrictionX;
+    dy *= player2FrictionY;
+
+    if (mounted) {
+      player.left += dx;
+      player.left = player.left > 0 ? player.left : 0;
+      player.left = player.left < (tableWidth - playerSize.w) ? player.left : (tableWidth - playerSize.w);
+
+      player.top += dy;
+      player.top = player.top > 0 ? player.top : 0;
+      player.top =
+          player.top > (MediaQuery.of(context).size.height / 2 - (kToolbarHeight)) ? player2.top : (MediaQuery.of(context).size.height / 2 - (kToolbarHeight));
+      player.top = player.top >= (MediaQuery.of(context).size.height - (kToolbarHeight + 120.h))
+          ? MediaQuery.of(context).size.height - (kToolbarHeight + 120.h)
+          : player2.top;
+    }
+
+    if (widget.gameId != null && widget.gameMode == GameMode.multiplayer) {
+      GameService.instance.updatePaddleMovement(
+        widget.gameId!,
+        widget.playerId!,
+        dx,
+        dy,
+      );
+    }
+  }
+
   // global attributes
   late String turn;
   bool gameIsStarted = false;
@@ -68,10 +184,6 @@ class _MyHomePageState extends State<GameScreen> {
   late double distanceBall2P2;
   int gameEndsAt = 10;
   Offset? previousPoint;
-
-  double pythagoras(double a, double b) {
-    return math.sqrt(math.pow(a, 2).toDouble() + math.pow(b, 2).toDouble());
-  }
 
   void nextRound(String player) {
     player == player1.name ? player1.score++ : player2.score++;
@@ -94,7 +206,10 @@ class _MyHomePageState extends State<GameScreen> {
     ball.top = (MediaQuery.of(context).size.height / 2) - ballRadius - 50;
   }
 
-  final goalWidth = 100.0;
+  double pythagoras(double a, double b) {
+    return math.sqrt(math.pow(a, 2).toDouble() + math.pow(b, 2).toDouble());
+  }
+
   void doTheMathWork() async {
     player1.right = player1.left + playerSize;
     player1.bottom = player1.top + playerSize;
@@ -198,9 +313,8 @@ class _MyHomePageState extends State<GameScreen> {
 
     // Adjust the speed factors (make the ball move faster or slower)
     double speedFactor = 2.0;
-
     // Limit the maximum speed
-    double maxSpeed = 4.0;
+    double maxSpeed = 3.0;
     horizontalSpeed = horizontalSpeed.clamp(-maxSpeed, maxSpeed);
     verticalSpeed = verticalSpeed.clamp(-maxSpeed, maxSpeed);
 
@@ -216,12 +330,10 @@ class _MyHomePageState extends State<GameScreen> {
       xSpeed *= speedFactor;
       ySpeed = verticalSpeed * speedFactor;
     }
-
     // Check for player's shot and adjust the speed if needed
     if (player.shotX != 0) {
       xSpeed = (player.shotX) / speedFactor;
     }
-
     if (player.shotY != 0) {
       ySpeed = (player.shotY) / speedFactor;
     }
@@ -275,9 +387,9 @@ class _MyHomePageState extends State<GameScreen> {
                   children: [
                     Expanded(child: TopSpace(playerSize: playerSize.w)),
                     Divider(color: Colors.blue[800], thickness: 3.w),
-                    SizedBox(height: playerSize.w * 2),
+                    SizedBox(height: playerSize.w),
                     const CenterLine(),
-                    SizedBox(height: playerSize.w * 2),
+                    SizedBox(height: playerSize.w),
                     Divider(color: Colors.blue[800], thickness: 3.w),
                     Expanded(child: BottomSpace(playerSize: playerSize.w)),
                   ],
@@ -326,15 +438,11 @@ class _MyHomePageState extends State<GameScreen> {
                       top: player2.top,
                       child: GestureDetector(
                         onPanUpdate: (details) {
-                          player2.left += details.delta.dx;
-                          player2.left = player2.left > 0 ? player2.left : 0;
-                          player2.left = player2.left < (tableWidth - playerSize) ? player2.left : (tableWidth - playerSize);
-                          player2.shotX = details.delta.dx;
-                          player2.top += details.delta.dy;
-                          player2.top = player2.top > 0 ? player2.top : 0;
-                          player2.top = player2.top > (sHeight / 2 - (kToolbarHeight - 20)) ? player2.top : (sHeight / 2 - (kToolbarHeight - 20));
-                          player2.top = player2.top >= (sHeight - (kToolbarHeight + 120)) ? sHeight - (kToolbarHeight + 120) : player2.top;
-                          player2.shotY = details.delta.dy;
+                          movePlayer2(
+                            player2,
+                            details.delta.dx,
+                            details.delta.dy,
+                          );
                           setState(() {});
                         },
                         onPanEnd: (details) {
@@ -354,35 +462,66 @@ class _MyHomePageState extends State<GameScreen> {
                   ? Positioned(
                       left: player1.left,
                       top: player1.top,
-                      child: Builder(builder: (context) {
-                        if (widget.gameMode == GameMode.player2) {
-                          return GestureDetector(
-                            onPanUpdate: (details) {
-                              player1.left += details.delta.dx;
-                              player1.left = player1.left > 0 ? player1.left : 0;
-                              player1.left = player1.left < (tableWidth - playerSize) ? player1.left : (tableWidth - playerSize);
-                              player1.shotX = details.delta.dx;
-                              player1.top += details.delta.dy;
-                              player1.top = player1.top > 0 ? player1.top : 0;
-                              player1.top = player1.top > (sHeight / 2 - (kToolbarHeight + 90)) ? (sHeight / 2 - (kToolbarHeight + 90)) : player1.top;
-                              player2.shotY = details.delta.dy;
-                              setState(() {});
-                            },
-                            onPanEnd: (details) {
-                              player2.shotX = 0;
-                              player2.shotY = 0;
-                              setState(() {});
-                            },
-                            child: PlayerChip(
-                              player: player1,
-                            ),
+                      child: Builder(
+                        builder: (context) {
+                          if (widget.gameMode == GameMode.player2) {
+                            return GestureDetector(
+                              onPanUpdate: (details) {
+                                movePlayer1(
+                                  player1,
+                                  details.delta.dx,
+                                  details.delta.dy,
+                                );
+                                setState(() {});
+                              },
+                              onPanEnd: (details) {
+                                player2.shotX = 0;
+                                player2.shotY = 0;
+                                setState(() {});
+                              },
+                              child: PlayerChip(
+                                player: player1,
+                              ),
+                            );
+                          }
+                          if (widget.gameMode == GameMode.multiplayer) {
+                            return StreamBuilder(
+                              stream: FirebaseFirestore.instance.collection("playing").doc(widget.gameId).snapshots(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  final game = Game.fromJson(snapshot.data!.data()!);
+                                  if (game.players?.playerId1?.id == widget.playerId) {
+                                    WidgetsBinding.instance.addPostFrameCallback((t) {
+                                      movePlayer1Multiplayer(
+                                        player1,
+                                        -game.player2Position!.x!.toDouble(),
+                                        -game.player2Position!.y!.toDouble(),
+                                      );
+                                      setState(() {});
+                                    });
+                                  } else if (game.players?.playerId2?.id == widget.playerId) {
+                                    WidgetsBinding.instance.addPostFrameCallback((t) {
+                                      movePlayer1Multiplayer(
+                                        player1,
+                                        -game.player1Position!.x!.toDouble(),
+                                        -game.player1Position!.y!.toDouble(),
+                                      );
+                                      setState(() {});
+                                    });
+                                  }
+                                }
+
+                                return PlayerChip(
+                                  player: player1,
+                                );
+                              },
+                            );
+                          }
+                          return PlayerChip(
+                            player: player1,
                           );
-                        }
-                        if (widget.gameMode == GameMode.multiplayer) {}
-                        return PlayerChip(
-                          player: player1,
-                        );
-                      }), // Player2 is now controlled by AI.
+                        },
+                      ), // Player2 is now controlled by AI.
                     )
                   : const SizedBox.shrink(),
               // ball and score text
@@ -403,7 +542,9 @@ class _MyHomePageState extends State<GameScreen> {
                     ),
                     SizedBox(height: 51.h),
                     InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        BaseNavigator.pop();
+                      },
                       child: Container(
                         height: 48.h,
                         width: 48.h,
@@ -483,8 +624,13 @@ class _MyHomePageState extends State<GameScreen> {
                         if (gameIsFinished) {
                           return;
                         }
-                        xSpeed = math.Random().nextBool() ? (math.Random().nextInt(2) + 1).toDouble() : -(math.Random().nextInt(2) + 1).toDouble();
-                        ySpeed = turn == player1.name ? (math.Random().nextInt(1) + 1).toDouble() : -(math.Random().nextInt(1) + 1).toDouble();
+                        xSpeed = 0.2;
+                        // math.Random().nextBool() ? (math.Random().nextInt(2) + 1).toDouble() : -(math.Random().nextInt(2) + 1).toDouble();
+                        ySpeed = turn == player1.name
+                            ? 0.2
+                            // (math.Random().nextInt(1) + 1).toDouble()
+                            : -0.2;
+                        // -(math.Random().nextInt(1) + 1).toDouble();
                         showStartText = false;
                         do {
                           ball.left += xSpeed;
