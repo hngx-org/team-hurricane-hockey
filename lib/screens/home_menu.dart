@@ -2,11 +2,13 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:team_hurricane_hockey/sound_control.dart';
+import 'package:provider/provider.dart';
 import 'package:team_hurricane_hockey/enums.dart';
+import 'package:team_hurricane_hockey/providers/my_provider.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
 import 'package:team_hurricane_hockey/screens/game_screen.dart';
 import 'package:team_hurricane_hockey/screens/widgets/settings_dialog.dart';
+import 'package:team_hurricane_hockey/sound_control.dart';
 
 class HomeMenu extends StatefulWidget {
   const HomeMenu({super.key});
@@ -19,11 +21,12 @@ class HomeMenu extends StatefulWidget {
 
 class _HomeMenuState extends State<HomeMenu> {
   SoundControl controller = SoundControl();
+  final p = Provider.of<MyProvider>(BaseNavigator.currentContext);
 
   @override
   void initState() {
-    controller.startBgMusic();
-    controller.initSfx();
+    if (p.isMusicPlaying) controller.startBgMusic();
+    if (p.isSfxOn) controller.initSfx();
     super.initState();
   }
 

@@ -2,17 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:team_hurricane_hockey/data/shared_prefences.dart';
 import 'package:team_hurricane_hockey/providers/my_provider.dart';
 import 'package:team_hurricane_hockey/router/app_router.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
 import 'package:team_hurricane_hockey/screens/splash_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await AppSharedPreferences.instance.initialize();
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => MyProvider()),
-        ChangeNotifierProvider(create: (context) => PaddleColorProvider()),
+        ChangeNotifierProvider(create: (context) => MyProvider()..initialize()),
+        ChangeNotifierProvider(
+            create: (context) => PaddleColorProvider()..initialize()),
       ],
       child: const MyApp(),
     ),

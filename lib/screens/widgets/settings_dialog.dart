@@ -57,7 +57,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 style: Theme.of(context).textTheme.labelMedium,
               ),
               icon: Icon(
-                p.bgMusicIcon,
+                p.isMusicPlaying
+                    ? Icons.volume_up_sharp
+                    : Icons.volume_off_sharp,
                 color: Colors.white,
               ),
             ),
@@ -85,7 +87,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 style: Theme.of(context).textTheme.labelMedium,
               ),
               icon: Icon(
-                p.sfxIcon,
+                p.isSfxOn ? Icons.music_note : Icons.music_off,
                 color: Colors.white,
               ),
             ),
