@@ -198,7 +198,9 @@ class _MyHomePageState extends State<GameScreen> {
     player1.top = player1.top.clamp(minY, maxY);
 
     // Update the UI to reflect the computer player's new position.
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void handlePaddleCollision(Player player) {
@@ -272,7 +274,7 @@ class _MyHomePageState extends State<GameScreen> {
       turn = math.Random().nextBool() ? player1.name : player2.name;
       gameIsStarted = true;
     } else {
-      if (widget.gameMode == GameMode.ai) {
+      if (widget.gameMode == GameMode.ai && !isPaused) {
         defendGoal();
       }
     }
@@ -543,7 +545,7 @@ class _MyHomePageState extends State<GameScreen> {
                             ? (math.Random().nextInt(1) + 1).toDouble()
                             : -(math.Random().nextInt(1) + 1).toDouble();
                         showStartText = false;
-                        do {
+                        while (mounted) {
                           ball.left += xSpeed;
                           ball.top += ySpeed;
                           if (ball.left > tableWidth - ballSize) {
@@ -572,13 +574,12 @@ class _MyHomePageState extends State<GameScreen> {
                             break;
                           }
 
+                          doTheMathWork();
+                          await Future.delayed(const Duration(milliseconds: 1));
                           if (mounted) {
-                            doTheMathWork();
-                            await Future.delayed(
-                                const Duration(milliseconds: 1));
                             setState(() {});
                           }
-                        } while (true);
+                        }
                       },
                     ),
                   ),
