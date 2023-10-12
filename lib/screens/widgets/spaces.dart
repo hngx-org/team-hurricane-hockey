@@ -15,11 +15,11 @@ class TopSpace extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            top: -60,
+            top: -120.h,
             left: MediaQuery.of(context).size.width / 2 - (50),
             child: Center(
               child: CustomPaint(
-                size: const Size(100, 100), // Adjust size as needed
+                size: Size(100, 200.w), // Adjust size as needed
                 painter: SemiCirclePainter(
                   color: Colors.blue.shade800,
                   isTop: true,
@@ -31,8 +31,7 @@ class TopSpace extends StatelessWidget {
             children: [
               SizedBox(height: 100.h),
               Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width * .1),
+                padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * .1),
                 child: Row(
                   children: [
                     Container(
@@ -102,13 +101,13 @@ class BottomSpace extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            bottom: -60,
+            bottom: -120.h,
             left: MediaQuery.of(context).size.width / 2 - (50),
             child: Center(
               child: Transform.rotate(
                 angle: math.pi,
                 child: CustomPaint(
-                  size: const Size(100, 100), // Adjust size as needed
+                  size: Size(100, 200.w), // Adjust size as needed
                   painter: SemiCirclePainter(
                     color: Colors.blue.shade800,
                     isTop: true,
@@ -121,8 +120,7 @@ class BottomSpace extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width * .1),
+                padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * .1),
                 child: Row(
                   children: [
                     Container(

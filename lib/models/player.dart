@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:team_hurricane_hockey/constants.dart';
 
-
-
 class Player {
   double left = 0;
   double right = 0;
