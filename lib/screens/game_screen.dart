@@ -23,6 +23,7 @@ class GameScreen extends StatefulWidget {
   final String? gameId;
   final String? playerId;
   final String? opponentId;
+  final double? speed;
 
   const GameScreen({
     Key? key,
@@ -30,6 +31,7 @@ class GameScreen extends StatefulWidget {
     this.gameId,
     this.playerId,
     this.opponentId,
+    this.speed,
   }) : super(key: key);
   static const routeName = 'gameScreen';
 
@@ -43,7 +45,8 @@ class _MyHomePageState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
-    final paddleColorProvider = Provider.of<PaddleColorProvider>(context, listen: false);
+    final paddleColorProvider =
+        Provider.of<PaddleColorProvider>(context, listen: false);
     if (widget.gameMode == GameMode.ai) {
       player1 = Player(
         name: "Computer",
@@ -162,17 +165,18 @@ class _MyHomePageState extends State<GameScreen> {
     required double minY,
     required double maxY,
   }) async {
-    final gridX = ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
-    final gridY = ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
+    final gridX =
+        ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
+    final gridY =
+        ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
     /**
      * Get grid to send to DB 
      */
     final verticalGrid = (top / gridY).ceilToDouble();
     final horizontalGrid = (left / gridX).ceilToDouble();
 
-    print(verticalGrid);
-
-    if (!(lastKnownX == horizontalGrid.toDouble() && lastKnownY == verticalGrid.toDouble())) {
+    if (!(lastKnownX == horizontalGrid.toDouble() &&
+        lastKnownY == verticalGrid.toDouble())) {
       if (widget.gameId != null && widget.gameMode == GameMode.multiplayer) {
         GameService.instance.updatePaddleMovement(
           widget.gameId!,
@@ -215,7 +219,9 @@ class _MyHomePageState extends State<GameScreen> {
       } else {
         player.left = player.left;
       }
-      player.left = player.left < (tableWidth - (playerSize.w + 7.w)) ? player.left : (tableWidth - (playerSize.w + 7.w));
+      player.left = player.left < (tableWidth - (playerSize.w + 7.w))
+          ? player.left
+          : (tableWidth - (playerSize.w + 7.w));
       player.top += dy;
       if (player.top <= 7.w) {
         player.top = 7.w;
@@ -223,8 +229,10 @@ class _MyHomePageState extends State<GameScreen> {
         player.top = player.top;
       }
 
-      if (player.top > MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w)) {
-        player.top = MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w);
+      if (player.top >
+          MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w)) {
+        player.top =
+            MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w);
       } else {
         player.top = player.top;
       }
@@ -240,8 +248,10 @@ class _MyHomePageState extends State<GameScreen> {
       return;
     }
 
-    final gridX = ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
-    final gridY = ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
+    final gridX =
+        ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
+    final gridY =
+        ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
     const xGrids = 5;
     const yGrids = 11;
     lastKnownOppX = dx;
@@ -249,14 +259,17 @@ class _MyHomePageState extends State<GameScreen> {
 
     player.left = gridX * (xGrids - dx);
     player.left = player.left <= 7.w ? 7.w : player.left;
-    player.left = player.left < (tableWidth - playerSize.w + 7.w) ? player.left : (tableWidth - playerSize.w + 7.w);
+    player.left = player.left < (tableWidth - playerSize.w + 7.w)
+        ? player.left
+        : (tableWidth - playerSize.w + 7.w);
 
     player.top = (gridY * (yGrids - dy));
     player.top = player.top > 7.w ? player.top : 7.w;
     if (player.top == gridY) {
       player.top = 7.w;
     } else {
-      player.top = player.top > (MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w))
+      player.top = player.top >
+              (MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w))
           ? (MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w))
           : player1.top;
     }
@@ -274,14 +287,18 @@ class _MyHomePageState extends State<GameScreen> {
       } else {
         player.left = player.left;
       }
-      player.left = player.left < (tableWidth - (playerSize.w + 7.w)) ? player.left : (tableWidth - (playerSize.w + 7.w));
+      player.left = player.left < (tableWidth - (playerSize.w + 7.w))
+          ? player.left
+          : (tableWidth - (playerSize.w + 7.w));
       player.top += dy;
       if (player.top <= 7.w) {
         player.top = 7.w;
       } else {
         player.top = player.top;
       }
-      if (player.top > MediaQuery.of(context).size.height / 2 && player.top >= MediaQuery.of(context).size.height - (playerSize.w + 7.w)) {
+      if (player.top > MediaQuery.of(context).size.height / 2 &&
+          player.top >=
+              MediaQuery.of(context).size.height - (playerSize.w + 7.w)) {
         player.top = MediaQuery.of(context).size.height - (playerSize.w + 7.w);
       } else if (player.top > MediaQuery.of(context).size.height / 2) {
         player.top = player2.top;
@@ -355,7 +372,8 @@ class _MyHomePageState extends State<GameScreen> {
 
     // Check if the ball is inside the goalpost area.
     if ((ball.top <= 0 || ball.bottom >= tableHeight) &&
-        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) || (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
+        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) ||
+            (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
     } else if (ball.top <= 0 || ball.bottom >= tableHeight) {
       ySpeed = -ySpeed;
     } else {
@@ -399,23 +417,27 @@ class _MyHomePageState extends State<GameScreen> {
     // Move the computer player's paddle towards the desired position.
     if (player1.centerX < desiredX) {
       if (player1.left < maxX) {
-        player1.left += 2.0; // Adjust the speed of the computer player's horizontal movement.
+        player1.left += widget.speed ??
+            2.0; // Adjust the speed of the computer player's horizontal movement.
       }
     } else if (player1.centerX > desiredX) {
       if (player1.left < 8) {
         return;
       }
 
-      player1.left -= 2.0; // Adjust the speed of the computer player's horizontal movement.
+      player1.left -= widget.speed ??
+          2.0; // Adjust the speed of the computer player's horizontal movement.
     }
     previousPoint = Offset(player1.left, 0);
 
     previousPoint = Offset(player1.left, 0);
 
     if (player1.centerY < desiredY) {
-      player1.top += 1.0; // Adjust the speed of the computer player's vertical movement.
+      player1.top +=
+          1.0; // Adjust the speed of the computer player's vertical movement.
     } else if (player1.centerY > desiredY) {
-      player1.top -= 1.0; // Adjust the speed of the computer player's vertical movement.
+      player1.top -=
+          1.0; // Adjust the speed of the computer player's vertical movement.
     }
     previousPoint = Offset(player1.left, player1.top);
     // Ensure the computer player's paddle stays within its half of the field horizontally and vertically.
@@ -465,11 +487,6 @@ class _MyHomePageState extends State<GameScreen> {
   }
 
   bool isPaused = false;
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -620,12 +637,18 @@ class _MyHomePageState extends State<GameScreen> {
                           }
                           if (widget.gameMode == GameMode.multiplayer) {
                             return StreamBuilder(
-                              stream: FirebaseFirestore.instance.collection("playing").doc(widget.gameId).snapshots(),
+                              stream: FirebaseFirestore.instance
+                                  .collection("playing")
+                                  .doc(widget.gameId)
+                                  .snapshots(),
                               builder: (context, snapshot) {
                                 if (snapshot.hasData) {
-                                  final game = Game.fromJson(snapshot.data!.data()!);
-                                  if (game.players?.playerId1?.id == widget.playerId) {
-                                    WidgetsBinding.instance.addPostFrameCallback((t) {
+                                  final game =
+                                      Game.fromJson(snapshot.data!.data()!);
+                                  if (game.players?.playerId1?.id ==
+                                      widget.playerId) {
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((t) {
                                       movePlayer1Multiplayer(
                                         player1,
                                         game.player2Position!.x!.toDouble(),
@@ -633,8 +656,10 @@ class _MyHomePageState extends State<GameScreen> {
                                       );
                                       setState(() {});
                                     });
-                                  } else if (game.players?.playerId2?.id == widget.playerId) {
-                                    WidgetsBinding.instance.addPostFrameCallback((t) {
+                                  } else if (game.players?.playerId2?.id ==
+                                      widget.playerId) {
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((t) {
                                       movePlayer1Multiplayer(
                                         player1,
                                         game.player1Position!.x!.toDouble(),
@@ -768,7 +793,9 @@ class _MyHomePageState extends State<GameScreen> {
                           textStart,
                           style: TextStyle(
                             fontSize: textStartFontSize,
-                            color: turn == player1.name ? player1.color : player2.color,
+                            color: turn == player1.name
+                                ? player1.color
+                                : player2.color,
                           ),
                         ),
                       ),
@@ -831,13 +858,23 @@ class _MyHomePageState extends State<GameScreen> {
                       children: [
                         Text(
                           "PAUSED",
-                          style: Theme.of(context).textTheme.labelMedium!.copyWith(fontSize: 36.sp, fontWeight: FontWeight.w900, color: Colors.blue),
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelMedium!
+                              .copyWith(
+                                  fontSize: 36.sp,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.blue),
                         ),
                         SizedBox(
                           height: 24.h,
                         ),
                         Button(
-                          child: Text("RESUME", style: Theme.of(context).textTheme.labelMedium!.copyWith(fontSize: 18.sp)),
+                          child: Text("RESUME",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium!
+                                  .copyWith(fontSize: 18.sp)),
                           onTap: () {
                             setState(() {
                               xSpeed = temporaryXSpeed;
@@ -852,7 +889,10 @@ class _MyHomePageState extends State<GameScreen> {
                         Button(
                           child: Text(
                             "QUIT",
-                            style: Theme.of(context).textTheme.labelMedium!.copyWith(fontSize: 18.sp),
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium!
+                                .copyWith(fontSize: 18.sp),
                           ),
                           onTap: () {
                             BaseNavigator.pop();

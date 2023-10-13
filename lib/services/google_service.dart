@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:tuple/tuple.dart';
@@ -32,7 +33,7 @@ class AuthRepository {
 
       return const Tuple3(null, "Oops something went wrong", null);
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
       return Tuple3(null, e.toString(), null);
     }
   }
