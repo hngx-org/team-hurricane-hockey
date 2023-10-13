@@ -39,32 +39,32 @@ class GameService {
           "x": dx,
           "y": dy,
         };
-        final standStill = {
-          "x": 0,
-          "y": 0,
-        };
+        // final standStill = {
+        //   "x": 0,
+        //   "y": 0,
+        // };
         await gameRoomRef.update({
           "player1_position": playerPosition,
         });
-        await gameRoomRef.update({
-          "player1_position": standStill,
-        });
+        // await gameRoomRef.update({
+        //   "player1_position": standStill,
+        // });
       } else {
         //If player is player 2
         final playerPosition = {
           "x": dx,
           "y": dy,
         };
-        final standStill = {
-          "x": 0,
-          "y": 0,
-        };
+        // final standStill = {
+        //   "x": 0,
+        //   "y": 0,
+        // };
         await gameRoomRef.update({
           "player2_position": playerPosition,
         });
-        await gameRoomRef.update({
-          "player2_position": standStill,
-        });
+        // await gameRoomRef.update({
+        //   "player2_position": standStill,
+        // });
       }
     }
   }
