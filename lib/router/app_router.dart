@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:team_hurricane_hockey/screens/difficulty_screen.dart';
 import 'package:team_hurricane_hockey/screens/game_screen.dart';
 import 'package:team_hurricane_hockey/screens/home_menu.dart';
 import 'package:team_hurricane_hockey/screens/paddles_and_puck_screen.dart';
@@ -47,10 +48,13 @@ class AppRouter {
           gameId: s["gameId"],
           opponentId: s["opponentId"],
           playerId: s["playerId"],
+          speed: s['speed'],
         ));
 
       case HomeMenu.routeName:
         return _getPageRoute(const HomeMenu());
+      case DifficultyScreen.routeName:
+        return _getPageRoute(const DifficultyScreen());
       case PaddlesAndPuckScreen.routeName:
         return _getPageRoute(const PaddlesAndPuckScreen());
 

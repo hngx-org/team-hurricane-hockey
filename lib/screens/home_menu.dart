@@ -5,20 +5,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:team_hurricane_hockey/providers/my_provider.dart';
-import 'package:team_hurricane_hockey/sound_control.dart';
 import 'package:team_hurricane_hockey/enums.dart';
 import 'package:team_hurricane_hockey/models/user.dart';
 import 'package:team_hurricane_hockey/models/waitlist_req.dart';
+import 'package:team_hurricane_hockey/providers/my_provider.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
+import 'package:team_hurricane_hockey/screens/difficulty_screen.dart';
 import 'package:team_hurricane_hockey/screens/game_screen.dart';
+import 'package:team_hurricane_hockey/screens/widgets/settings_dialog.dart';
 import 'package:team_hurricane_hockey/services/firebase/game_service.dart';
 import 'package:team_hurricane_hockey/services/firebase/user_query.dart';
 import 'package:team_hurricane_hockey/services/firebase/waitlist_query.dart';
 import 'package:team_hurricane_hockey/services/google_service.dart';
 import 'package:team_hurricane_hockey/services/local_storage.dart';
+import 'package:team_hurricane_hockey/sound_control.dart';
 import 'package:uuid/uuid.dart';
-import 'package:team_hurricane_hockey/screens/widgets/settings_dialog.dart';
 
 class HomeMenu extends StatefulWidget {
   const HomeMenu({super.key});
@@ -337,11 +338,7 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                             onPressed: () {
                               controller.playSfx();
                               BaseNavigator.pushNamed(
-                                GameScreen.routeName,
-                                args: {
-                                  "mode": GameMode.ai,
-                                },
-                              );
+                                  DifficultyScreen.routeName);
                             },
                             child: Text(
                               'VS AI',
