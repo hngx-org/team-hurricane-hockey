@@ -19,7 +19,6 @@ import 'package:team_hurricane_hockey/services/google_service.dart';
 import 'package:team_hurricane_hockey/services/local_storage.dart';
 import 'package:uuid/uuid.dart';
 import 'package:team_hurricane_hockey/screens/widgets/settings_dialog.dart';
-import 'package:team_hurricane_hockey/sound_control.dart';
 
 class HomeMenu extends StatefulWidget {
   const HomeMenu({super.key});
@@ -30,7 +29,7 @@ class HomeMenu extends StatefulWidget {
   State<HomeMenu> createState() => _HomeMenuState();
 }
 
-class _HomeMenuState extends State<HomeMenu> {
+class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
   final user = AppStorage.instance.getUserData();
   loadingDialog() {
     showDialog(
@@ -50,7 +49,10 @@ class _HomeMenuState extends State<HomeMenu> {
                 const SizedBox(height: 30),
                 Text(
                   'LOOKING FOR PLAYERS ONLINE',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.black),
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(color: Colors.black),
                 ),
               ],
             ),
@@ -72,13 +74,18 @@ class _HomeMenuState extends State<HomeMenu> {
               children: [
                 Text(
                   'ONLINE PLAYERS',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.black),
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(color: Colors.black),
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
                   height: 500.h,
                   child: StreamBuilder(
-                    stream: FirebaseFirestore.instance.collection("waitlist").snapshots(),
+                    stream: FirebaseFirestore.instance
+                        .collection("waitlist")
+                        .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(
@@ -138,7 +145,8 @@ class _HomeMenuState extends State<HomeMenu> {
                               contentPadding: EdgeInsets.zero,
                               onTap: () async {
                                 final id = const Uuid().v1();
-                                await WaitlistQuery.instance.sendRequest(user!.id!, data.id!, id);
+                                await WaitlistQuery.instance
+                                    .sendRequest(user!.id!, data.id!, id);
                               },
                               leading: ClipRRect(
                                 borderRadius: BorderRadius.circular(1000),
@@ -257,6 +265,7 @@ class _HomeMenuState extends State<HomeMenu> {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     if (p.isMusicPlaying) controller.startBgMusic();
     if (p.isSfxOn) controller.initSfx();
     super.initState();
@@ -264,10 +273,21 @@ class _HomeMenuState extends State<HomeMenu> {
 
   @override
   void dispose() async {
+    WidgetsBinding.instance.removeObserver(this);
     await bgMusic.stop();
     bgMusic.dispose();
     sfx.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      bgMusic.pause();
+    } else if (state == AppLifecycleState.resumed) {
+      if (p.isMusicPlaying) bgMusic.resume();
+    }
   }
 
   @override
@@ -347,15 +367,18 @@ class _HomeMenuState extends State<HomeMenu> {
                                   email: user?.email,
                                   isReady: true,
                                 );
-                                final s = await WaitlistQuery.instance.checkIntoWaitlist(
+                                final s = await WaitlistQuery.instance
+                                    .checkIntoWaitlist(
                                   waitlist,
                                   user!.id!,
                                 );
                                 if (s) {
                                   final s = await wailistDialog();
-                                  WaitlistQuery.instance.deleteUserOnWaitlist(user!.id!);
+                                  WaitlistQuery.instance
+                                      .deleteUserOnWaitlist(user!.id!);
                                   if (s != null) {
-                                    final gameCreation = await GameService.instance.createGame(
+                                    final gameCreation =
+                                        await GameService.instance.createGame(
                                       s["gameId"],
                                       s["opponentId"],
                                       s["opponentName"],
