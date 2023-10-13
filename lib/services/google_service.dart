@@ -45,7 +45,7 @@ class AuthRepository {
         /// Sign out is successful if you receive a null value from the google sign in account
         return const Tuple2(null, null);
       }
-      return Tuple2(s, "Oops eomething went wrong");
+      return Tuple2(s, "Oops something went wrong");
     } catch (e) {
       return Tuple2(null, e.toString());
     }
