@@ -18,13 +18,6 @@ import 'package:team_hurricane_hockey/screens/widgets/player.dart';
 import 'package:team_hurricane_hockey/screens/widgets/spaces.dart';
 import 'package:team_hurricane_hockey/services/firebase/game_service.dart';
 
-class GridCell {
-  bool isOccupied = false;
-  String objectId = "";
-
-  GridCell(this.isOccupied, this.objectId);
-}
-
 class GameScreen extends StatefulWidget {
   final GameMode gameMode;
   final String? gameId;
@@ -46,16 +39,55 @@ class GameScreen extends StatefulWidget {
 
 class _MyHomePageState extends State<GameScreen> {
   Game? game;
-  
+
   @override
   void initState() {
     super.initState();
+    final paddleColorProvider = Provider.of<PaddleColorProvider>(context, listen: false);
+    if (widget.gameMode == GameMode.ai) {
+      player1 = Player(
+        name: "Computer",
+        color: paddleColorProvider.player1Color,
+      );
+
+      player2 = Player(
+        name: "Player",
+        color: paddleColorProvider.player2Color,
+      );
+    } else if (widget.gameMode == GameMode.player2) {
+      player1 = Player(
+        name: "Player 1",
+        color: paddleColorProvider.player1Color,
+      );
+
+      player2 = Player(
+        name: "Player 2",
+        color: paddleColorProvider.player2Color,
+      );
+    } else {
+      player1 = Player(
+        name: "Player 1",
+        color: paddleColorProvider.player1Color,
+      );
+
+      player2 = Player(
+        name: "Player 2",
+        color: paddleColorProvider.player2Color,
+      );
+    }
+
+    ball = Puck(
+      name: paddleColorProvider.puckColor.toString(),
+      color: paddleColorProvider.puckColor,
+    );
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       getGameDetails();
     });
   }
 
   getGameDetails() async {
+    // final paddleColorProvider = Provider.of<PaddleColorProvider>(context, listen: false);
+
     if (widget.gameId == null) {
       return;
     }
@@ -64,6 +96,27 @@ class _MyHomePageState extends State<GameScreen> {
 
       if (serverGame != null) {
         game = serverGame;
+        // if (game?.players?.playerId1?.id == widget.playerId) {
+        //   player2 = Player(
+        //     name: game!.players!.playerId1!.name!,
+        //     color: paddleColorProvider.player2Color,
+        //   );
+
+        //   player1 = Player(
+        //     name: game!.players!.playerId2!.name!,
+        //     color: paddleColorProvider.player1Color,
+        //   );
+        // } else {
+        //   player2 = Player(
+        //     name: game!.players!.playerId2!.name!,
+        //     color: paddleColorProvider.player2Color,
+        //   );
+
+        //   player1 = Player(
+        //     name: game!.players!.playerId1!.name!,
+        //     color: paddleColorProvider.player1Color,
+        //   );
+        // }
       } else {
         game = Game(
           players: Players(),
@@ -72,31 +125,21 @@ class _MyHomePageState extends State<GameScreen> {
     }
   }
 
-  // Paddle 2 (Player 2) attribute
-  double player2FrictionX = 0.997;
-  double player2FrictionY = 0.997;
-
   // player 1 & 2 and ball variables
-  late Player player1;
-  late Player player2;
+  Player player1 = Player(
+    name: "Computer",
+    color: Colors.red,
+  );
+  Player player2 = Player(
+    name: "Player 2",
+    color: Colors.blue,
+  );
 
-  late Puck ball;
+  Puck ball = Puck(
+    name: "ball",
+    color: Colors.black,
+  );
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final paddleColorProvider = Provider.of<PaddleColorProvider>(context);
-    player1 = Player(
-        name: paddleColorProvider.player1Color.toString(),
-        color: paddleColorProvider.player1Color);
-    player2 = Player(
-        name: paddleColorProvider.player2Color.toString(),
-        color: paddleColorProvider.player2Color);
-    ball = Puck(
-        name: paddleColorProvider.puckColor.toString(),
-        color: paddleColorProvider.puckColor);
-  }
-  
   // ball attributes
   late double xSpeed = 0;
   late double ySpeed = 0;
@@ -126,6 +169,8 @@ class _MyHomePageState extends State<GameScreen> {
      */
     final verticalGrid = (top / gridY).ceilToDouble();
     final horizontalGrid = (left / gridX).ceilToDouble();
+
+    print(verticalGrid);
 
     if (!(lastKnownX == horizontalGrid.toDouble() && lastKnownY == verticalGrid.toDouble())) {
       if (widget.gameId != null && widget.gameMode == GameMode.multiplayer) {
@@ -197,8 +242,8 @@ class _MyHomePageState extends State<GameScreen> {
 
     final gridX = ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
     final gridY = ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
-    const xGrids = 6;
-    const yGrids = 12;
+    const xGrids = 5;
+    const yGrids = 11;
     lastKnownOppX = dx;
     lastKnownOppY = dy;
 
@@ -206,11 +251,15 @@ class _MyHomePageState extends State<GameScreen> {
     player.left = player.left <= 7.w ? 7.w : player.left;
     player.left = player.left < (tableWidth - playerSize.w + 7.w) ? player.left : (tableWidth - playerSize.w + 7.w);
 
-    player.left = gridY * (yGrids - dy);
+    player.top = (gridY * (yGrids - dy));
     player.top = player.top > 7.w ? player.top : 7.w;
-    player.top = player.top > (MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w))
-        ? (MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w))
-        : player1.top;
+    if (player.top == gridY) {
+      player.top = 7.w;
+    } else {
+      player.top = player.top > (MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w))
+          ? (MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w))
+          : player1.top;
+    }
   }
 
   movePlayer2(
@@ -306,8 +355,7 @@ class _MyHomePageState extends State<GameScreen> {
 
     // Check if the ball is inside the goalpost area.
     if ((ball.top <= 0 || ball.bottom >= tableHeight) &&
-        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) ||
-            (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
+        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) || (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
     } else if (ball.top <= 0 || ball.bottom >= tableHeight) {
       ySpeed = -ySpeed;
     } else {
@@ -351,27 +399,23 @@ class _MyHomePageState extends State<GameScreen> {
     // Move the computer player's paddle towards the desired position.
     if (player1.centerX < desiredX) {
       if (player1.left < maxX) {
-        player1.left +=
-            2.0; // Adjust the speed of the computer player's horizontal movement.
+        player1.left += 2.0; // Adjust the speed of the computer player's horizontal movement.
       }
     } else if (player1.centerX > desiredX) {
       if (player1.left < 8) {
         return;
       }
 
-      player1.left -=
-          2.0; // Adjust the speed of the computer player's horizontal movement.
+      player1.left -= 2.0; // Adjust the speed of the computer player's horizontal movement.
     }
     previousPoint = Offset(player1.left, 0);
 
     previousPoint = Offset(player1.left, 0);
 
     if (player1.centerY < desiredY) {
-      player1.top +=
-          1.0; // Adjust the speed of the computer player's vertical movement.
+      player1.top += 1.0; // Adjust the speed of the computer player's vertical movement.
     } else if (player1.centerY > desiredY) {
-      player1.top -=
-          1.0; // Adjust the speed of the computer player's vertical movement.
+      player1.top -= 1.0; // Adjust the speed of the computer player's vertical movement.
     }
     previousPoint = Offset(player1.left, player1.top);
     // Ensure the computer player's paddle stays within its half of the field horizontally and vertically.
@@ -549,7 +593,7 @@ class _MyHomePageState extends State<GameScreen> {
               // player1 (top player)
               !gameIsFinished
                   ? AnimatedPositioned(
-                      duration: const Duration(milliseconds: 80),
+                      duration: const Duration(milliseconds: 100),
                       left: player1.left,
                       top: player1.top,
                       child: Builder(
@@ -565,8 +609,8 @@ class _MyHomePageState extends State<GameScreen> {
                                 setState(() {});
                               },
                               onPanEnd: (details) {
-                                player2.shotX = 0;
-                                player2.shotY = 0;
+                                player1.shotX = 0;
+                                player1.shotY = 0;
                                 setState(() {});
                               },
                               child: PlayerChip(
@@ -584,8 +628,8 @@ class _MyHomePageState extends State<GameScreen> {
                                     WidgetsBinding.instance.addPostFrameCallback((t) {
                                       movePlayer1Multiplayer(
                                         player1,
-                                        -game.player2Position!.x!.toDouble(),
-                                        -game.player2Position!.y!.toDouble(),
+                                        game.player2Position!.x!.toDouble(),
+                                        game.player2Position!.y!.toDouble(),
                                       );
                                       setState(() {});
                                     });
@@ -593,8 +637,8 @@ class _MyHomePageState extends State<GameScreen> {
                                     WidgetsBinding.instance.addPostFrameCallback((t) {
                                       movePlayer1Multiplayer(
                                         player1,
-                                        -game.player1Position!.x!.toDouble(),
-                                        -game.player1Position!.y!.toDouble(),
+                                        game.player1Position!.x!.toDouble(),
+                                        game.player1Position!.y!.toDouble(),
                                       );
                                       setState(() {});
                                     });
@@ -713,15 +757,18 @@ class _MyHomePageState extends State<GameScreen> {
                   child: Visibility(
                     visible: showStartText,
                     child: TextButton(
+                      style: Theme.of(context).textButtonTheme.style?.copyWith(
+                            backgroundColor: const MaterialStatePropertyAll(
+                              Colors.white,
+                            ),
+                          ),
                       child: RotatedBox(
                         quarterTurns: turn == player1.name ? 2 : 0,
                         child: Text(
                           textStart,
                           style: TextStyle(
                             fontSize: textStartFontSize,
-                            color: turn == player1.name
-                                ? player1.color
-                                : player2.color,
+                            color: turn == player1.name ? player1.color : player2.color,
                           ),
                         ),
                       ),
@@ -729,12 +776,8 @@ class _MyHomePageState extends State<GameScreen> {
                         if (gameIsFinished) {
                           return;
                         }
-                        xSpeed = math.Random().nextBool()
-                            ? 0.6
-                            : -0.6;
-                        ySpeed = turn == player1.name
-                            ? 0.6
-                            : -0.6;
+                        xSpeed = math.Random().nextBool() ? 1.2 : -1.2;
+                        ySpeed = turn == player1.name ? 1.2 : -1.2;
                         showStartText = false;
                         while (mounted) {
                           ball.left += xSpeed;
@@ -788,23 +831,13 @@ class _MyHomePageState extends State<GameScreen> {
                       children: [
                         Text(
                           "PAUSED",
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelMedium!
-                              .copyWith(
-                                  fontSize: 36.sp,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.blue),
+                          style: Theme.of(context).textTheme.labelMedium!.copyWith(fontSize: 36.sp, fontWeight: FontWeight.w900, color: Colors.blue),
                         ),
                         SizedBox(
                           height: 24.h,
                         ),
                         Button(
-                          child: Text("RESUME",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelMedium!
-                                  .copyWith(fontSize: 18.sp)),
+                          child: Text("RESUME", style: Theme.of(context).textTheme.labelMedium!.copyWith(fontSize: 18.sp)),
                           onTap: () {
                             setState(() {
                               xSpeed = temporaryXSpeed;
@@ -819,10 +852,7 @@ class _MyHomePageState extends State<GameScreen> {
                         Button(
                           child: Text(
                             "QUIT",
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelMedium!
-                                .copyWith(fontSize: 18.sp),
+                            style: Theme.of(context).textTheme.labelMedium!.copyWith(fontSize: 18.sp),
                           ),
                           onTap: () {
                             BaseNavigator.pop();

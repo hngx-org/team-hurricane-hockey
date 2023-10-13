@@ -32,9 +32,8 @@ final _providers = <SingleChildWidget>[
   ChangeNotifierProvider<GameProvider>(
     create: (_) => GameProvider.instance,
   ),
- ChangeNotifierProvider(create: (context) => MyProvider()..initialize()),
- ChangeNotifierProvider(
-            create: (context) => PaddleColorProvider()..initialize()),
+  ChangeNotifierProvider(create: (context) => MyProvider()..initialize()),
+  ChangeNotifierProvider(create: (context) => PaddleColorProvider()..initialize()),
 ];
 
 class MyApp extends StatelessWidget {
@@ -58,7 +57,7 @@ class MyApp extends StatelessWidget {
             dividerTheme: const DividerThemeData(space: 1),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 10),
                 side: BorderSide(
                   color: Colors.white,
                   width: 2.0.w,
