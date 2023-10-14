@@ -145,7 +145,7 @@ class _DifficultyScreenState extends State<DifficultyScreen> {
                               BaseNavigator.pop();
                             }),
                       ),
-                      SizedBox(height: 100.0.h),
+
                     ],
                   ),
                 ],
