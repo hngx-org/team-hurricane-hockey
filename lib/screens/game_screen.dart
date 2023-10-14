@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -398,55 +399,74 @@ class _MyHomePageState extends State<GameScreen> {
     }
   }
 
-  // AI Logic for player2 (defending its house)
+  void updateAI() {
+    // Calculate the desired paddle vector for defending the goal
+    defendGoal();
+
+    // Add some random error to make AI less perfect
+     addError();
+
+    // Move the paddle based on the calculated desired vector
+    movePaddle();
+  }
+
   void defendGoal() {
-    // Calculate the desired defensive position for the computer player based on the ball's position.
-    double desiredX = ball.centerX;
-    double desiredY = ball.centerY;
+    double desiredX = ball.centerX; // Defend against the puck's x position
 
-    // Adjust desiredX to stay within the computer player's half of the field horizontally.
-    double minX = 0;
-    double maxX = tableWidth - (player1.size);
+    // Adjust the desired X position based on the puck's velocity and other factors
+    // if (ball.centerX < tableHeight / 2) {
+    //   // If the puck is in the opponent's half, go back to defending the goal
+    //   desiredX = tableWidth / 2 - playerRadius;
+    //   player1.top = playerSize * 1.2; // Set to the center of the goal
+    // } else {
+    if (ball.velocityX > 0) {
+      // If the puck is moving towards the AI's side, adjust the desiredX
+      desiredX += (ball.velocityY / ball.velocityX) * (player1.top - ball.top);
+    }
+    // }
 
-    desiredX = desiredX.clamp(minX, maxX);
-    // Adjust desiredY to stay within the computer player's half of the field vertically.
-    double minY = 0; // Adjust this value as needed.
-    double maxY = (tableHeight - 100) / 2;
-    desiredY = desiredY.clamp(minY, maxY);
+    double goalLeft1 = (MediaQuery.of(context).size.width - goalWidth) / 2;
+    double goalRight1 = goalLeft1 + goalWidth;
 
-    // Move the computer player's paddle towards the desired position.
-    if (player1.centerX < desiredX) {
-      if (player1.left < maxX) {
-        player1.left += widget.speed ??
-            2.0; // Adjust the speed of the computer player's horizontal movement.
+    // Limit the desiredX within the boundaries of the goal
+    desiredX = max(min(desiredX, goalRight1), goalLeft1);
+
+    // Set the paddle's x position based on the desiredX
+    player1.left = desiredX;
+  }
+
+  void addError() {
+    // Add some randomness to the AI's behavior
+    final random = Random();
+    player1.left +=
+        random.nextDouble() * 5 - 2.5; // Example error in x position
+    player1.top += random.nextDouble() * 5 - 2.5; // Example error in y position
+  }
+
+  void movePaddle() {
+    if (ball.centerX > player1.centerX) {
+      // Move the paddle right to follow the puck
+      player1.left += widget.speed ?? 2.0;
+    } else if (ball.centerX > player1.centerX) {
+      // Move the paddle left to follow the puck
+      player1.left -= widget.speed ?? 2.0;
+    }
+
+    // Check if the ball is in the AI's half
+    if (ball.centerX < tableHeight / 2) {
+      // If the puck is in the AI's half, adjust the paddle's vertical position
+      if (ball.centerY > player1.centerY) {
+        // Move the paddle down to follow the puck
+        player1.top += widget.speed ?? 2.0;
+      } else if (ball.centerY < player1.centerY) {
+        // Move the paddle up to follow the puck
+        player1.top -= widget.speed ?? 2.0;
       }
-    } else if (player1.centerX > desiredX) {
-      if (player1.left < 8) {
-        return;
-      }
-
-      player1.left -= widget.speed ??
-          2.0; // Adjust the speed of the computer player's horizontal movement.
     }
-    previousPoint = Offset(player1.left, 0);
 
-    previousPoint = Offset(player1.left, 0);
-
-    if (player1.centerY < desiredY) {
-      player1.top +=
-          1.0; // Adjust the speed of the computer player's vertical movement.
-    } else if (player1.centerY > desiredY) {
-      player1.top -=
-          1.0; // Adjust the speed of the computer player's vertical movement.
-    }
-    previousPoint = Offset(player1.left, player1.top);
-    // Ensure the computer player's paddle stays within its half of the field horizontally and vertically.
-    player1.top = player1.top.clamp(minY, maxY);
-
-    // Update the UI to reflect the computer player's new position.
-    if (mounted) {
-      setState(() {});
-    }
+    // Limit the paddle's movement within the game boundaries
+    player1.left = max(min(player1.left, tableWidth), 0);
+    player1.top = max(min(player1.top, (tableHeight / 2) - 100), 0);
   }
 
   void handlePaddleCollision(Player player) {
@@ -512,7 +532,7 @@ class _MyHomePageState extends State<GameScreen> {
       gameIsStarted = true;
     } else {
       if (widget.gameMode == GameMode.ai && !isPaused) {
-        defendGoal();
+        updateAI();
       }
     }
 
