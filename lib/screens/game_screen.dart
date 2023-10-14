@@ -148,6 +148,7 @@ class _MyHomePageState extends State<GameScreen> {
   late double xSpeed = 0;
   late double ySpeed = 0;
 
+//for pausing game
   late double temporaryXSpeed;
   late double temporaryYSpeed;
 
@@ -400,73 +401,54 @@ class _MyHomePageState extends State<GameScreen> {
   }
 
   void updateAI() {
-    // Calculate the desired paddle vector for defending the goal
-    defendGoal();
+    //print(ball.centerX);
+    if ((ball.centerX - player1.centerX) < playerSize &&
+        tableWidth - ball.centerX < 40) {
+      player1.left -= Random().nextDouble() * 20;
+      player1.top -= Random().nextDouble() * 20;
+    } else if ((ball.centerX - player1.centerX) < playerSize &&
+        ball.centerX < 40) {
+      player1.left += Random().nextDouble() * 20;
+      player1.top -= Random().nextDouble() * 20;
+    } else {
+      if (ball.bottom < tableHeight / 2) {
+        if (ball.centerX > player1.centerX) {
+          // Move the paddle right to follow the puck
 
-    // Add some random error to make AI less perfect
-     addError();
+          player1.left += widget.speed ?? 2.0;
+        } else if (ball.centerX < player1.centerX) {
+          // Move the paddle left to follow the puck
 
-    // Move the paddle based on the calculated desired vector
-    movePaddle();
-  }
+          player1.left -= widget.speed ?? 2.0;
+        }
 
-  void defendGoal() {
-    double desiredX = ball.centerX; // Defend against the puck's x position
+        // Check if the ball is in the AI's half
 
-    // Adjust the desired X position based on the puck's velocity and other factors
-    // if (ball.centerX < tableHeight / 2) {
-    //   // If the puck is in the opponent's half, go back to defending the goal
-    //   desiredX = tableWidth / 2 - playerRadius;
-    //   player1.top = playerSize * 1.2; // Set to the center of the goal
-    // } else {
-    if (ball.velocityX > 0) {
-      // If the puck is moving towards the AI's side, adjust the desiredX
-      desiredX += (ball.velocityY / ball.velocityX) * (player1.top - ball.top);
-    }
-    // }
-
-    double goalLeft1 = (MediaQuery.of(context).size.width - goalWidth) / 2;
-    double goalRight1 = goalLeft1 + goalWidth;
-
-    // Limit the desiredX within the boundaries of the goal
-    desiredX = max(min(desiredX, goalRight1), goalLeft1);
-
-    // Set the paddle's x position based on the desiredX
-    player1.left = desiredX;
-  }
-
-  void addError() {
-    // Add some randomness to the AI's behavior
-    final random = Random();
-    player1.left +=
-        random.nextDouble() * 5 - 2.5; // Example error in x position
-    player1.top += random.nextDouble() * 5 - 2.5; // Example error in y position
-  }
-
-  void movePaddle() {
-    if (ball.centerX > player1.centerX) {
-      // Move the paddle right to follow the puck
-      player1.left += widget.speed ?? 2.0;
-    } else if (ball.centerX > player1.centerX) {
-      // Move the paddle left to follow the puck
-      player1.left -= widget.speed ?? 2.0;
-    }
-
-    // Check if the ball is in the AI's half
-    if (ball.centerX < tableHeight / 2) {
-      // If the puck is in the AI's half, adjust the paddle's vertical position
-      if (ball.centerY > player1.centerY) {
-        // Move the paddle down to follow the puck
-        player1.top += widget.speed ?? 2.0;
-      } else if (ball.centerY < player1.centerY) {
-        // Move the paddle up to follow the puck
-        player1.top -= widget.speed ?? 2.0;
+        // If the puck is in the AI's half, adjust the paddle's vertical position
+        if (ball.centerY > player1.centerY) {
+          // Move the paddle down to follow the puck
+          player1.top += widget.speed ?? 2.0;
+        } else if (ball.centerY < player1.centerY) {
+          // Move the paddle up to follow the puck
+          player1.top -= widget.speed ?? 2.0;
+        }
+      } else {
+        if (player1.top >= playerSize * 1.2) {
+          player1.top -= widget.speed ?? 2.0;
+        }
+        if (player1.left >= tableWidth / 2 - playerRadius) {
+          player1.left -= widget.speed ?? 2.0;
+        } else {
+          player1.left += widget.speed ?? 2.0;
+        }
       }
     }
 
     // Limit the paddle's movement within the game boundaries
-    player1.left = max(min(player1.left, tableWidth), 0);
-    player1.top = max(min(player1.top, (tableHeight / 2) - 100), 0);
+    player1.left =
+        max(min(player1.left, tableWidth - (playerSize + ballSize)), 0);
+    player1.top = max(
+        min(player1.top, (tableHeight / 2) - 100), (playerRadius + ballSize));
   }
 
   void handlePaddleCollision(Player player) {
