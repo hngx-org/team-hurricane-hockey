@@ -50,10 +50,7 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                 const SizedBox(height: 30),
                 Text(
                   'LOOKING FOR PLAYERS ONLINE',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(color: Colors.black),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.black),
                 ),
               ],
             ),
@@ -75,18 +72,13 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
               children: [
                 Text(
                   'ONLINE PLAYERS',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(color: Colors.black),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.black),
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
                   height: 500.h,
                   child: StreamBuilder(
-                    stream: FirebaseFirestore.instance
-                        .collection("waitlist")
-                        .snapshots(),
+                    stream: FirebaseFirestore.instance.collection("waitlist").snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(
@@ -146,8 +138,7 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                               contentPadding: EdgeInsets.zero,
                               onTap: () async {
                                 final id = const Uuid().v1();
-                                await WaitlistQuery.instance
-                                    .sendRequest(user!.id!, data.id!, id);
+                                await WaitlistQuery.instance.sendRequest(user!.id!, data.id!, id);
                               },
                               leading: ClipRRect(
                                 borderRadius: BorderRadius.circular(1000),
@@ -283,8 +274,7 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
       bgMusic.pause();
     } else if (state == AppLifecycleState.resumed) {
       if (p.isMusicPlaying) bgMusic.resume();
@@ -337,8 +327,7 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                           child: TextButton(
                             onPressed: () {
                               controller.playSfx();
-                              BaseNavigator.pushNamed(
-                                  DifficultyScreen.routeName);
+                              BaseNavigator.pushNamed(DifficultyScreen.routeName);
                             },
                             child: Text(
                               'VS AI',
@@ -364,18 +353,15 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                                   email: user?.email,
                                   isReady: true,
                                 );
-                                final s = await WaitlistQuery.instance
-                                    .checkIntoWaitlist(
+                                final s = await WaitlistQuery.instance.checkIntoWaitlist(
                                   waitlist,
                                   user!.id!,
                                 );
                                 if (s) {
                                   final s = await wailistDialog();
-                                  WaitlistQuery.instance
-                                      .deleteUserOnWaitlist(user!.id!);
+                                  WaitlistQuery.instance.deleteUserOnWaitlist(user!.id!);
                                   if (s != null) {
-                                    final gameCreation =
-                                        await GameService.instance.createGame(
+                                    final gameCreation = await GameService.instance.createGame(
                                       s["gameId"],
                                       s["opponentId"],
                                       s["opponentName"],
@@ -391,6 +377,8 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                                           "mode": GameMode.multiplayer,
                                           "opponentId": s["opponentId"],
                                           "playerId": user!.id!,
+                                          "playerName": user!.name,
+                                          "opponentName": s["opponentName"],
                                         },
                                       );
                                     }
