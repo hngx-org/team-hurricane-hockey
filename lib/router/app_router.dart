@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:team_hurricane_hockey/screens/difficulty_screen.dart';
-import 'package:team_hurricane_hockey/screens/game_mode.dart';
+import 'package:team_hurricane_hockey/screens/game_mode_screen.dart';
 import 'package:team_hurricane_hockey/screens/game_screen.dart';
 import 'package:team_hurricane_hockey/screens/home_menu.dart';
 import 'package:team_hurricane_hockey/screens/paddles_and_puck_screen.dart';
