@@ -47,14 +47,6 @@ class _MyHomePageState extends State<GameScreen> {
   final p = Provider.of<MyProvider>(BaseNavigator.currentContext);
 
   @override
-  void dispose() {
-    wallSfx.dispose();
-    paddleSfx.dispose();
-    goalSfx.dispose();
-    super.dispose();
-  }
-
-  @override
   void initState() {
     super.initState();
 
@@ -369,12 +361,15 @@ class _MyHomePageState extends State<GameScreen> {
   }
 
   void playWallSound() {
-    if (ball.top == 0 ||
-        ball.bottom == tableHeight ||
-        ball.left == 0 ||
-        ball.right == tableWidth) {
-      sound.onWallCollision();
-    }
+    sound.onWallCollision;
+  }
+
+  void playPaddleSound() {
+    sound.onPaddleCollision();
+  }
+
+  void playGoalSound() {
+    sound.onGoal();
   }
 
   void doTheMathWork() async {
@@ -401,9 +396,10 @@ class _MyHomePageState extends State<GameScreen> {
     if ((ball.top <= 0 || ball.bottom >= tableHeight) &&
         ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) ||
             (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
-      sound.onGoal();
+      playGoalSound();
     } else if (ball.top <= 0 || ball.bottom >= tableHeight) {
       ySpeed = -ySpeed;
+      playWallSound();
     } else {
       distanceBall2P1 = pythagoras(
         ball.centerX - player1.centerX,
@@ -478,7 +474,7 @@ class _MyHomePageState extends State<GameScreen> {
   }
 
   void handlePaddleCollision(Player player) {
-    sound.onPaddleCollision();
+    playPaddleSound();
     // Calculate the horizontal and vertical distances between the ball and the player's center
     double horizontalDistance = ball.centerX - player.centerX;
     double verticalDistance = ball.centerY - player.centerY;
@@ -865,7 +861,6 @@ class _MyHomePageState extends State<GameScreen> {
                             break;
                           }
                           doTheMathWork();
-                          playWallSound();
                           await Future.delayed(const Duration(milliseconds: 1));
                           if (mounted) {
                             setState(() {});
