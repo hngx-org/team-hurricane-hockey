@@ -10,6 +10,7 @@ import 'package:team_hurricane_hockey/models/user.dart';
 import 'package:team_hurricane_hockey/models/waitlist_req.dart';
 import 'package:team_hurricane_hockey/providers/my_provider.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
+import 'package:team_hurricane_hockey/screens/difficulty_screen.dart';
 import 'package:team_hurricane_hockey/screens/game_mode.dart';
 import 'package:team_hurricane_hockey/screens/game_screen.dart';
 import 'package:team_hurricane_hockey/screens/widgets/settings_dialog.dart';

@@ -9,7 +9,7 @@ class MyProvider extends ChangeNotifier {
 
   double sfxVolume = 1.0;
 
-  int  gameEndsAt = 0;
+  int gameEndsAt = 0;
 
   initialize() async {
     isMusicPlaying = prefs.getbgMusicState();
@@ -30,9 +30,8 @@ class MyProvider extends ChangeNotifier {
     newSfxState ? sfxVolume = 1.0 : sfxVolume = 0.0;
     prefs.setSFX(newSfxState);
     notifyListeners();
-
-    
   }
+
   void updateGameMode(int newGameMode) {
     gameEndsAt = newGameMode;
     notifyListeners();
@@ -69,6 +68,4 @@ class PaddleColorProvider extends ChangeNotifier {
     prefs.setColor("player_2", color);
     notifyListeners();
   }
-
-  
 }
