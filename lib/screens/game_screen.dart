@@ -13,6 +13,8 @@ import 'package:team_hurricane_hockey/models/player.dart';
 import 'package:team_hurricane_hockey/models/puck.dart';
 import 'package:team_hurricane_hockey/providers/my_provider.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
+import 'package:team_hurricane_hockey/screens/home_menu.dart';
+import 'package:team_hurricane_hockey/screens/provider/game_provider.dart';
 import 'package:team_hurricane_hockey/screens/widgets/button.dart';
 import 'package:team_hurricane_hockey/screens/widgets/center_circe.dart';
 import 'package:team_hurricane_hockey/screens/widgets/player.dart';
@@ -55,7 +57,8 @@ class _MyHomePageState extends State<GameScreen> {
     sound.initWallSfx();
     sound.initFinalWhistle();
 
-    final paddleColorProvider = Provider.of<PaddleColorProvider>(context, listen: false);
+    final paddleColorProvider =
+        Provider.of<PaddleColorProvider>(context, listen: false);
     if (widget.gameMode == GameMode.ai) {
       player1 = Player(
         name: "Computer",
@@ -175,15 +178,18 @@ class _MyHomePageState extends State<GameScreen> {
     required double minY,
     required double maxY,
   }) async {
-    final gridX = ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
-    final gridY = ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
+    final gridX =
+        ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
+    final gridY =
+        ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
     /**
      * Get grid to send to DB 
      */
     final verticalGrid = (top / gridY).ceilToDouble();
     final horizontalGrid = (left / gridX).ceilToDouble();
 
-    if (!(lastKnownX == horizontalGrid.toDouble() && lastKnownY == verticalGrid.toDouble())) {
+    if (!(lastKnownX == horizontalGrid.toDouble() &&
+        lastKnownY == verticalGrid.toDouble())) {
       if (widget.gameId != null && widget.gameMode == GameMode.multiplayer) {
         GameService.instance.updatePaddleMovement(
           widget.gameId!,
@@ -226,7 +232,9 @@ class _MyHomePageState extends State<GameScreen> {
       } else {
         player.left = player.left;
       }
-      player.left = player.left < (tableWidth - (playerSize.w + 7.w)) ? player.left : (tableWidth - (playerSize.w + 7.w));
+      player.left = player.left < (tableWidth - (playerSize.w + 7.w))
+          ? player.left
+          : (tableWidth - (playerSize.w + 7.w));
       player.top += dy;
       if (player.top <= 7.w) {
         player.top = 7.w;
@@ -234,8 +242,10 @@ class _MyHomePageState extends State<GameScreen> {
         player.top = player.top;
       }
 
-      if (player.top > MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w)) {
-        player.top = MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w);
+      if (player.top >
+          MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w)) {
+        player.top =
+            MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w);
       } else {
         player.top = player.top;
       }
@@ -251,8 +261,10 @@ class _MyHomePageState extends State<GameScreen> {
       return;
     }
 
-    final gridX = ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
-    final gridY = ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
+    final gridX =
+        ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
+    final gridY =
+        ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
     const xGrids = 5;
     const yGrids = 11;
     lastKnownOppX = dx;
@@ -260,14 +272,17 @@ class _MyHomePageState extends State<GameScreen> {
 
     player.left = gridX * (xGrids - dx);
     player.left = player.left <= 7.w ? 7.w : player.left;
-    player.left = player.left < (tableWidth - playerSize.w + 7.w) ? player.left : (tableWidth - playerSize.w + 7.w);
+    player.left = player.left < (tableWidth - playerSize.w + 7.w)
+        ? player.left
+        : (tableWidth - playerSize.w + 7.w);
 
     player.top = (gridY * (yGrids - dy));
     player.top = player.top > 7.w ? player.top : 7.w;
     if (player.top == gridY) {
       player.top = 7.w;
     } else {
-      player.top = player.top > (MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w))
+      player.top = player.top >
+              (MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w))
           ? (MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w))
           : player1.top;
     }
@@ -285,14 +300,18 @@ class _MyHomePageState extends State<GameScreen> {
       } else {
         player.left = player.left;
       }
-      player.left = player.left < (tableWidth - (playerSize.w + 7.w)) ? player.left : (tableWidth - (playerSize.w + 7.w));
+      player.left = player.left < (tableWidth - (playerSize.w + 7.w))
+          ? player.left
+          : (tableWidth - (playerSize.w + 7.w));
       player.top += dy;
       if (player.top <= 7.w) {
         player.top = 7.w;
       } else {
         player.top = player.top;
       }
-      if (player.top > MediaQuery.of(context).size.height / 2 && player.top >= MediaQuery.of(context).size.height - (playerSize.w + 7.w)) {
+      if (player.top > MediaQuery.of(context).size.height / 2 &&
+          player.top >=
+              MediaQuery.of(context).size.height - (playerSize.w + 7.w)) {
         player.top = MediaQuery.of(context).size.height - (playerSize.w + 7.w);
       } else if (player.top > MediaQuery.of(context).size.height / 2) {
         player.top = player2.top;
@@ -310,36 +329,146 @@ class _MyHomePageState extends State<GameScreen> {
   }
 
   // global attributes
+  final gameProvider = GameProvider.instance;
   late String turn;
   bool gameIsStarted = false;
   bool gameIsFinished = false;
   bool showStartText = true;
   late double distanceBall2P1;
   late double distanceBall2P2;
-  int gameEndsAt = 10;
+  // int gameEndsAt = p.gameEndsAt;
   Offset? previousPoint;
+  
 
-  void nextRound(String player) {
+  Future<void>? nextRound(String player) {
     player == player1.name ? player1.score++ : player2.score++;
     turn = player;
     xSpeed = 0;
     ySpeed = 0;
     showStartText = true;
-    if (player1.score == gameEndsAt) {
+
+    if (player1.score == p.gameEndsAt) {
       blowFinalWhistle();
-      textStart = "${player1.name} Wins";
-      textStartFontSize *= 2;
       turn = player1.name;
       gameIsFinished = true;
-    } else if (player2.score == gameEndsAt) {
+      return showDialog(
+          context: BaseNavigator.currentContext,
+          builder: (context) {
+            return gameCompleteDialog(
+                gameCompleteDialogTitle: "${player1.name} Wins");
+          });
+
+      // textStartFontSize *= 2;
+    } else if (player2.score == p.gameEndsAt) {
       blowFinalWhistle();
-      textStart = "${player2.name} Wins";
-      textStartFontSize *= 2;
-      turn = player2.name;
-      gameIsFinished = true;
+      gameIsFinished = true; 
+      return showDialog(
+          context: BaseNavigator.currentContext,
+          builder: (context) {
+            return gameCompleteDialog(
+                gameCompleteDialogTitle: "${player2.name} Wins");
+          });
+
+      // turn = player2.name;
     }
     ball.left = (MediaQuery.of(context).size.width / 2) - ballRadius;
     ball.top = (MediaQuery.of(context).size.height / 2) - ballRadius;
+    return null;
+  }
+
+  AlertDialog gameCompleteDialog({required String gameCompleteDialogTitle}) {
+    return AlertDialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+      shape: const BeveledRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24.0),
+          bottomRight: Radius.circular(24.0),
+        ),
+      ),
+      title: Center(
+        child: Text(
+          gameCompleteDialogTitle,
+        ),
+      ),
+      titleTextStyle: Theme.of(context).textTheme.labelMedium!.copyWith(
+            fontSize: 36.sp,
+            fontWeight: FontWeight.w900,
+            color: Colors.blue,
+          ),
+      content: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            TextButton.icon(
+              style: TextButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                side: const BorderSide(
+                  color: Colors.white,
+                  width: 1.0,
+                ),
+                shape: const BeveledRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(12.0),
+                    bottomRight: Radius.circular(12.0),
+                  ),
+                ),
+              ),
+              onPressed: () async {
+                sound.playSfx();
+              },
+              label: Text(
+                'PLAY AGAIN',
+                style: Theme.of(context)
+                    .textTheme
+                    .labelMedium!
+                    .copyWith(fontSize: 18.sp),
+              ),
+              icon: const Icon(
+                Icons.refresh_sharp,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 15.0),
+            TextButton.icon(
+              style: TextButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                side: const BorderSide(
+                  color: Colors.white,
+                  width: 1.0,
+                ),
+                shape: const BeveledRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(12.0),
+                    bottomRight: Radius.circular(12.0),
+                  ),
+                ),
+              ),
+              onPressed: () {
+                sound.playSfx();
+                BaseNavigator.pushNamedAndclear(HomeMenu.routeName);
+              },
+              label: Text(
+                'BACK TO MENU',
+                style: Theme.of(context)
+                    .textTheme
+                    .labelMedium!
+                    .copyWith(fontSize: 18.sp),
+              ),
+              icon: const Icon(
+                Icons.menu,
+                color: Colors.white,
+              ),
+            ),
+            // const SizedBox(height: 15.0),
+          ],
+        ),
+      ),
+    );
   }
 
   double pythagoras(double a, double b) {
@@ -384,11 +513,11 @@ class _MyHomePageState extends State<GameScreen> {
 
     // Check if the ball is inside the goalpost area.
     if ((ball.top <= 0 || ball.bottom >= tableHeight) &&
-        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) || (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
+        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) ||
+            (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
       playGoalSound();
     } else if (ball.top <= 0 || ball.bottom >= tableHeight) {
       ySpeed = -ySpeed;
-      playWallSound();
     } else {
       distanceBall2P1 = pythagoras(
         ball.centerX - player1.centerX,
@@ -413,10 +542,12 @@ class _MyHomePageState extends State<GameScreen> {
 
   void updateAI() {
     //print(ball.centerX);
-    if ((ball.centerX - player1.centerX) < playerSize && tableWidth - ball.centerX < 40) {
+    if ((ball.centerX - player1.centerX) < playerSize &&
+        tableWidth - ball.centerX < 40) {
       player1.left -= Random().nextDouble() * 20;
       player1.top -= Random().nextDouble() * 20;
-    } else if ((ball.centerX - player1.centerX) < playerSize && ball.centerX < 40) {
+    } else if ((ball.centerX - player1.centerX) < playerSize &&
+        ball.centerX < 40) {
       player1.left += Random().nextDouble() * 20;
       player1.top -= Random().nextDouble() * 20;
     } else {
@@ -454,8 +585,10 @@ class _MyHomePageState extends State<GameScreen> {
     }
 
     // Limit the paddle's movement within the game boundaries
-    player1.left = max(min(player1.left, tableWidth - (playerSize + ballSize)), 0);
-    player1.top = max(min(player1.top, (tableHeight / 2) - 100), (playerRadius + ballSize));
+    player1.left =
+        max(min(player1.left, tableWidth - (playerSize + ballSize)), 0);
+    player1.top = max(
+        min(player1.top, (tableHeight / 2) - 100), (playerRadius + ballSize));
   }
 
   void handlePaddleCollision(Player player) {
@@ -647,12 +780,18 @@ class _MyHomePageState extends State<GameScreen> {
                           }
                           if (widget.gameMode == GameMode.multiplayer) {
                             return StreamBuilder(
-                              stream: FirebaseFirestore.instance.collection("playing").doc(widget.gameId).snapshots(),
+                              stream: FirebaseFirestore.instance
+                                  .collection("playing")
+                                  .doc(widget.gameId)
+                                  .snapshots(),
                               builder: (context, snapshot) {
                                 if (snapshot.hasData) {
-                                  final game = Game.fromJson(snapshot.data!.data()!);
-                                  if (game.players?.playerId1?.id == widget.playerId) {
-                                    WidgetsBinding.instance.addPostFrameCallback((t) {
+                                  final game =
+                                      Game.fromJson(snapshot.data!.data()!);
+                                  if (game.players?.playerId1?.id ==
+                                      widget.playerId) {
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((t) {
                                       movePlayer1Multiplayer(
                                         player1,
                                         game.player2Position!.x!.toDouble(),
@@ -660,8 +799,10 @@ class _MyHomePageState extends State<GameScreen> {
                                       );
                                       setState(() {});
                                     });
-                                  } else if (game.players?.playerId2?.id == widget.playerId) {
-                                    WidgetsBinding.instance.addPostFrameCallback((t) {
+                                  } else if (game.players?.playerId2?.id ==
+                                      widget.playerId) {
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((t) {
                                       movePlayer1Multiplayer(
                                         player1,
                                         game.player1Position!.x!.toDouble(),
@@ -796,7 +937,9 @@ class _MyHomePageState extends State<GameScreen> {
                           textStart,
                           style: TextStyle(
                             fontSize: textStartFontSize,
-                            color: turn == player1.name ? player1.color : player2.color,
+                            color: turn == player1.name
+                                ? player1.color
+                                : player2.color,
                           ),
                         ),
                       ),
@@ -811,12 +954,14 @@ class _MyHomePageState extends State<GameScreen> {
                           ball.left += xSpeed;
                           ball.top += ySpeed;
 
-                          if (ball.left == 7.w || ball.left >= tableWidth - ballSize) {
-                            playPaddleSound();
+                          if (ball.left == 7.w ||
+                              ball.left >= tableWidth - ballSize) {
+                            playWallSound();
                           }
 
-                          if (ball.top == 7.w || ball.top == tableHeight - 14.w) {
-                            playPaddleSound();
+                          if (ball.top == 7.w ||
+                              ball.top == tableHeight - 14.w) {
+                            playWallSound();
                           }
 
                           if (ball.left > tableWidth - ballSize) {
@@ -863,48 +1008,65 @@ class _MyHomePageState extends State<GameScreen> {
               ),
               Visibility(
                 visible: isPaused,
-                child: Container(
-                  height: sHeight,
-                  width: sWidth,
-                  color: Colors.black.withOpacity(0.8),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "PAUSED",
-                          style: Theme.of(context).textTheme.labelMedium!.copyWith(fontSize: 36.sp, fontWeight: FontWeight.w900, color: Colors.blue),
-                        ),
-                        SizedBox(
-                          height: 24.h,
-                        ),
-                        Button(
-                          child: Text("RESUME", style: Theme.of(context).textTheme.labelMedium!.copyWith(fontSize: 18.sp)),
-                          onTap: () {
-                            setState(() {
-                              sound.playSfx();
-                              xSpeed = temporaryXSpeed;
-                              ySpeed = temporaryYSpeed;
-                              isPaused = false;
-                            });
-                          },
-                        ),
-                        SizedBox(
-                          height: 16.h,
-                        ),
-                        Button(
-                          child: Text(
-                            "QUIT",
-                            style: Theme.of(context).textTheme.labelMedium!.copyWith(fontSize: 18.sp),
-                          ),
-                          onTap: () {
-                            sound.playSfx();
-                            BaseNavigator.pop();
-                          },
-                        )
-                      ],
+                child: Stack(
+                  children: [
+                    Container(
+                      height: sHeight,
+                      width: sWidth,
+                      color: Colors.black.withOpacity(0.8),
                     ),
-                  ),
+                    AlertDialog(
+                      backgroundColor: Colors.transparent,
+                      title: const Center(
+                        child: Text(
+                          "PAUSED",
+                        ),
+                      ),
+                      titleTextStyle: Theme.of(context)
+                          .textTheme
+                          .labelMedium!
+                          .copyWith(
+                              fontSize: 36.sp,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.blue),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Button(
+                            child: Text("RESUME",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelMedium!
+                                    .copyWith(fontSize: 18.sp)),
+                            onTap: () {
+                              setState(() {
+                                sound.playSfx();
+                                xSpeed = temporaryXSpeed;
+                                ySpeed = temporaryYSpeed;
+                                isPaused = false;
+                              });
+                            },
+                          ),
+                          SizedBox(
+                            height: 16.h,
+                          ),
+                          Button(
+                            child: Text(
+                              "QUIT",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium!
+                                  .copyWith(fontSize: 18.sp),
+                            ),
+                            onTap: () {
+                              sound.playSfx();
+                              BaseNavigator.pop();
+                            },
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               )
             ],

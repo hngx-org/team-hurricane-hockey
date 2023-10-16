@@ -1,24 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:team_hurricane_hockey/enums.dart';
+import 'package:provider/provider.dart';
+import 'package:team_hurricane_hockey/providers/my_provider.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
-import 'package:team_hurricane_hockey/screens/game_screen.dart';
+import 'package:team_hurricane_hockey/screens/difficulty_screen.dart';
 import 'package:team_hurricane_hockey/screens/widgets/button.dart';
 import 'package:team_hurricane_hockey/sound_control.dart';
 
-class DifficultyScreen extends StatefulWidget {
-  static const routeName = "difficulty";
-  const DifficultyScreen({super.key});
+class GameModeScreen extends StatefulWidget {
+  static const routeName = "game_mode";
+  const GameModeScreen({super.key});
 
   @override
-  State<DifficultyScreen> createState() => _DifficultyScreenState();
+  State<GameModeScreen> createState() => _GameModeScreenState();
 }
 
-class _DifficultyScreenState extends State<DifficultyScreen> {
+class _GameModeScreenState extends State<GameModeScreen> {
   SoundControl controller = SoundControl();
+  final p = Provider.of<MyProvider>(BaseNavigator.currentContext);
+
   @override
   Widget build(BuildContext context) {
+    
     return AnnotatedRegion(
       value: SystemUiOverlayStyle.dark.copyWith(
         systemNavigationBarColor: Colors.black,
@@ -47,7 +51,7 @@ class _DifficultyScreenState extends State<DifficultyScreen> {
                   Center(
                     child: FittedBox(
                       child: Text(
-                        'DIFFICULTY',
+                        'GAME MODE',
                         style: Theme.of(context)
                             .textTheme
                             .headlineLarge!
@@ -66,16 +70,11 @@ class _DifficultyScreenState extends State<DifficultyScreen> {
                       TextButton(
                         onPressed: () {
                           controller.playSfx();
-                          BaseNavigator.pushNamedAndReplace(
-                            GameScreen.routeName,
-                            args: {
-                              "mode": GameMode.ai,
-                              'speed': 3.0,
-                            },
-                          );
+                          BaseNavigator.pushNamed(DifficultyScreen.routeName);
+                          p.updateGameMode(5);
                         },
                         child: Text(
-                          'EASY',
+                          'BEST OF 5',
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                       ),
@@ -85,16 +84,11 @@ class _DifficultyScreenState extends State<DifficultyScreen> {
                       TextButton(
                         onPressed: () {
                           controller.playSfx();
-                          BaseNavigator.pushNamedAndReplace(
-                            GameScreen.routeName,
-                            args: {
-                              "mode": GameMode.ai,
-                              'speed': 5.0,
-                            },
-                          );
+                          BaseNavigator.pushNamed(DifficultyScreen.routeName);
+                          p.updateGameMode(7);
                         },
                         child: Text(
-                          'MEDIUM',
+                          'BEST OF 7',
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                       ),
@@ -104,16 +98,11 @@ class _DifficultyScreenState extends State<DifficultyScreen> {
                       TextButton(
                         onPressed: () {
                           controller.playSfx();
-                          BaseNavigator.pushNamedAndReplace(
-                            GameScreen.routeName,
-                            args: {
-                              "mode": GameMode.ai,
-                              'speed': 7.0,
-                            },
-                          );
+                          BaseNavigator.pushNamed(DifficultyScreen.routeName);
+                          p.updateGameMode(10);
                         },
                         child: Text(
-                          'HARD',
+                          'BEST OF 10',
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                       ),
