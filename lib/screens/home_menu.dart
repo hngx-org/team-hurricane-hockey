@@ -343,7 +343,7 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                           child: TextButton(
                             onPressed: () {
                               controller.playSfx();
-                              BaseNavigator.pushNamed(DifficultyScreen.routeName);
+                              BaseNavigator.pushNamed(GameModeScreen.routeName);
                             },
                             child: Text(
                               'VS AI',

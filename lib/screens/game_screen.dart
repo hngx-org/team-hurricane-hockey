@@ -346,7 +346,7 @@ class _MyHomePageState extends State<GameScreen> {
     ySpeed = 0;
     showStartText = true;
 
-    if ((widget.gameMode == GameMode.ai && player1.score == gameEndsAt) ||
+    if ((widget.gameMode == GameMode.ai && player1.score == p.gameEndsAt) ||
         (widget.gameMode == GameMode.player2 && player1.score == gameEndsAt)||
         (widget.gameMode == GameMode.multiplayer && player1.score == gameEndsAt)) {
       blowFinalWhistle();
@@ -361,7 +361,7 @@ class _MyHomePageState extends State<GameScreen> {
 
       // textStartFontSize *= 2;
     } else if ((widget.gameMode == GameMode.ai &&
-            player2.score == gameEndsAt) ||
+            player2.score == p.gameEndsAt) ||
         (widget.gameMode == GameMode.player2 && player2.score == gameEndsAt)||
         (widget.gameMode == GameMode.multiplayer && player2.score == gameEndsAt)) {
       blowFinalWhistle();
