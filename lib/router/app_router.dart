@@ -43,17 +43,13 @@ class AppRouter {
 
       case GameScreen.routeName:
         final s = settings.arguments as Map<String, dynamic>;
-        return _getPageRoute(
-          GameScreen(
-            gameMode: s["mode"],
-            gameId: s["gameId"],
-            opponentId: s["opponentId"],
-            playerId: s["playerId"],
-            speed: s['speed'],
-            playerName: s["playerName"],
-            opponentName: s["opponentName"],
-          ),
-        );
+        return _getPageRoute(GameScreen(
+          gameMode: s["mode"],
+          gameId: s["gameId"],
+          opponentId: s["opponentId"],
+          playerId: s["playerId"],
+          speed: s['speed'],
+        ));
 
       case HomeMenu.routeName:
         return _getPageRoute(const HomeMenu());

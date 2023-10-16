@@ -8,6 +8,8 @@ final sfx = AudioPlayer();
 final paddleSfx = AudioPlayer();
 final wallSfx = AudioPlayer();
 final goalSfx = AudioPlayer();
+final goalWhistle = AudioPlayer();
+final finalWhistle = AudioPlayer();
 
 class SoundControl {
   final p = Provider.of<MyProvider>(BaseNavigator.currentContext);
@@ -57,6 +59,11 @@ class SoundControl {
 
   Future<void> initGoalSfx() async {
     await goalSfx.setSource(AssetSource('sounds/goal.mp3'));
+    await goalWhistle.setSource(AssetSource('sounds/goal_whistle.mp3'));
+  }
+
+  Future<void> initFinalWhistle() async {
+    await finalWhistle.setSource(AssetSource('sounds/final_whistle.mp3'));
   }
 
   Future<void> playSfx() async {
@@ -76,7 +83,8 @@ class SoundControl {
 
   Future<void> onPaddleCollision() async {
     if (p.isSfxOn) {
-      await paddleSfx.play(AssetSource('sounds/paddle.mp3'), volume: p.sfxVolume);
+      await paddleSfx.play(AssetSource('sounds/paddle.mp3'),
+          volume: p.sfxVolume);
     }
   }
 
@@ -89,6 +97,13 @@ class SoundControl {
   Future<void> onGoal() async {
     if (p.isSfxOn) {
       await goalSfx.play(AssetSource('sounds/goal.mp3'), volume: p.sfxVolume);
+      await goalWhistle.play(AssetSource('sounds/goal_whistle.mp3'));
+    }
+  }
+
+  Future<void> onGameFinished() async {
+    if (p.isSfxOn) {
+      await finalWhistle.play(AssetSource('sounds/final_whistle.mp3'));
     }
   }
 }

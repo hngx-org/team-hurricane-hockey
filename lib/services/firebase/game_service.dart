@@ -22,37 +22,6 @@ class GameService {
     }
   }
 
-  Future updateBallMovement(
-    String gameId,
-    double dx,
-    double dy,
-  ) async {
-    final gameRoomRef = firestore.collection('playing').doc(gameId);
-    final gameRoomData = (await gameRoomRef.get()).data();
-
-    if (gameRoomData != null) {
-      final ballGridPosition = {
-        "x": dx,
-        "y": dy,
-      };
-      await gameRoomRef.update({
-        "ball_position": ballGridPosition,
-      });
-    }
-  }
-
-  Future updatePlayerScore(
-    Map<String, dynamic> update,
-    String gameId,
-  ) async {
-    final gameRoomRef = firestore.collection('playing').doc(gameId);
-    final gameRoomData = (await gameRoomRef.get()).data();
-
-    if (gameRoomData != null) {
-      await gameRoomRef.update(update);
-    }
-  }
-
   Future updatePaddleMovement(
     String gameId,
     String playerId,
@@ -64,39 +33,39 @@ class GameService {
 
     if (gameRoomData != null) {
       final game = Game.fromJson(gameRoomData);
-      if (game.playerId1?.id == playerId) {
+      if (game.players?.playerId1?.id == playerId) {
         //If player is player 1
         final playerPosition = {
           "x": dx,
           "y": dy,
         };
+        // final standStill = {
+        //   "x": 0,
+        //   "y": 0,
+        // };
         await gameRoomRef.update({
           "player1_position": playerPosition,
         });
+        // await gameRoomRef.update({
+        //   "player1_position": standStill,
+        // });
       } else {
         //If player is player 2
         final playerPosition = {
           "x": dx,
           "y": dy,
         };
+        // final standStill = {
+        //   "x": 0,
+        //   "y": 0,
+        // };
         await gameRoomRef.update({
           "player2_position": playerPosition,
         });
+        // await gameRoomRef.update({
+        //   "player2_position": standStill,
+        // });
       }
-    }
-  }
-
-  Future pauseAndResumeGame(
-    String gameId,
-    String status,
-  ) async {
-    final gameRoomRef = firestore.collection('playing').doc(gameId);
-    final gameRoomData = (await gameRoomRef.get()).data();
-
-    if (gameRoomData != null) {
-      await gameRoomRef.update({
-        "status": status,
-      });
     }
   }
 
@@ -111,17 +80,19 @@ class GameService {
       final result = await firestore.collection("playing").doc(gameId).get();
       if (!result.exists) {
         await firestore.collection("playing").doc(gameId).set({
-          "player_id_1": {
-            "id": userId,
-            "name": userName,
-            "score": 0,
-            "is_ready": true,
-          },
-          "player_id_2": {
-            "id": opponentId,
-            "name": opponentName,
-            "score": 0,
-            "is_ready": true,
+          "players": {
+            "player_id_1": {
+              "id": userId,
+              "name": userName,
+              "score": 0,
+              "is_ready": true,
+            },
+            "player_id_2": {
+              "id": opponentId,
+              "name": opponentName,
+              "score": 0,
+              "is_ready": true,
+            },
           },
           "ball_position": {
             "x": 0,
