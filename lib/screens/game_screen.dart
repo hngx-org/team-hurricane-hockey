@@ -354,6 +354,7 @@ class _MyHomePageState extends State<GameScreen> {
       gameIsFinished = true;
       return showDialog(
           context: BaseNavigator.currentContext,
+          barrierColor: Colors.black.withOpacity(0.8),
           builder: (context) {
             return gameCompleteDialog(
                 gameCompleteDialogTitle: "${player1.name} Wins");
