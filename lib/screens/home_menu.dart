@@ -278,6 +278,8 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
     await bgMusic.stop();
     bgMusic.dispose();
     sfx.dispose();
+    finalWhistle.dispose();
+    
     super.dispose();
   }
 

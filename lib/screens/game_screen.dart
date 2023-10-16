@@ -53,6 +53,7 @@ class _MyHomePageState extends State<GameScreen> {
     sound.initGoalSfx();
     sound.initPaddleSfx();
     sound.initWallSfx();
+    sound.initFinalWhistle();
 
     final paddleColorProvider =
         Provider.of<PaddleColorProvider>(context, listen: false);
@@ -342,11 +343,13 @@ class _MyHomePageState extends State<GameScreen> {
     ySpeed = 0;
     showStartText = true;
     if (player1.score == gameEndsAt) {
+      blowFinalWhistle();
       textStart = "${player1.name} Wins";
       textStartFontSize *= 2;
       turn = player1.name;
       gameIsFinished = true;
     } else if (player2.score == gameEndsAt) {
+      blowFinalWhistle();
       textStart = "${player2.name} Wins";
       textStartFontSize *= 2;
       turn = player2.name;
@@ -370,6 +373,10 @@ class _MyHomePageState extends State<GameScreen> {
 
   void playGoalSound() {
     sound.onGoal();
+  }
+
+  void blowFinalWhistle() {
+    sound.onGameFinished();
   }
 
   void doTheMathWork() async {
@@ -860,6 +867,12 @@ class _MyHomePageState extends State<GameScreen> {
                             nextRound(player2.name);
                             break;
                           }
+                          // if (ball.left == 0 ||
+                          //     ball.right == tableWidth ||
+                          //     ball.top == 0 ||
+                          //     ball.bottom == tableHeight) {
+                          //   playWallSound();
+                          // }
                           doTheMathWork();
                           await Future.delayed(const Duration(milliseconds: 1));
                           if (mounted) {
