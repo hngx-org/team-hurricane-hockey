@@ -336,9 +336,8 @@ class _MyHomePageState extends State<GameScreen> {
   bool showStartText = true;
   late double distanceBall2P1;
   late double distanceBall2P2;
-  // int gameEndsAt = p.gameEndsAt;
+  int gameEndsAt = 7;
   Offset? previousPoint;
-  
 
   Future<void>? nextRound(String player) {
     player == player1.name ? player1.score++ : player2.score++;
@@ -347,7 +346,8 @@ class _MyHomePageState extends State<GameScreen> {
     ySpeed = 0;
     showStartText = true;
 
-    if (player1.score == p.gameEndsAt) {
+    if ((widget.gameMode == GameMode.ai && player1.score == p.gameEndsAt) ||
+        player1.score == gameEndsAt) {
       blowFinalWhistle();
       turn = player1.name;
       gameIsFinished = true;
@@ -359,9 +359,11 @@ class _MyHomePageState extends State<GameScreen> {
           });
 
       // textStartFontSize *= 2;
-    } else if (player2.score == p.gameEndsAt) {
+    } else if ((widget.gameMode == GameMode.ai &&
+            player2.score == p.gameEndsAt) ||
+        player2.score == gameEndsAt) {
       blowFinalWhistle();
-      gameIsFinished = true; 
+      gameIsFinished = true;
       return showDialog(
           context: BaseNavigator.currentContext,
           builder: (context) {
