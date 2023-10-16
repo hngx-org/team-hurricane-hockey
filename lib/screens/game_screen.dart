@@ -167,7 +167,7 @@ class _MyHomePageState extends State<GameScreen> {
   double lastKnownOppX = 0;
   double lastKnownOppY = 0;
 
-  final goalWidth = 200.0.w;
+  final goalWidth = 160.0.w;
 
   gridSizingFunction({
     required double left,
@@ -207,7 +207,7 @@ class _MyHomePageState extends State<GameScreen> {
   late final double tableWidth;
 
   // Start text attributes
-  String textStart = 'Tap to start!';
+  String textStart = 'Tap to start';
   final textStartHeight = 120.0.h;
   final textStartWidth = 480.0.w;
   double textStartFontSize = 30.0.sp;
@@ -316,7 +316,7 @@ class _MyHomePageState extends State<GameScreen> {
   bool showStartText = true;
   late double distanceBall2P1;
   late double distanceBall2P2;
-  int gameEndsAt = 10;
+  int gameEndsAt = 7;
   Offset? previousPoint;
 
   void nextRound(String player) {

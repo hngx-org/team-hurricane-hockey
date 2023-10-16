@@ -439,7 +439,7 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                               );
                             },
                             child: Text(
-                              'Settings',
+                              'SETTINGS',
                               style: Theme.of(context).textTheme.labelMedium,
                             ),
                           ),
