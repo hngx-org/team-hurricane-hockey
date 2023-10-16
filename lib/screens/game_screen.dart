@@ -354,6 +354,7 @@ class _MyHomePageState extends State<GameScreen> {
       gameIsFinished = true;
       return showDialog(
           context: BaseNavigator.currentContext,
+          barrierColor: Colors.black.withOpacity(0.8),
           builder: (context) {
             return gameCompleteDialog(
                 gameCompleteDialogTitle: "${player1.name} Wins");
@@ -368,6 +369,7 @@ class _MyHomePageState extends State<GameScreen> {
       gameIsFinished = true;
       return showDialog(
           context: BaseNavigator.currentContext,
+          barrierColor: Colors.black.withOpacity(0.8),
           builder: (context) {
             return gameCompleteDialog(
                 gameCompleteDialogTitle: "${player2.name} Wins");
@@ -423,6 +425,22 @@ class _MyHomePageState extends State<GameScreen> {
               ),
               onPressed: () async {
                 sound.playSfx();
+                player1.score = 0;
+                player2.score = 0;
+
+                player1.left = tableWidth / 2 - playerRadius;
+                player1.top = playerSize * 1.2;
+                player2.left = tableWidth / 2 - playerRadius;
+                player2.top = tableHeight - (playerSize * 2.5);
+                // textStartLeft = tableWidth / 2 - textStartWidth / 2;
+                // textStartTop = tableHeight / 2 - textStartHeight / 2;
+                ball.left = tableWidth / 2 - ballRadius;
+                ball.top = tableHeight / 2 - ballRadius;
+                turn = math.Random().nextBool() ? player1.name : player2.name;
+                gameIsStarted = true;
+                gameIsFinished = false;
+                setState(() {});
+                Navigator.pop(context);
               },
               label: Text(
                 'PLAY AGAIN',
