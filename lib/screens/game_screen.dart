@@ -186,13 +186,16 @@ class _MyHomePageState extends State<GameScreen> {
     required double left,
     required double top,
   }) async {
-    final gridX = ((MediaQuery.of(context).size.width - 14.w) / 10).ceilToDouble();
-    final gridY = ((MediaQuery.of(context).size.height - 14.w) / 22).ceilToDouble();
+    final gridX =
+        ((MediaQuery.of(context).size.width - 14.w) / 10).ceilToDouble();
+    final gridY =
+        ((MediaQuery.of(context).size.height - 14.w) / 22).ceilToDouble();
 
     final verticalGrid = (top / gridY).ceilToDouble();
     final horizontalGrid = (left / gridX).ceilToDouble();
 
-    if (!(lastKnownBallX == horizontalGrid.toDouble() && lastKnownBallY == verticalGrid.toDouble())) {
+    if (!(lastKnownBallX == horizontalGrid.toDouble() &&
+        lastKnownBallY == verticalGrid.toDouble())) {
       if (widget.gameId != null && widget.gameMode == GameMode.multiplayer) {
         GameService.instance.updateBallMovement(
           widget.gameId!,
@@ -211,15 +214,18 @@ class _MyHomePageState extends State<GameScreen> {
     required double minY,
     required double maxY,
   }) async {
-    final gridX = ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
-    final gridY = ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
+    final gridX =
+        ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
+    final gridY =
+        ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
     /**
      * Get grid to send to DB 
      */
     final verticalGrid = (top / gridY).ceilToDouble();
     final horizontalGrid = (left / gridX).ceilToDouble();
 
-    if (!(lastKnownX == horizontalGrid.toDouble() && lastKnownY == verticalGrid.toDouble())) {
+    if (!(lastKnownX == horizontalGrid.toDouble() &&
+        lastKnownY == verticalGrid.toDouble())) {
       if (widget.gameId != null && widget.gameMode == GameMode.multiplayer) {
         GameService.instance.updatePaddleMovement(
           widget.gameId!,
@@ -262,7 +268,9 @@ class _MyHomePageState extends State<GameScreen> {
       } else {
         player.left = player.left;
       }
-      player.left = player.left < (tableWidth - (playerSize.w + 7.w)) ? player.left : (tableWidth - (playerSize.w + 7.w));
+      player.left = player.left < (tableWidth - (playerSize.w + 7.w))
+          ? player.left
+          : (tableWidth - (playerSize.w + 7.w));
       player.top += dy;
       if (player.top <= 7.w) {
         player.top = 7.w;
@@ -270,8 +278,10 @@ class _MyHomePageState extends State<GameScreen> {
         player.top = player.top;
       }
 
-      if (player.top > MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w)) {
-        player.top = MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w);
+      if (player.top >
+          MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w)) {
+        player.top =
+            MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w);
       } else {
         player.top = player.top;
       }
@@ -286,8 +296,10 @@ class _MyHomePageState extends State<GameScreen> {
       return;
     }
 
-    final gridX = ((MediaQuery.of(context).size.width - 14.w) / 10).ceilToDouble();
-    final gridY = ((MediaQuery.of(context).size.height - 14.w) / 22).ceilToDouble();
+    final gridX =
+        ((MediaQuery.of(context).size.width - 14.w) / 10).ceilToDouble();
+    final gridY =
+        ((MediaQuery.of(context).size.height - 14.w) / 22).ceilToDouble();
     const xGrids = 10;
     const yGrids = 22;
     lastKnownBallX = dx;
@@ -295,7 +307,9 @@ class _MyHomePageState extends State<GameScreen> {
 
     ball.left = gridX * (xGrids - dx);
     ball.left = ball.left <= 7.w ? 7.w : ball.left;
-    ball.left = ball.left < (tableWidth - playerSize.w + 7.w) ? ball.left : (tableWidth - playerSize.w + 7.w);
+    ball.left = ball.left < (tableWidth - playerSize.w + 7.w)
+        ? ball.left
+        : (tableWidth - playerSize.w + 7.w);
 
     ball.top = (gridY * (yGrids - dy));
     ball.top = ball.top > 7.w ? ball.top : ball.top;
@@ -310,8 +324,10 @@ class _MyHomePageState extends State<GameScreen> {
       return;
     }
 
-    final gridX = ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
-    final gridY = ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
+    final gridX =
+        ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
+    final gridY =
+        ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
     const xGrids = 5;
     const yGrids = 11;
     lastKnownOppX = dx;
@@ -319,14 +335,17 @@ class _MyHomePageState extends State<GameScreen> {
 
     player.left = gridX * (xGrids - dx);
     player.left = player.left <= 7.w ? 7.w : player.left;
-    player.left = player.left < (tableWidth - playerSize.w + 7.w) ? player.left : (tableWidth - playerSize.w + 7.w);
+    player.left = player.left < (tableWidth - playerSize.w + 7.w)
+        ? player.left
+        : (tableWidth - playerSize.w + 7.w);
 
     player.top = (gridY * (yGrids - dy));
     player.top = player.top > 7.w ? player.top : 7.w;
     if (player.top == gridY) {
       player.top = 7.w;
     } else {
-      player.top = player.top > (MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w))
+      player.top = player.top >
+              (MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w))
           ? (MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w))
           : player1.top;
     }
@@ -344,14 +363,18 @@ class _MyHomePageState extends State<GameScreen> {
       } else {
         player.left = player.left;
       }
-      player.left = player.left < (tableWidth - (playerSize.w + 7.w)) ? player.left : (tableWidth - (playerSize.w + 7.w));
+      player.left = player.left < (tableWidth - (playerSize.w + 7.w))
+          ? player.left
+          : (tableWidth - (playerSize.w + 7.w));
       player.top += dy;
       if (player.top <= 7.w) {
         player.top = 7.w;
       } else {
         player.top = player.top;
       }
-      if (player.top > MediaQuery.of(context).size.height / 2 && player.top >= MediaQuery.of(context).size.height - (playerSize.w + 7.w)) {
+      if (player.top > MediaQuery.of(context).size.height / 2 &&
+          player.top >=
+              MediaQuery.of(context).size.height - (playerSize.w + 7.w)) {
         player.top = MediaQuery.of(context).size.height - (playerSize.w + 7.w);
       } else if (player.top > MediaQuery.of(context).size.height / 2) {
         player.top = player2.top;
@@ -440,9 +463,6 @@ class _MyHomePageState extends State<GameScreen> {
     double goalRight1 = goalLeft1 + goalWidth;
     double goalLeft2 = MediaQuery.of(context).size.width / 2 - goalWidth / 2;
     double goalRight2 = goalLeft2 + goalWidth;
-
-    print("xSpeed: $xSpeed");
-    print("ySpeed: $ySpeed");
     // Check if the ball is inside the goalpost area.
     if ((ball.top <= 0 || ball.bottom >= tableHeight) &&
         ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) ||
@@ -589,7 +609,7 @@ class _MyHomePageState extends State<GameScreen> {
       gameIsStarted = true;
     } else {
       if (widget.gameMode == GameMode.ai && !isPaused) {
-       updateAI();
+        updateAI();
       } else if (widget.gameMode == GameMode.multiplayer) {
         if (game?.status?.toLowerCase() == "paused" && !isPaused) {
           temporaryXSpeed = xSpeed;
@@ -724,58 +744,86 @@ class _MyHomePageState extends State<GameScreen> {
                           }
                           if (widget.gameMode == GameMode.multiplayer) {
                             return StreamBuilder(
-                              stream: firestore.collection("playing").doc(widget.gameId).snapshots(),
+                              stream: firestore
+                                  .collection("playing")
+                                  .doc(widget.gameId)
+                                  .snapshots(),
                               builder: (context, snapshot) {
                                 if (snapshot.hasData) {
-                                  final g = Game.fromJson(snapshot.data!.data()!);
+                                  final g =
+                                      Game.fromJson(snapshot.data!.data()!);
                                   /**
                                    * Score check
                                    */
-                                  if (g.playerId1?.score != game?.playerId1?.score || g.playerId2?.score != game?.playerId2?.score) {
+                                  if (g.playerId1?.score !=
+                                          game?.playerId1?.score ||
+                                      g.playerId2?.score !=
+                                          game?.playerId2?.score) {
                                     //Reset game
-                                    if (g.playerId1!.score! > game!.playerId1!.score!) {
+                                    if (g.playerId1!.score! >
+                                        game!.playerId1!.score!) {
                                       if (g.playerId1?.id == widget.playerId) {
-                                        player1.left = sWidth / 2 - playerRadius;
+                                        player1.left =
+                                            sWidth / 2 - playerRadius;
                                         player1.top = playerSize * 1.2;
-                                        player2.left = sWidth / 2 - playerRadius;
-                                        player2.top = sHeight - (playerSize * 2.5);
+                                        player2.left =
+                                            sWidth / 2 - playerRadius;
+                                        player2.top =
+                                            sHeight - (playerSize * 2.5);
                                         ball.left = sWidth / 2 - ballRadius;
-                                        ball.top = (sHeight / 2) - ballRadius - 50;
+                                        ball.top =
+                                            (sHeight / 2) - ballRadius - 50;
                                         setState(() {});
                                         nextRound(player2.name);
-                                      } else if (g.playerId1?.id == widget.playerId) {
-                                        player1.left = sWidth / 2 - playerRadius;
+                                      } else if (g.playerId1?.id ==
+                                          widget.playerId) {
+                                        player1.left =
+                                            sWidth / 2 - playerRadius;
                                         player1.top = playerSize * 1.2;
-                                        player2.left = sWidth / 2 - playerRadius;
-                                        player2.top = sHeight - (playerSize * 2.5);
+                                        player2.left =
+                                            sWidth / 2 - playerRadius;
+                                        player2.top =
+                                            sHeight - (playerSize * 2.5);
                                         ball.left = sWidth / 2 - ballRadius;
-                                        ball.top = (sHeight / 2) - ballRadius - 50;
+                                        ball.top =
+                                            (sHeight / 2) - ballRadius - 50;
                                         setState(() {});
                                         nextRound(player1.name);
                                       }
                                     } else {
                                       if (g.playerId2?.id == widget.playerId) {
-                                        player1.left = sWidth / 2 - playerRadius;
+                                        player1.left =
+                                            sWidth / 2 - playerRadius;
                                         player1.top = playerSize * 1.2;
-                                        player2.left = sWidth / 2 - playerRadius;
-                                        player2.top = sHeight - (playerSize * 2.5);
+                                        player2.left =
+                                            sWidth / 2 - playerRadius;
+                                        player2.top =
+                                            sHeight - (playerSize * 2.5);
                                         ball.left = sWidth / 2 - ballRadius;
-                                        ball.top = (sHeight / 2) - ballRadius - 50;
+                                        ball.top =
+                                            (sHeight / 2) - ballRadius - 50;
                                         setState(() {});
                                         nextRound(player2.name);
-                                      } else if (g.playerId2?.id == widget.playerId) {
-                                        player1.left = sWidth / 2 - playerRadius;
+                                      } else if (g.playerId2?.id ==
+                                          widget.playerId) {
+                                        player1.left =
+                                            sWidth / 2 - playerRadius;
                                         player1.top = playerSize * 1.2;
-                                        player2.left = sWidth / 2 - playerRadius;
-                                        player2.top = sHeight - (playerSize * 2.5);
+                                        player2.left =
+                                            sWidth / 2 - playerRadius;
+                                        player2.top =
+                                            sHeight - (playerSize * 2.5);
                                         ball.left = sWidth / 2 - ballRadius;
-                                        ball.top = (sHeight / 2) - ballRadius - 50;
+                                        ball.top =
+                                            (sHeight / 2) - ballRadius - 50;
                                         setState(() {});
                                         nextRound(player1.name);
                                       }
                                     }
 
-                                    Future.delayed(const Duration(milliseconds: 2)).then((value) {
+                                    Future.delayed(
+                                            const Duration(milliseconds: 2))
+                                        .then((value) {
                                       if (mounted) {
                                         setState(() {});
                                       }
@@ -783,7 +831,8 @@ class _MyHomePageState extends State<GameScreen> {
                                   }
                                   game = Game.fromJson(snapshot.data!.data()!);
                                   if (g.playerId1?.id == widget.playerId) {
-                                    WidgetsBinding.instance.addPostFrameCallback((t) {
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((t) {
                                       movePlayer1Multiplayer(
                                         player1,
                                         g.player2Position!.x!.toDouble(),
@@ -791,8 +840,10 @@ class _MyHomePageState extends State<GameScreen> {
                                       );
                                       setState(() {});
                                     });
-                                  } else if (g.playerId2?.id == widget.playerId) {
-                                    WidgetsBinding.instance.addPostFrameCallback((t) {
+                                  } else if (g.playerId2?.id ==
+                                      widget.playerId) {
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((t) {
                                       movePlayer1Multiplayer(
                                         player1,
                                         g.player1Position!.x!.toDouble(),
@@ -822,69 +873,71 @@ class _MyHomePageState extends State<GameScreen> {
                 right: 24.w,
                 child: Builder(builder: (context) {
                   if (widget.gameMode == GameMode.multiplayer) {
-                    return Column(
-                      children: [
-                        RotatedBox(
-                          quarterTurns: 1,
-                          child: Text(
-                            game?.playerId1?.id == widget.playerId ? game?.playerId2?.score.toString() ?? "0" : game?.playerId1?.score.toString() ?? "0",
-                            style: TextStyle(
-                              fontSize: 48.sp,
-                              fontWeight: FontWeight.w700,
-                            ),
+                    return Column(children: [
+                      RotatedBox(
+                        quarterTurns: 1,
+                        child: Text(
+                          game?.playerId1?.id == widget.playerId
+                              ? game?.playerId2?.score.toString() ?? "0"
+                              : game?.playerId1?.score.toString() ?? "0",
+                          style: TextStyle(
+                            fontSize: 48.sp,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 51.h),
-                    Visibility(
-                      visible: (xSpeed != 0 && ySpeed != 0),
-                      maintainAnimation: true,
-                      maintainSize: true,
-                      maintainState: true,
-                      child: InkWell(
-                        onTap: () {
-                          sound.playSfx();
-                          temporaryXSpeed = xSpeed;
-                          temporaryYSpeed = ySpeed;
-                          setState(() {
-                            xSpeed = 0;
-                            ySpeed = 0;
-                            isPaused = true;
-                          });
-                        },
-                        child: Container(
-                          height: 48.h,
-                          width: 48.h,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(width: 4.w),
-                              child: Center(
-                                child: Transform.rotate(
-                                  angle: math.pi / 2,
-                                  child: Icon(
-                                    Icons.pause,
-                                    size: 30.h,
-                                  ),
+                      SizedBox(height: 51.h),
+                      Visibility(
+                        visible: (xSpeed != 0 && ySpeed != 0),
+                        maintainAnimation: true,
+                        maintainSize: true,
+                        maintainState: true,
+                        child: InkWell(
+                          onTap: () {
+                            sound.playSfx();
+                            temporaryXSpeed = xSpeed;
+                            temporaryYSpeed = ySpeed;
+                            setState(() {
+                              xSpeed = 0;
+                              ySpeed = 0;
+                              isPaused = true;
+                            });
+                          },
+                          child: Container(
+                            height: 48.h,
+                            width: 48.h,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(width: 4.w),
+                            ),
+                            child: Center(
+                              child: Transform.rotate(
+                                angle: math.pi / 2,
+                                child: Icon(
+                                  Icons.pause,
+                                  size: 30.h,
                                 ),
                               ),
                             ),
                           ),
                         ),
-                        SizedBox(height: 51.h),
-                        RotatedBox(
-                          quarterTurns: 1,
-                          child: Text(
-                            game?.playerId1?.id == widget.playerId ? game?.playerId1?.score.toString() ?? "0" : game?.playerId2?.score.toString() ?? "0",
-                            style: TextStyle(
-                              fontSize: 48.sp,
-                              fontWeight: FontWeight.w700,
-                            ),
+                      ),
+                      SizedBox(height: 51.h),
+                      RotatedBox(
+                        quarterTurns: 1,
+                        child: Text(
+                          game?.playerId1?.id == widget.playerId
+                              ? game?.playerId1?.score.toString() ?? "0"
+                              : game?.playerId2?.score.toString() ?? "0",
+                          style: TextStyle(
+                            fontSize: 48.sp,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                      ],
-                    );
+                      ),
+                    ]);
                   }
+
                   return Column(
                     children: [
                       RotatedBox(
@@ -947,6 +1000,7 @@ class _MyHomePageState extends State<GameScreen> {
                   );
                 }),
               ),
+
               !gameIsFinished
                   ? AnimatedPositioned(
                       duration: const Duration(milliseconds: 15),
@@ -992,7 +1046,9 @@ class _MyHomePageState extends State<GameScreen> {
                           textStart,
                           style: TextStyle(
                             fontSize: textStartFontSize,
-                            color: turn == player1.name ? player1.color : player2.color,
+                            color: turn == player1.name
+                                ? player1.color
+                                : player2.color,
                           ),
                         ),
                       ),
@@ -1148,92 +1204,102 @@ class _MyHomePageState extends State<GameScreen> {
                 ),
               ),
               Visibility(
-                visible: isPaused,
-                child: Container(
-                  height: sHeight,
-                  width: sWidth,
-                  color: Colors.black.withOpacity(0.8),
-                  child: Builder(builder: (context) {
-                    if (widget.gameMode == GameMode.multiplayer && game?.pausedBy != widget.playerId) {
+                  visible: isPaused,
+                  child: Container(
+                    height: sHeight,
+                    width: sWidth,
+                    color: Colors.black.withOpacity(0.8),
+                    child: Builder(builder: (context) {
+                      if (widget.gameMode == GameMode.multiplayer &&
+                          game?.pausedBy != widget.playerId) {
+                        return Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                "PAUSED",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelMedium!
+                                    .copyWith(
+                                      fontSize: 36.sp,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.blue,
+                                    ),
+                              ),
+                              SizedBox(height: 24.h),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 24),
+                                child: Text(
+                                  "Game paused by ${widget.opponentName}",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelMedium!
+                                      .copyWith(
+                                        fontSize: 20.sp,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                      ),
+                                ),
+                              )
+                            ],
+                          ),
+                        );
+                      }
                       return Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               "PAUSED",
-                              style: Theme.of(context).textTheme.labelMedium!.copyWith(
-                                    fontSize: 36.sp,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.blue,
-                                  ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium!
+                                  .copyWith(
+                                      fontSize: 36.sp,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.blue),
                             ),
-                            SizedBox(height: 24.h),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                            SizedBox(
+                              height: 24.h,
+                            ),
+                            Button(
+                              child: Text("RESUME",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelMedium!
+                                      .copyWith(fontSize: 18.sp)),
+                              onTap: () {
+                                setState(() {
+                                  sound.playSfx();
+                                  xSpeed = temporaryXSpeed;
+                                  ySpeed = temporaryYSpeed;
+                                  isPaused = false;
+                                });
+                              },
+                            ),
+                            SizedBox(
+                              height: 16.h,
+                            ),
+                            Button(
                               child: Text(
-                                "Game paused by ${widget.opponentName}",
-                                style: Theme.of(context).textTheme.labelMedium!.copyWith(
-                                      fontSize: 20.sp,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                    ),
+                                "QUIT",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelMedium!
+                                    .copyWith(fontSize: 18.sp),
                               ),
+                              onTap: () {
+                                sound.playSfx();
+                                BaseNavigator.pop();
+                              },
                             )
                           ],
                         ),
                       );
-                    }
-                    return Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            "PAUSED",
-                            style: Theme.of(context).textTheme.labelMedium!.copyWith(
-                                  fontSize: 36.sp,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.blue),
-                        ),
-                        SizedBox(
-                          height: 24.h,
-                        ),
-                        Button(
-                          child: Text("RESUME",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelMedium!
-                                  .copyWith(fontSize: 18.sp)),
-                          onTap: () {
-                            setState(() {
-                              sound.playSfx();
-                              xSpeed = temporaryXSpeed;
-                              ySpeed = temporaryYSpeed;
-                              isPaused = false;
-                            });
-                          },
-                        ),
-                        SizedBox(
-                          height: 16.h,
-                        ),
-                        Button(
-                          child: Text(
-                            "QUIT",
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelMedium!
-                                .copyWith(fontSize: 18.sp),
-                          ),
-                          onTap: () {
-                            sound.playSfx();
-                            BaseNavigator.pop();
-                          },
-                        )
-                      ],
-                    ),
-                  ),
-
-                ),
-              )
+                    }),
+                  )),
             ],
           ),
         ),
