@@ -18,6 +18,7 @@ import 'package:team_hurricane_hockey/screens/widgets/center_circe.dart';
 import 'package:team_hurricane_hockey/screens/widgets/player.dart';
 import 'package:team_hurricane_hockey/screens/widgets/spaces.dart';
 import 'package:team_hurricane_hockey/services/firebase/game_service.dart';
+import 'package:team_hurricane_hockey/sound_control.dart';
 
 class GameScreen extends StatefulWidget {
   final GameMode gameMode;
@@ -42,10 +43,25 @@ class GameScreen extends StatefulWidget {
 
 class _MyHomePageState extends State<GameScreen> {
   Game? game;
+  final sound = SoundControl();
+  final p = Provider.of<MyProvider>(BaseNavigator.currentContext);
+
+  @override
+  void dispose() {
+    wallSfx.dispose();
+    paddleSfx.dispose();
+    goalSfx.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
+
+    sound.initGoalSfx();
+    sound.initPaddleSfx();
+    sound.initWallSfx();
+
     final paddleColorProvider =
         Provider.of<PaddleColorProvider>(context, listen: false);
     if (widget.gameMode == GameMode.ai) {
@@ -352,6 +368,15 @@ class _MyHomePageState extends State<GameScreen> {
     return math.sqrt(math.pow(a, 2).toDouble() + math.pow(b, 2).toDouble());
   }
 
+  void playWallSound() {
+    if (ball.top == 0 ||
+        ball.bottom == tableHeight ||
+        ball.left == 0 ||
+        ball.right == tableWidth) {
+      sound.onWallCollision();
+    }
+  }
+
   void doTheMathWork() async {
     player1.right = player1.left + playerSize;
     player1.bottom = player1.top + playerSize;
@@ -376,6 +401,7 @@ class _MyHomePageState extends State<GameScreen> {
     if ((ball.top <= 0 || ball.bottom >= tableHeight) &&
         ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) ||
             (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
+      sound.onGoal();
     } else if (ball.top <= 0 || ball.bottom >= tableHeight) {
       ySpeed = -ySpeed;
     } else {
@@ -452,6 +478,7 @@ class _MyHomePageState extends State<GameScreen> {
   }
 
   void handlePaddleCollision(Player player) {
+    sound.onPaddleCollision();
     // Calculate the horizontal and vertical distances between the ball and the player's center
     double horizontalDistance = ball.centerX - player.centerX;
     double verticalDistance = ball.centerY - player.centerY;
@@ -709,6 +736,7 @@ class _MyHomePageState extends State<GameScreen> {
                       maintainState: true,
                       child: InkWell(
                         onTap: () {
+                          sound.playSfx();
                           temporaryXSpeed = xSpeed;
                           temporaryYSpeed = ySpeed;
                           setState(() {
@@ -836,8 +864,8 @@ class _MyHomePageState extends State<GameScreen> {
                             nextRound(player2.name);
                             break;
                           }
-
                           doTheMathWork();
+                          playWallSound();
                           await Future.delayed(const Duration(milliseconds: 1));
                           if (mounted) {
                             setState(() {});
@@ -879,6 +907,7 @@ class _MyHomePageState extends State<GameScreen> {
                                   .copyWith(fontSize: 18.sp)),
                           onTap: () {
                             setState(() {
+                              sound.playSfx();
                               xSpeed = temporaryXSpeed;
                               ySpeed = temporaryYSpeed;
                               isPaused = false;
@@ -897,6 +926,7 @@ class _MyHomePageState extends State<GameScreen> {
                                 .copyWith(fontSize: 18.sp),
                           ),
                           onTap: () {
+                            sound.playSfx();
                             BaseNavigator.pop();
                           },
                         )
