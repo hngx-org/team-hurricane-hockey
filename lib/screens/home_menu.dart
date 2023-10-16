@@ -10,7 +10,7 @@ import 'package:team_hurricane_hockey/models/user.dart';
 import 'package:team_hurricane_hockey/models/waitlist_req.dart';
 import 'package:team_hurricane_hockey/providers/my_provider.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
-import 'package:team_hurricane_hockey/screens/difficulty_screen.dart';
+import 'package:team_hurricane_hockey/screens/game_mode.dart';
 import 'package:team_hurricane_hockey/screens/game_screen.dart';
 import 'package:team_hurricane_hockey/screens/widgets/settings_dialog.dart';
 import 'package:team_hurricane_hockey/services/firebase/game_service.dart';
@@ -267,6 +267,7 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
+
     if (p.isMusicPlaying) controller.startBgMusic();
     if (p.isSfxOn) controller.initSfx();
     super.initState();
@@ -275,11 +276,13 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
   @override
   void dispose() async {
     WidgetsBinding.instance.removeObserver(this);
-    await bgMusic.stop();
-    bgMusic.dispose();
-    sfx.dispose();
-    finalWhistle.dispose();
-    
+    // await bgMusic.stop();
+    // bgMusic.dispose();
+    // sfx.dispose();
+    // finalWhistle.dispose();
+    // goalWhistle.dispose();
+    // paddleSfx.dispose();
+
     super.dispose();
   }
 
@@ -339,8 +342,7 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                           child: TextButton(
                             onPressed: () {
                               controller.playSfx();
-                              BaseNavigator.pushNamed(
-                                  DifficultyScreen.routeName);
+                              BaseNavigator.pushNamed(GameModeScreen.routeName);
                             },
                             child: Text(
                               'VS AI',

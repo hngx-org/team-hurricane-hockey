@@ -8,4 +8,7 @@ class GameProvider extends ChangeNotifier {
   Player? _player;
 
   Player? get player => _player;
+  int gameEndsAt = 0;
+
+  
 }

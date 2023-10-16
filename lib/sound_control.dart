@@ -90,7 +90,11 @@ class SoundControl {
 
   Future<void> onWallCollision() async {
     if (p.isSfxOn) {
-      await wallSfx.play(AssetSource('sounds/wall.mp3'), volume: p.sfxVolume);
+      await wallSfx.play(
+        AssetSource('sounds/wall.mp3'),
+        volume: p.sfxVolume,
+      );
+      wallSfx.setReleaseMode(ReleaseMode.release);
     }
   }
 
