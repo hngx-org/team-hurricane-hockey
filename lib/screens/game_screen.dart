@@ -18,6 +18,7 @@ import 'package:team_hurricane_hockey/screens/widgets/center_circe.dart';
 import 'package:team_hurricane_hockey/screens/widgets/player.dart';
 import 'package:team_hurricane_hockey/screens/widgets/spaces.dart';
 import 'package:team_hurricane_hockey/services/firebase/game_service.dart';
+import 'package:team_hurricane_hockey/sound_control.dart';
 
 class GameScreen extends StatefulWidget {
   final GameMode gameMode;
@@ -78,11 +79,18 @@ class _MyHomePageState extends State<GameScreen> {
   };
 
   Game? game;
+  final sound = SoundControl();
+  final p = Provider.of<MyProvider>(BaseNavigator.currentContext);
 
   @override
   void initState() {
     super.initState();
-    final paddleColorProvider = Provider.of<PaddleColorProvider>(context, listen: false);
+    sound.initGoalSfx();
+    sound.initPaddleSfx();
+    sound.initWallSfx();
+
+    final paddleColorProvider =
+        Provider.of<PaddleColorProvider>(context, listen: false);
     if (widget.gameMode == GameMode.ai) {
       player1 = Player(
         name: "Computer",
@@ -401,6 +409,18 @@ class _MyHomePageState extends State<GameScreen> {
     return math.sqrt(math.pow(a, 2).toDouble() + math.pow(b, 2).toDouble());
   }
 
+  void playWallSound() {
+    sound.onWallCollision;
+  }
+
+  void playPaddleSound() {
+    sound.onPaddleCollision();
+  }
+
+  void playGoalSound() {
+    sound.onGoal();
+  }
+
   void doTheMathWork() async {
     player1.right = player1.left + playerSize;
     player1.bottom = player1.top + playerSize;
@@ -425,9 +445,12 @@ class _MyHomePageState extends State<GameScreen> {
     print("ySpeed: $ySpeed");
     // Check if the ball is inside the goalpost area.
     if ((ball.top <= 0 || ball.bottom >= tableHeight) &&
-        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) || (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
+        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) ||
+            (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
+      playGoalSound();
     } else if (ball.top <= 0 || ball.bottom >= tableHeight) {
       ySpeed = -ySpeed;
+      playWallSound();
     } else {
       distanceBall2P1 = pythagoras(
         ball.centerX - player1.centerX,
@@ -502,6 +525,7 @@ class _MyHomePageState extends State<GameScreen> {
   }
 
   void handlePaddleCollision(Player player) {
+    playPaddleSound();
     // Calculate the horizontal and vertical distances between the ball and the player's center
     double horizontalDistance = ball.centerX - player.centerX;
     double verticalDistance = ball.centerY - player.centerY;
@@ -810,39 +834,31 @@ class _MyHomePageState extends State<GameScreen> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 51.h),
-                        Visibility(
-                          visible: (xSpeed != 0 && ySpeed != 0),
-                          maintainAnimation: true,
-                          maintainSize: true,
-                          maintainState: true,
-                          child: InkWell(
-                            onTap: () async {
-                              /**
-                                   * Pause the game on the server
-                                   */
-                              temporaryXSpeed = xSpeed;
-                              temporaryYSpeed = ySpeed;
-                              setState(() {
-                                xSpeed = 0;
-                                ySpeed = 0;
-                                isPaused = true;
-                              });
-
-                              if (game?.status?.toLowerCase() != "paused") {
-                                await GameService.instance.pauseAndResumeGame(
-                                  widget.gameId!,
-                                  "paused",
-                                );
-                              }
-                            },
-                            child: Container(
-                              height: 48.h,
-                              width: 48.h,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(width: 4.w),
-                              ),
+                      ),
+                    ),
+                    SizedBox(height: 51.h),
+                    Visibility(
+                      visible: (xSpeed != 0 && ySpeed != 0),
+                      maintainAnimation: true,
+                      maintainSize: true,
+                      maintainState: true,
+                      child: InkWell(
+                        onTap: () {
+                          sound.playSfx();
+                          temporaryXSpeed = xSpeed;
+                          temporaryYSpeed = ySpeed;
+                          setState(() {
+                            xSpeed = 0;
+                            ySpeed = 0;
+                            isPaused = true;
+                          });
+                        },
+                        child: Container(
+                          height: 48.h,
+                          width: 48.h,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(width: 4.w),
                               child: Center(
                                 child: Transform.rotate(
                                   angle: math.pi / 2,
@@ -1120,7 +1136,6 @@ class _MyHomePageState extends State<GameScreen> {
 
                             break;
                           }
-
                           doTheMathWork();
                           await Future.delayed(const Duration(milliseconds: 1));
                           if (mounted) {
@@ -1177,41 +1192,46 @@ class _MyHomePageState extends State<GameScreen> {
                             style: Theme.of(context).textTheme.labelMedium!.copyWith(
                                   fontSize: 36.sp,
                                   fontWeight: FontWeight.w900,
-                                  color: Colors.blue,
-                                ),
+                                  color: Colors.blue),
+                        ),
+                        SizedBox(
+                          height: 24.h,
+                        ),
+                        Button(
+                          child: Text("RESUME",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium!
+                                  .copyWith(fontSize: 18.sp)),
+                          onTap: () {
+                            setState(() {
+                              sound.playSfx();
+                              xSpeed = temporaryXSpeed;
+                              ySpeed = temporaryYSpeed;
+                              isPaused = false;
+                            });
+                          },
+                        ),
+                        SizedBox(
+                          height: 16.h,
+                        ),
+                        Button(
+                          child: Text(
+                            "QUIT",
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium!
+                                .copyWith(fontSize: 18.sp),
                           ),
-                          SizedBox(
-                            height: 24.h,
-                          ),
-                          Button(
-                            child: Text(
-                              "RESUME",
-                              style: Theme.of(context).textTheme.labelMedium!.copyWith(fontSize: 18.sp),
-                            ),
-                            onTap: () {
-                              setState(() {
-                                xSpeed = temporaryXSpeed;
-                                ySpeed = temporaryYSpeed;
-                                isPaused = false;
-                              });
-                            },
-                          ),
-                          SizedBox(
-                            height: 16.h,
-                          ),
-                          Button(
-                            child: Text(
-                              "QUIT",
-                              style: Theme.of(context).textTheme.labelMedium!.copyWith(fontSize: 18.sp),
-                            ),
-                            onTap: () {
-                              BaseNavigator.pop();
-                            },
-                          )
-                        ],
-                      ),
-                    );
-                  }),
+                          onTap: () {
+                            sound.playSfx();
+                            BaseNavigator.pop();
+                          },
+                        )
+                      ],
+                    ),
+                  ),
+
                 ),
               )
             ],

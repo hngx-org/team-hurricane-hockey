@@ -5,6 +5,9 @@ import 'package:team_hurricane_hockey/router/base_navigator.dart';
 
 final bgMusic = AudioPlayer();
 final sfx = AudioPlayer();
+final paddleSfx = AudioPlayer();
+final wallSfx = AudioPlayer();
+final goalSfx = AudioPlayer();
 
 class SoundControl {
   final p = Provider.of<MyProvider>(BaseNavigator.currentContext);
@@ -44,6 +47,18 @@ class SoundControl {
     p.updateSfxState(true);
   }
 
+  Future<void> initPaddleSfx() async {
+    await paddleSfx.setSource(AssetSource('sounds/paddle.mp3'));
+  }
+
+  Future<void> initWallSfx() async {
+    await wallSfx.setSource(AssetSource('sounds/wall.mp3'));
+  }
+
+  Future<void> initGoalSfx() async {
+    await goalSfx.setSource(AssetSource('sounds/goal.mp3'));
+  }
+
   Future<void> playSfx() async {
     await sfx.play(AssetSource('sounds/menu_select.mp3'), volume: p.sfxVolume);
   }
@@ -56,6 +71,24 @@ class SoundControl {
       await sfx.setVolume(0.0);
 
       p.updateSfxState(false);
+    }
+  }
+
+  Future<void> onPaddleCollision() async {
+    if (p.isSfxOn) {
+      await paddleSfx.play(AssetSource('sounds/paddle.mp3'), volume: p.sfxVolume);
+    }
+  }
+
+  Future<void> onWallCollision() async {
+    if (p.isSfxOn) {
+      await wallSfx.play(AssetSource('sounds/wall.mp3'), volume: p.sfxVolume);
+    }
+  }
+
+  Future<void> onGoal() async {
+    if (p.isSfxOn) {
+      await goalSfx.play(AssetSource('sounds/goal.mp3'), volume: p.sfxVolume);
     }
   }
 }
