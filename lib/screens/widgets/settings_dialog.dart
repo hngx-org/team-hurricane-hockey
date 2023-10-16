@@ -15,10 +15,10 @@ class SettingsDialog extends StatefulWidget {
 
 class _SettingsDialogState extends State<SettingsDialog> {
   SoundControl controller = SoundControl();
-  final p = Provider.of<MyProvider>(BaseNavigator.currentContext);
 
   @override
   Widget build(BuildContext context) {
+    final p = Provider.of<MyProvider>(context);
     return AlertDialog(
       backgroundColor: const Color(0xFF150337),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16),
