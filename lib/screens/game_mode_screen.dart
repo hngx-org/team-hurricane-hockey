@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:team_hurricane_hockey/enums.dart';
 import 'package:team_hurricane_hockey/providers/my_provider.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
 import 'package:team_hurricane_hockey/screens/difficulty_screen.dart';
+import 'package:team_hurricane_hockey/screens/game_screen.dart';
 import 'package:team_hurricane_hockey/screens/widgets/button.dart';
 import 'package:team_hurricane_hockey/sound_control.dart';
 
@@ -20,9 +22,12 @@ class _GameModeScreenState extends State<GameModeScreen> {
   SoundControl controller = SoundControl();
   final p = Provider.of<MyProvider>(BaseNavigator.currentContext);
 
+  final _vsAI = 'AI';
+  final _vsOnline = 'Multiplayer';
+  final _vsLocal = 'Player2';
+
   @override
   Widget build(BuildContext context) {
-    
     return AnnotatedRegion(
       value: SystemUiOverlayStyle.dark.copyWith(
         systemNavigationBarColor: Colors.black,
@@ -70,7 +75,27 @@ class _GameModeScreenState extends State<GameModeScreen> {
                       TextButton(
                         onPressed: () {
                           controller.playSfx();
-                          BaseNavigator.pushNamed(DifficultyScreen.routeName);
+                          if (p.vsMode == _vsAI) {
+                            BaseNavigator.pushNamed(DifficultyScreen.routeName);
+                          } else if (p.vsMode == _vsLocal) {
+                            BaseNavigator.pushNamed(
+                              GameScreen.routeName,
+                              args: {
+                                "mode": GameMode.player2,
+                              },
+                            );
+                          } else if (p.vsMode == _vsOnline) {
+                            // BaseNavigator.pushNamed(
+                            //   GameScreen.routeName,
+                            //   args: {
+                            //     "gameId": s["gameId"],
+                            //     "mode": GameMode.multiplayer,
+                            //     "opponentId": s["opponentId"],
+                            //     "playerId": user!.id!,
+                            //   },
+                            // );
+                          }
+
                           p.updateGameMode(5);
                         },
                         child: Text(
@@ -84,7 +109,26 @@ class _GameModeScreenState extends State<GameModeScreen> {
                       TextButton(
                         onPressed: () {
                           controller.playSfx();
-                          BaseNavigator.pushNamed(DifficultyScreen.routeName);
+                          if (p.vsMode == _vsAI) {
+                            BaseNavigator.pushNamed(DifficultyScreen.routeName);
+                          } else if (p.vsMode == _vsLocal) {
+                            BaseNavigator.pushNamed(
+                              GameScreen.routeName,
+                              args: {
+                                "mode": GameMode.player2,
+                              },
+                            );
+                          } else if (p.vsMode == _vsOnline) {
+                            // BaseNavigator.pushNamed(
+                            //   GameScreen.routeName,
+                            //   args: {
+                            //     "gameId": s["gameId"],
+                            //     "mode": GameMode.multiplayer,
+                            //     "opponentId": s["opponentId"],
+                            //     "playerId": user!.id!,
+                            //   },
+                            // );
+                          }
                           p.updateGameMode(7);
                         },
                         child: Text(
@@ -98,7 +142,26 @@ class _GameModeScreenState extends State<GameModeScreen> {
                       TextButton(
                         onPressed: () {
                           controller.playSfx();
-                          BaseNavigator.pushNamed(DifficultyScreen.routeName);
+                          if (p.vsMode == _vsAI) {
+                            BaseNavigator.pushNamed(DifficultyScreen.routeName);
+                          } else if (p.vsMode == _vsLocal) {
+                            BaseNavigator.pushNamed(
+                              GameScreen.routeName,
+                              args: {
+                                "mode": GameMode.player2,
+                              },
+                            );
+                          } else if (p.vsMode == _vsOnline) {
+                            // BaseNavigator.pushNamed(
+                            //   GameScreen.routeName,
+                            //   args: {
+                            //     "gameId": s["gameId"],
+                            //     "mode": GameMode.multiplayer,
+                            //     "opponentId": s["opponentId"],
+                            //     "playerId": user!.id!,
+                            //   },
+                            // );
+                          }
                           p.updateGameMode(10);
                         },
                         child: Text(
