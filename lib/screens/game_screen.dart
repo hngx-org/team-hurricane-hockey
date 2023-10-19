@@ -242,10 +242,8 @@ class _MyHomePageState extends State<GameScreen> {
         player.top = player.top;
       }
 
-      if (player.top >
-          MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w)) {
-        player.top =
-            MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w);
+      if (player.top > tableHeight / 2 - (playerSize.w + 7.w)) {
+        player.top = tableHeight / 2 - (playerSize.w + 7.w);
       } else {
         player.top = player.top;
       }
@@ -261,10 +259,8 @@ class _MyHomePageState extends State<GameScreen> {
       return;
     }
 
-    final gridX =
-        ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
-    final gridY =
-        ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
+    final gridX = ((tableWidth - 14.w) / 5).ceilToDouble();
+    final gridY = ((tableHeight - 14.w) / 11).ceilToDouble();
     const xGrids = 5;
     const yGrids = 11;
     lastKnownOppX = dx;
@@ -281,9 +277,8 @@ class _MyHomePageState extends State<GameScreen> {
     if (player.top == gridY) {
       player.top = 7.w;
     } else {
-      player.top = player.top >
-              (MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w))
-          ? (MediaQuery.of(context).size.height / 2 - (playerSize.w + 7.w))
+      player.top = player.top > (tableHeight / 2 - (playerSize.w + 7.w))
+          ? (tableHeight / 2 - (playerSize.w + 7.w))
           : player1.top;
     }
   }
@@ -309,21 +304,20 @@ class _MyHomePageState extends State<GameScreen> {
       } else {
         player.top = player.top;
       }
-      if (player.top > MediaQuery.of(context).size.height / 2 &&
-          player.top >=
-              MediaQuery.of(context).size.height - (playerSize.w + 7.w)) {
-        player.top = MediaQuery.of(context).size.height - (playerSize.w + 7.w);
-      } else if (player.top > MediaQuery.of(context).size.height / 2) {
+      if (player.top > tableHeight / 2 &&
+          player.top >= tableHeight - (playerSize.w + 7.w)) {
+        player.top = tableHeight - (playerSize.w + 7.w);
+      } else if (player.top > tableHeight / 2) {
         player.top = player2.top;
       } else {
-        player.top = MediaQuery.of(context).size.height / 2;
+        player.top = tableHeight / 2;
       }
 
       gridSizingFunction(
         left: player.left,
         top: player.top,
-        minY: MediaQuery.of(context).size.height / 2,
-        maxY: MediaQuery.of(context).size.height - (playerSize.h + 7.w),
+        minY: tableHeight / 2,
+        maxY: tableHeight - (playerSize.h + 7.w),
       );
     }
   }
@@ -419,6 +413,7 @@ class _MyHomePageState extends State<GameScreen> {
                   color: Colors.white,
                   width: 1.0,
                 ),
+                elevation: 0,
                 shape: const BeveledRectangleBorder(
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(12.0),
@@ -460,6 +455,7 @@ class _MyHomePageState extends State<GameScreen> {
             const SizedBox(height: 15.0),
             TextButton.icon(
               style: TextButton.styleFrom(
+                elevation: 0,
                 padding:
                     const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                 side: const BorderSide(
@@ -501,7 +497,7 @@ class _MyHomePageState extends State<GameScreen> {
   }
 
   void playWallSound() {
-    sound.onWallCollision;
+    sound.onWallCollision();
   }
 
   void playPaddleSound() {
@@ -531,16 +527,25 @@ class _MyHomePageState extends State<GameScreen> {
     ball.centerY = ball.top + ballRadius;
 
     // Calculate the left and right bounds of the goalpost.
-    double goalLeft1 = (MediaQuery.of(context).size.width - goalWidth) / 2;
+    double goalLeft1 = (tableWidth - goalWidth) / 2;
     double goalRight1 = goalLeft1 + goalWidth;
-    double goalLeft2 = MediaQuery.of(context).size.width / 2 - goalWidth / 2;
+    double goalLeft2 = tableWidth / 2 - goalWidth / 2;
     double goalRight2 = goalLeft2 + goalWidth;
+    //print(ball.top);
+    if (ball.top <= -20 || ball.bottom >= tableHeight + 20) {
+      playGoalSound(); // Play a sound when the ball passes the left goalpost
+    }
 
+    // Check if the ball has crossed the right goalpost
+    // if (ball.left <= goalRight1 &&
+    //     ball.right >= goalRight1 &&
+    //     (ball.top <= player1.top || ball.bottom >= player1.bottom)) {
+    //   playGoalSound(); // Play a sound when the ball passes the right goalpost
+    // }
     // Check if the ball is inside the goalpost area.
     if ((ball.top <= 0 || ball.bottom >= tableHeight) &&
         ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) ||
             (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
-      playGoalSound();
     } else if (ball.top <= 0 || ball.bottom >= tableHeight) {
       ySpeed = -ySpeed;
     } else {
@@ -666,8 +671,8 @@ class _MyHomePageState extends State<GameScreen> {
     if (!gameIsStarted) {
       player1.score = 0;
       player2.score = 0;
-      tableWidth = sWidth;
-      tableHeight = sHeight;
+      tableWidth = sWidth - 3.w;
+      tableHeight = sHeight - 3.w;
       player1.left = sWidth / 2 - playerRadius;
       player1.top = playerSize * 1.2;
       player2.left = sWidth / 2 - playerRadius;
@@ -979,14 +984,21 @@ class _MyHomePageState extends State<GameScreen> {
                           ball.left += xSpeed;
                           ball.top += ySpeed;
 
-                          if (ball.left == 7.w ||
-                              ball.left >= tableWidth - ballSize) {
-                            playWallSound();
-                          }
+                          if (ball.left <= 0 ||
+                              ball.right >= tableWidth ||
+                              ball.top <= 0 ||
+                              ball.bottom >= tableHeight) {
+                            // Check if the ball is rolling through the top or bottom
 
-                          if (ball.top == 7.w ||
-                              ball.top == tableHeight - 14.w) {
-                            playWallSound();
+                            bool isRollingThroughTop =
+                                ball.top <= 0 && ySpeed < 0;
+                            bool isRollingThroughBottom =
+                                ball.bottom >= tableHeight && ySpeed > 0;
+
+                            if (isRollingThroughTop || isRollingThroughBottom) {
+                            } else {
+                              playWallSound(); // Play a sound when the ball hits the border
+                            }
                           }
 
                           if (ball.left > tableWidth - ballSize) {
