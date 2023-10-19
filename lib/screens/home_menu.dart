@@ -263,6 +263,9 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
 
   SoundControl controller = SoundControl();
   final p = Provider.of<MyProvider>(BaseNavigator.currentContext);
+  final _vsAI = 'AI';
+  final _vsOnline = 'Multiplayer';
+  final _vsLocal = 'Player2';
 
   @override
   void initState() {
@@ -343,6 +346,7 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                             onPressed: () {
                               controller.playSfx();
                               BaseNavigator.pushNamed(GameModeScreen.routeName);
+                              p.updateVsMode(_vsAI);
                             },
                             child: Text(
                               'VS AI',
@@ -401,6 +405,7 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                                   }
                                 }
                               }
+                              p.updateVsMode(_vsOnline);
                             },
                             child: Text(
                               'MULTIPLAYER',
@@ -414,12 +419,8 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                           child: TextButton(
                             onPressed: () {
                               controller.playSfx();
-                              BaseNavigator.pushNamed(
-                                GameScreen.routeName,
-                                args: {
-                                  "mode": GameMode.player2,
-                                },
-                              );
+                              BaseNavigator.pushNamed(GameModeScreen.routeName);
+                              p.updateVsMode(_vsLocal);
                             },
                             child: Text(
                               'VS PLAYER 2',

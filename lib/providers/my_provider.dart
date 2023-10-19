@@ -11,6 +11,8 @@ class MyProvider extends ChangeNotifier {
 
   int gameEndsAt = 0;
 
+  String? vsMode;
+
   initialize() async {
     isMusicPlaying = prefs.getbgMusicState();
     isSfxOn = prefs.getSFX();
@@ -34,6 +36,11 @@ class MyProvider extends ChangeNotifier {
 
   void updateGameMode(int newGameMode) {
     gameEndsAt = newGameMode;
+    notifyListeners();
+  }
+
+  void updateVsMode(String newVsMode) {
+    vsMode = newVsMode;
     notifyListeners();
   }
 }
