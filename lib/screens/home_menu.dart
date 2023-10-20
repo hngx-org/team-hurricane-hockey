@@ -261,7 +261,8 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
     }
   }
 
-  SoundControl controller = SoundControl();
+  SoundControl sound = SoundControl();
+  // SoundControl controller = SoundControl();
   final p = Provider.of<MyProvider>(BaseNavigator.currentContext);
   final _vsAI = 'AI';
   final _vsOnline = 'Multiplayer';
@@ -270,9 +271,10 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
-
-    if (p.isMusicPlaying) controller.startBgMusic();
-    if (p.isSfxOn) controller.initSfx();
+    sound.startBgMusic();
+    sound.loadSfx();
+    // if (p.isMusicPlaying) controller.startBgMusic();
+    // if (p.isSfxOn) controller.initSfx();
     super.initState();
   }
 
@@ -293,9 +295,9 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive) {
-      bgMusic.pause();
+      // bgMusic.pause();
     } else if (state == AppLifecycleState.resumed) {
-      if (p.isMusicPlaying) bgMusic.resume();
+      // if (p.isMusicPlaying) bgMusic.resume();
     }
   }
 
@@ -344,7 +346,8 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                           duration: const Duration(milliseconds: 200),
                           child: TextButton(
                             onPressed: () {
-                              controller.playSfx();
+                              // controller.playSfx();
+                              sound.onButtonPressed();
                               BaseNavigator.pushNamed(GameModeScreen.routeName);
                               p.updateVsMode(_vsAI);
                             },
@@ -360,7 +363,7 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                           child: TextButton(
                             onPressed: () async {
                               // AppStorage.instance.clearUser();
-
+                              sound.onButtonPressed();
                               if (user == null) {
                                 final data = await googleLogin();
                                 if (data != null) {}
@@ -418,7 +421,8 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                           duration: const Duration(milliseconds: 400),
                           child: TextButton(
                             onPressed: () {
-                              controller.playSfx();
+                              sound.onButtonPressed();
+                              // controller.playSfx();
                               BaseNavigator.pushNamed(GameModeScreen.routeName);
                               p.updateVsMode(_vsLocal);
                             },
@@ -433,7 +437,8 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                           duration: const Duration(milliseconds: 800),
                           child: TextButton(
                             onPressed: () {
-                              controller.playSfx();
+                              sound.onButtonPressed();
+                              // controller.playSfx();
                               showDialog(
                                 context: context,
                                 builder: (context) {

@@ -19,7 +19,7 @@ class GameModeScreen extends StatefulWidget {
 }
 
 class _GameModeScreenState extends State<GameModeScreen> {
-  SoundControl controller = SoundControl();
+  SoundControl sound = SoundControl();
   final p = Provider.of<MyProvider>(BaseNavigator.currentContext);
 
   final _vsAI = 'AI';
@@ -74,7 +74,8 @@ class _GameModeScreenState extends State<GameModeScreen> {
                     children: [
                       TextButton(
                         onPressed: () {
-                          controller.playSfx();
+                          sound.onButtonPressed();
+                          // controller.playSfx();
                           if (p.vsMode == _vsAI) {
                             BaseNavigator.pushNamed(DifficultyScreen.routeName);
                           } else if (p.vsMode == _vsLocal) {
@@ -108,7 +109,8 @@ class _GameModeScreenState extends State<GameModeScreen> {
                       ),
                       TextButton(
                         onPressed: () {
-                          controller.playSfx();
+                          sound.onButtonPressed();
+                          // controller.playSfx();
                           if (p.vsMode == _vsAI) {
                             BaseNavigator.pushNamed(DifficultyScreen.routeName);
                           } else if (p.vsMode == _vsLocal) {
@@ -141,7 +143,8 @@ class _GameModeScreenState extends State<GameModeScreen> {
                       ),
                       TextButton(
                         onPressed: () {
-                          controller.playSfx();
+                          sound.onButtonPressed();
+                          // controller.playSfx();
                           if (p.vsMode == _vsAI) {
                             BaseNavigator.pushNamed(DifficultyScreen.routeName);
                           } else if (p.vsMode == _vsLocal) {
@@ -194,7 +197,8 @@ class _GameModeScreenState extends State<GameModeScreen> {
                               ],
                             ),
                             onTap: () {
-                              controller.playSfx();
+                              sound.onButtonPressed();
+                              // controller.playSfx();
                               BaseNavigator.pop();
                             }),
                       ),

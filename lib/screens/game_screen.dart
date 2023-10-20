@@ -45,17 +45,17 @@ class GameScreen extends StatefulWidget {
 
 class _MyHomePageState extends State<GameScreen> {
   Game? game;
-  final sound = SoundControl();
+  SoundControl sound = SoundControl();
   final p = Provider.of<MyProvider>(BaseNavigator.currentContext);
 
   @override
   void initState() {
     super.initState();
 
-    sound.initGoalSfx();
-    sound.initPaddleSfx();
-    sound.initWallSfx();
-    sound.initFinalWhistle();
+    // sound.initGoalSfx();
+    // sound.initPaddleSfx();
+    // sound.initWallSfx();
+    // sound.initFinalWhistle();
 
     final paddleColorProvider =
         Provider.of<PaddleColorProvider>(context, listen: false);
@@ -345,7 +345,7 @@ class _MyHomePageState extends State<GameScreen> {
             player1.score == p.gameEndsAt) ||
         (widget.gameMode == GameMode.multiplayer &&
             player1.score == gameEndsAt)) {
-      blowFinalWhistle();
+      sound.onGameComplete();
       turn = player1.name;
       gameIsFinished = true;
       return showDialog(
@@ -362,7 +362,7 @@ class _MyHomePageState extends State<GameScreen> {
             player2.score == p.gameEndsAt) ||
         (widget.gameMode == GameMode.multiplayer &&
             player2.score == gameEndsAt)) {
-      blowFinalWhistle();
+      sound.onGameComplete();
       gameIsFinished = true;
       return showDialog(
           context: BaseNavigator.currentContext,
@@ -422,7 +422,7 @@ class _MyHomePageState extends State<GameScreen> {
                 ),
               ),
               onPressed: () async {
-                sound.playSfx();
+                sound.onButtonPressed();
                 player1.score = 0;
                 player2.score = 0;
 
@@ -470,7 +470,7 @@ class _MyHomePageState extends State<GameScreen> {
                 ),
               ),
               onPressed: () {
-                sound.playSfx();
+                sound.onButtonPressed();
                 BaseNavigator.pushNamedAndclear(HomeMenu.routeName);
               },
               label: Text(
@@ -496,21 +496,21 @@ class _MyHomePageState extends State<GameScreen> {
     return math.sqrt(math.pow(a, 2).toDouble() + math.pow(b, 2).toDouble());
   }
 
-  void playWallSound() {
-    sound.onWallCollision();
-  }
+  // void playWallSound() {
+  //   sound.onWallCollision();
+  // }
 
-  void playPaddleSound() {
-    sound.onPaddleCollision();
-  }
+  // void playPaddleSound() {
+  //   sound.onPaddleCollision();
+  // }
 
-  void playGoalSound() {
-    sound.onGoal();
-  }
+  // void playGoalSound() {
+  //   sound.onGoal();
+  // }
 
-  void blowFinalWhistle() {
-    sound.onGameFinished();
-  }
+  // void blowFinalWhistle() {
+  //   sound.onGameFinished();
+  // }
 
   void doTheMathWork() async {
     player1.right = player1.left + playerSize;
@@ -533,7 +533,7 @@ class _MyHomePageState extends State<GameScreen> {
     double goalRight2 = goalLeft2 + goalWidth;
     //print(ball.top);
     if (ball.top <= -20 || ball.bottom >= tableHeight + 20) {
-      playGoalSound(); // Play a sound when the ball passes the left goalpost
+      sound.onGoal(); // Play a sound when the ball passes the left goalpost
     }
 
     // Check if the ball has crossed the right goalpost
@@ -622,7 +622,8 @@ class _MyHomePageState extends State<GameScreen> {
   }
 
   void handlePaddleCollision(Player player) {
-    playPaddleSound();
+    sound.onPaddleCollision();
+    // playPaddleSound();
     // Calculate the horizontal and vertical distances between the ball and the player's center
     double horizontalDistance = ball.centerX - player.centerX;
     double verticalDistance = ball.centerY - player.centerY;
@@ -880,7 +881,7 @@ class _MyHomePageState extends State<GameScreen> {
                       maintainState: true,
                       child: InkWell(
                         onTap: () {
-                          sound.playSfx();
+                          sound.onButtonPressed();
                           temporaryXSpeed = xSpeed;
                           temporaryYSpeed = ySpeed;
                           setState(() {
@@ -997,7 +998,8 @@ class _MyHomePageState extends State<GameScreen> {
 
                             if (isRollingThroughTop || isRollingThroughBottom) {
                             } else {
-                              playWallSound(); // Play a sound when the ball hits the border
+                              sound.onWallCollision();
+                              // Play a sound when the ball hits the border
                             }
                           }
 
@@ -1077,7 +1079,7 @@ class _MyHomePageState extends State<GameScreen> {
                                     .copyWith(fontSize: 18.sp)),
                             onTap: () {
                               setState(() {
-                                sound.playSfx();
+                                sound.onButtonPressed();
                                 xSpeed = temporaryXSpeed;
                                 ySpeed = temporaryYSpeed;
                                 isPaused = false;
@@ -1096,8 +1098,9 @@ class _MyHomePageState extends State<GameScreen> {
                                   .copyWith(fontSize: 18.sp),
                             ),
                             onTap: () {
-                              sound.playSfx();
-                              BaseNavigator.pop();
+                              sound.onButtonPressed();
+                              BaseNavigator.pushNamedAndclear(
+                                  HomeMenu.routeName);
                             },
                           )
                         ],
