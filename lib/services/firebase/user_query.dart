@@ -26,12 +26,17 @@ class UserQuery {
 
   Future<bool> saveUser(UserData user) async {
     try {
-      await firestore.collection("users").doc(user.id).set(user.toJson());
-      final result = await firestore.collection("users").doc(user.id).get();
-      if (result.exists) {
+      final check = await firestore.collection("users").doc(user.id).get();
+      if (check.exists) {
         return true;
       } else {
-        return false;
+        await firestore.collection("users").doc(user.id).set(user.toJson());
+        final result = await firestore.collection("users").doc(user.id).get();
+        if (result.exists) {
+          return true;
+        } else {
+          return false;
+        }
       }
     } catch (e) {
       return false;

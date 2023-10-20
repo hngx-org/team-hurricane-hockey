@@ -39,32 +39,18 @@ class GameService {
           "x": dx,
           "y": dy,
         };
-        // final standStill = {
-        //   "x": 0,
-        //   "y": 0,
-        // };
         await gameRoomRef.update({
           "player1_position": playerPosition,
         });
-        // await gameRoomRef.update({
-        //   "player1_position": standStill,
-        // });
       } else {
         //If player is player 2
         final playerPosition = {
           "x": dx,
           "y": dy,
         };
-        // final standStill = {
-        //   "x": 0,
-        //   "y": 0,
-        // };
         await gameRoomRef.update({
           "player2_position": playerPosition,
         });
-        // await gameRoomRef.update({
-        //   "player2_position": standStill,
-        // });
       }
     }
   }
@@ -85,29 +71,13 @@ class GameService {
               "id": userId,
               "name": userName,
               "score": 0,
-              "is_ready": true,
             },
             "player_id_2": {
               "id": opponentId,
               "name": opponentName,
               "score": 0,
-              "is_ready": true,
             },
           },
-          "ball_position": {
-            "x": 0,
-            "y": 0,
-          },
-          "player1_position": {
-            "x": 0,
-            "y": 0,
-          },
-          "player2_position": {
-            "x": 0,
-            "y": 0,
-          },
-          "status": "waiting",
-          "winner": "",
           "created_at": DateTime.now().toIso8601String(),
         });
 

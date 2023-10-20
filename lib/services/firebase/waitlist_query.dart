@@ -27,13 +27,10 @@ class WaitlistQuery {
   Future<bool> sendRequest(
     String id,
     String request,
-    String gameId,
   ) async {
     try {
       await firestore.collection("waitlist").doc(id).update({
-        "isAccepted": true,
-        "accepterId": request,
-        "gameId": gameId,
+        "request": request,
       });
       final result = await firestore.collection("waitlist").doc(id).get();
 
@@ -50,15 +47,32 @@ class WaitlistQuery {
   Future<bool> acceptRequest(
     String id,
     String request,
-    String gameId,
   ) async {
     try {
       await firestore.collection("waitlist").doc(id).update({
-        "isAccepted": true,
-        "accepterId": request,
-        "gameId": gameId,
+        "accepted": request,
       });
       final result = await firestore.collection("waitlist").doc(id).get();
+
+      if (result.exists) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> sendGameId(
+    String opponentId,
+    String gameId,
+  ) async {
+    try {
+      await firestore.collection("waitlist").doc(opponentId).update({
+        "gameId": gameId,
+      });
+      final result = await firestore.collection("waitlist").doc(opponentId).get();
 
       if (result.exists) {
         return true;

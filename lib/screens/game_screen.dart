@@ -11,15 +11,17 @@ import 'package:team_hurricane_hockey/enums.dart';
 import 'package:team_hurricane_hockey/models/game.dart';
 import 'package:team_hurricane_hockey/models/player.dart';
 import 'package:team_hurricane_hockey/models/puck.dart';
+import 'package:team_hurricane_hockey/models/server/game_event.dart' as Event;
 import 'package:team_hurricane_hockey/providers/my_provider.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
-import 'package:team_hurricane_hockey/screens/home_menu.dart';
+import 'package:team_hurricane_hockey/screens/home/home_menu.dart';
 import 'package:team_hurricane_hockey/screens/provider/game_provider.dart';
 import 'package:team_hurricane_hockey/screens/widgets/button.dart';
 import 'package:team_hurricane_hockey/screens/widgets/center_circe.dart';
 import 'package:team_hurricane_hockey/screens/widgets/player.dart';
 import 'package:team_hurricane_hockey/screens/widgets/spaces.dart';
 import 'package:team_hurricane_hockey/services/firebase/game_service.dart';
+import 'package:team_hurricane_hockey/services/web_socket_service.dart/socket_service.dart';
 import 'package:team_hurricane_hockey/sound_control.dart';
 
 class GameScreen extends StatefulWidget {
@@ -57,8 +59,7 @@ class _MyHomePageState extends State<GameScreen> {
     sound.initWallSfx();
     sound.initFinalWhistle();
 
-    final paddleColorProvider =
-        Provider.of<PaddleColorProvider>(context, listen: false);
+    final paddleColorProvider = Provider.of<PaddleColorProvider>(context, listen: false);
     if (widget.gameMode == GameMode.ai) {
       player1 = Player(
         name: "Computer",
@@ -101,8 +102,6 @@ class _MyHomePageState extends State<GameScreen> {
   }
 
   getGameDetails() async {
-    // final paddleColorProvider = Provider.of<PaddleColorProvider>(context, listen: false);
-
     if (widget.gameId == null) {
       return;
     }
@@ -111,32 +110,24 @@ class _MyHomePageState extends State<GameScreen> {
 
       if (serverGame != null) {
         game = serverGame;
-        // if (game?.players?.playerId1?.id == widget.playerId) {
-        //   player2 = Player(
-        //     name: game!.players!.playerId1!.name!,
-        //     color: paddleColorProvider.player2Color,
-        //   );
-
-        //   player1 = Player(
-        //     name: game!.players!.playerId2!.name!,
-        //     color: paddleColorProvider.player1Color,
-        //   );
-        // } else {
-        //   player2 = Player(
-        //     name: game!.players!.playerId2!.name!,
-        //     color: paddleColorProvider.player2Color,
-        //   );
-
-        //   player1 = Player(
-        //     name: game!.players!.playerId1!.name!,
-        //     color: paddleColorProvider.player1Color,
-        //   );
-        // }
       } else {
         game = Game(
           players: Players(),
         );
       }
+
+      await SocketService.instance.initSocketConnection("8");
+      SocketService.instance.connectAndListen(
+        // On data received from the socket connection
+        (data) async {
+          final event = Event.GameEvent.fromJson(data);
+          print(event.toJson());
+        },
+        // On error received from the socket connection
+        (error) async {},
+        // On error received from the socket connection when it is cancelled
+        () async {},
+      );
     }
   }
 
@@ -178,18 +169,15 @@ class _MyHomePageState extends State<GameScreen> {
     required double minY,
     required double maxY,
   }) async {
-    final gridX =
-        ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
-    final gridY =
-        ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
+    final gridX = ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
+    final gridY = ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
     /**
      * Get grid to send to DB 
      */
     final verticalGrid = (top / gridY).ceilToDouble();
     final horizontalGrid = (left / gridX).ceilToDouble();
 
-    if (!(lastKnownX == horizontalGrid.toDouble() &&
-        lastKnownY == verticalGrid.toDouble())) {
+    if (!(lastKnownX == horizontalGrid.toDouble() && lastKnownY == verticalGrid.toDouble())) {
       if (widget.gameId != null && widget.gameMode == GameMode.multiplayer) {
         GameService.instance.updatePaddleMovement(
           widget.gameId!,
@@ -232,9 +220,7 @@ class _MyHomePageState extends State<GameScreen> {
       } else {
         player.left = player.left;
       }
-      player.left = player.left < (tableWidth - (playerSize.w + 7.w))
-          ? player.left
-          : (tableWidth - (playerSize.w + 7.w));
+      player.left = player.left < (tableWidth - (playerSize.w + 7.w)) ? player.left : (tableWidth - (playerSize.w + 7.w));
       player.top += dy;
       if (player.top <= 7.w) {
         player.top = 7.w;
@@ -268,18 +254,14 @@ class _MyHomePageState extends State<GameScreen> {
 
     player.left = gridX * (xGrids - dx);
     player.left = player.left <= 7.w ? 7.w : player.left;
-    player.left = player.left < (tableWidth - playerSize.w + 7.w)
-        ? player.left
-        : (tableWidth - playerSize.w + 7.w);
+    player.left = player.left < (tableWidth - playerSize.w + 7.w) ? player.left : (tableWidth - playerSize.w + 7.w);
 
     player.top = (gridY * (yGrids - dy));
     player.top = player.top > 7.w ? player.top : 7.w;
     if (player.top == gridY) {
       player.top = 7.w;
     } else {
-      player.top = player.top > (tableHeight / 2 - (playerSize.w + 7.w))
-          ? (tableHeight / 2 - (playerSize.w + 7.w))
-          : player1.top;
+      player.top = player.top > (tableHeight / 2 - (playerSize.w + 7.w)) ? (tableHeight / 2 - (playerSize.w + 7.w)) : player1.top;
     }
   }
 
@@ -295,17 +277,14 @@ class _MyHomePageState extends State<GameScreen> {
       } else {
         player.left = player.left;
       }
-      player.left = player.left < (tableWidth - (playerSize.w + 7.w))
-          ? player.left
-          : (tableWidth - (playerSize.w + 7.w));
+      player.left = player.left < (tableWidth - (playerSize.w + 7.w)) ? player.left : (tableWidth - (playerSize.w + 7.w));
       player.top += dy;
       if (player.top <= 7.w) {
         player.top = 7.w;
       } else {
         player.top = player.top;
       }
-      if (player.top > tableHeight / 2 &&
-          player.top >= tableHeight - (playerSize.w + 7.w)) {
+      if (player.top > tableHeight / 2 && player.top >= tableHeight - (playerSize.w + 7.w)) {
         player.top = tableHeight - (playerSize.w + 7.w);
       } else if (player.top > tableHeight / 2) {
         player.top = player2.top;
@@ -340,11 +319,8 @@ class _MyHomePageState extends State<GameScreen> {
     ySpeed = 0;
     showStartText = true;
 
-    if (((widget.gameMode == GameMode.ai ||
-                widget.gameMode == GameMode.player2) &&
-            player1.score == p.gameEndsAt) ||
-        (widget.gameMode == GameMode.multiplayer &&
-            player1.score == gameEndsAt)) {
+    if (((widget.gameMode == GameMode.ai || widget.gameMode == GameMode.player2) && player1.score == p.gameEndsAt) ||
+        (widget.gameMode == GameMode.multiplayer && player1.score == gameEndsAt)) {
       blowFinalWhistle();
       turn = player1.name;
       gameIsFinished = true;
@@ -352,24 +328,19 @@ class _MyHomePageState extends State<GameScreen> {
           context: BaseNavigator.currentContext,
           barrierColor: Colors.black.withOpacity(0.8),
           builder: (context) {
-            return gameCompleteDialog(
-                gameCompleteDialogTitle: "${player1.name} Wins");
+            return gameCompleteDialog(gameCompleteDialogTitle: "${player1.name} Wins");
           });
 
       // textStartFontSize *= 2;
-    } else if (((widget.gameMode == GameMode.ai ||
-                widget.gameMode == GameMode.player2) &&
-            player2.score == p.gameEndsAt) ||
-        (widget.gameMode == GameMode.multiplayer &&
-            player2.score == gameEndsAt)) {
+    } else if (((widget.gameMode == GameMode.ai || widget.gameMode == GameMode.player2) && player2.score == p.gameEndsAt) ||
+        (widget.gameMode == GameMode.multiplayer && player2.score == gameEndsAt)) {
       blowFinalWhistle();
       gameIsFinished = true;
       return showDialog(
           context: BaseNavigator.currentContext,
           barrierColor: Colors.black.withOpacity(0.8),
           builder: (context) {
-            return gameCompleteDialog(
-                gameCompleteDialogTitle: "${player2.name} Wins");
+            return gameCompleteDialog(gameCompleteDialogTitle: "${player2.name} Wins");
           });
 
       // turn = player2.name;
@@ -407,8 +378,7 @@ class _MyHomePageState extends State<GameScreen> {
           children: [
             TextButton.icon(
               style: TextButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                 side: const BorderSide(
                   color: Colors.white,
                   width: 1.0,
@@ -442,10 +412,7 @@ class _MyHomePageState extends State<GameScreen> {
               },
               label: Text(
                 'PLAY AGAIN',
-                style: Theme.of(context)
-                    .textTheme
-                    .labelMedium!
-                    .copyWith(fontSize: 18.sp),
+                style: Theme.of(context).textTheme.labelMedium!.copyWith(fontSize: 18.sp),
               ),
               icon: const Icon(
                 Icons.refresh_sharp,
@@ -456,8 +423,7 @@ class _MyHomePageState extends State<GameScreen> {
             TextButton.icon(
               style: TextButton.styleFrom(
                 elevation: 0,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                 side: const BorderSide(
                   color: Colors.white,
                   width: 1.0,
@@ -475,10 +441,7 @@ class _MyHomePageState extends State<GameScreen> {
               },
               label: Text(
                 'BACK TO MENU',
-                style: Theme.of(context)
-                    .textTheme
-                    .labelMedium!
-                    .copyWith(fontSize: 18.sp),
+                style: Theme.of(context).textTheme.labelMedium!.copyWith(fontSize: 18.sp),
               ),
               icon: const Icon(
                 Icons.menu,
@@ -544,8 +507,7 @@ class _MyHomePageState extends State<GameScreen> {
     // }
     // Check if the ball is inside the goalpost area.
     if ((ball.top <= 0 || ball.bottom >= tableHeight) &&
-        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) ||
-            (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
+        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) || (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
     } else if (ball.top <= 0 || ball.bottom >= tableHeight) {
       ySpeed = -ySpeed;
     } else {
@@ -571,13 +533,10 @@ class _MyHomePageState extends State<GameScreen> {
   }
 
   void updateAI() {
-    //print(ball.centerX);
-    if ((ball.centerX - player1.centerX) < playerSize &&
-        tableWidth - ball.centerX < 40) {
+    if ((ball.centerX - player1.centerX) < playerSize && tableWidth - ball.centerX < 40) {
       player1.left -= Random().nextDouble() * 20;
       player1.top -= Random().nextDouble() * 20;
-    } else if ((ball.centerX - player1.centerX) < playerSize &&
-        ball.centerX < 40) {
+    } else if ((ball.centerX - player1.centerX) < playerSize && ball.centerX < 40) {
       player1.left += Random().nextDouble() * 20;
       player1.top -= Random().nextDouble() * 20;
     } else {
@@ -615,10 +574,8 @@ class _MyHomePageState extends State<GameScreen> {
     }
 
     // Limit the paddle's movement within the game boundaries
-    player1.left =
-        max(min(player1.left, tableWidth - (playerSize + ballSize)), 0);
-    player1.top = max(
-        min(player1.top, (tableHeight / 2) - 100), (playerRadius + ballSize));
+    player1.left = max(min(player1.left, tableWidth - (playerSize + ballSize)), 0);
+    player1.top = max(min(player1.top, (tableHeight / 2) - 100), (playerRadius + ballSize));
   }
 
   void handlePaddleCollision(Player player) {
@@ -809,45 +766,37 @@ class _MyHomePageState extends State<GameScreen> {
                             );
                           }
                           if (widget.gameMode == GameMode.multiplayer) {
-                            return StreamBuilder(
-                              stream: FirebaseFirestore.instance
-                                  .collection("playing")
-                                  .doc(widget.gameId)
-                                  .snapshots(),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData) {
-                                  final game =
-                                      Game.fromJson(snapshot.data!.data()!);
-                                  if (game.players?.playerId1?.id ==
-                                      widget.playerId) {
-                                    WidgetsBinding.instance
-                                        .addPostFrameCallback((t) {
-                                      movePlayer1Multiplayer(
-                                        player1,
-                                        game.player2Position!.x!.toDouble(),
-                                        game.player2Position!.y!.toDouble(),
-                                      );
-                                      setState(() {});
-                                    });
-                                  } else if (game.players?.playerId2?.id ==
-                                      widget.playerId) {
-                                    WidgetsBinding.instance
-                                        .addPostFrameCallback((t) {
-                                      movePlayer1Multiplayer(
-                                        player1,
-                                        game.player1Position!.x!.toDouble(),
-                                        game.player1Position!.y!.toDouble(),
-                                      );
-                                      setState(() {});
-                                    });
-                                  }
-                                }
+                            // movePlayer1Multiplayer(
+                            //   player1,
+                            //   game.player2Position!.x!.toDouble(),
+                            //   game.player2Position!.y!.toDouble(),
+                            // );
 
-                                return PlayerChip(
-                                  player: player1,
-                                );
-                              },
+                            return PlayerChip(
+                              player: player1,
                             );
+                            // return StreamBuilder(
+                            //   stream: FirebaseFirestore.instance.collection("playing").doc(widget.gameId).snapshots(),
+                            //   builder: (context, snapshot) {
+                            //     if (snapshot.hasData) {
+                            //       final game = Game.fromJson(snapshot.data!.data() ?? {});
+                            //       if (game.players?.playerId1?.id == widget.playerId) {
+                            //         WidgetsBinding.instance.addPostFrameCallback((t) {
+                            //           setState(() {});
+                            //         });
+                            //       } else if (game.players?.playerId2?.id == widget.playerId) {
+                            //         WidgetsBinding.instance.addPostFrameCallback((t) {
+                            //           // movePlayer1Multiplayer(
+                            //           //   player1,
+                            //           //   game.player1Position!.x!.toDouble(),
+                            //           //   game.player1Position!.y!.toDouble(),
+                            //           // );
+                            //           setState(() {});
+                            //         });
+                            //       }
+                            //     }
+                            //   },
+                            // );
                           }
                           return PlayerChip(
                             player: player1,
@@ -967,9 +916,7 @@ class _MyHomePageState extends State<GameScreen> {
                           textStart,
                           style: TextStyle(
                             fontSize: textStartFontSize,
-                            color: turn == player1.name
-                                ? player1.color
-                                : player2.color,
+                            color: turn == player1.name ? player1.color : player2.color,
                           ),
                         ),
                       ),
@@ -984,16 +931,11 @@ class _MyHomePageState extends State<GameScreen> {
                           ball.left += xSpeed;
                           ball.top += ySpeed;
 
-                          if (ball.left <= 0 ||
-                              ball.right >= tableWidth ||
-                              ball.top <= 0 ||
-                              ball.bottom >= tableHeight) {
+                          if (ball.left <= 0 || ball.right >= tableWidth || ball.top <= 0 || ball.bottom >= tableHeight) {
                             // Check if the ball is rolling through the top or bottom
 
-                            bool isRollingThroughTop =
-                                ball.top <= 0 && ySpeed < 0;
-                            bool isRollingThroughBottom =
-                                ball.bottom >= tableHeight && ySpeed > 0;
+                            bool isRollingThroughTop = ball.top <= 0 && ySpeed < 0;
+                            bool isRollingThroughBottom = ball.bottom >= tableHeight && ySpeed > 0;
 
                             if (isRollingThroughTop || isRollingThroughBottom) {
                             } else {
@@ -1059,22 +1001,12 @@ class _MyHomePageState extends State<GameScreen> {
                           "PAUSED",
                         ),
                       ),
-                      titleTextStyle: Theme.of(context)
-                          .textTheme
-                          .labelMedium!
-                          .copyWith(
-                              fontSize: 36.sp,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.blue),
+                      titleTextStyle: Theme.of(context).textTheme.labelMedium!.copyWith(fontSize: 36.sp, fontWeight: FontWeight.w900, color: Colors.blue),
                       content: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Button(
-                            child: Text("RESUME",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelMedium!
-                                    .copyWith(fontSize: 18.sp)),
+                            child: Text("RESUME", style: Theme.of(context).textTheme.labelMedium!.copyWith(fontSize: 18.sp)),
                             onTap: () {
                               setState(() {
                                 sound.playSfx();
@@ -1090,10 +1022,7 @@ class _MyHomePageState extends State<GameScreen> {
                           Button(
                             child: Text(
                               "QUIT",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelMedium!
-                                  .copyWith(fontSize: 18.sp),
+                              style: Theme.of(context).textTheme.labelMedium!.copyWith(fontSize: 18.sp),
                             ),
                             onTap: () {
                               sound.playSfx();
