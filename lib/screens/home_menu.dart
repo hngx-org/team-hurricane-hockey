@@ -271,10 +271,8 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
-    sound.startBgMusic();
+    if (p.isMusicPlaying) sound.startBgMusic();
     sound.loadSfx();
-    // if (p.isMusicPlaying) controller.startBgMusic();
-    // if (p.isSfxOn) controller.initSfx();
     super.initState();
   }
 

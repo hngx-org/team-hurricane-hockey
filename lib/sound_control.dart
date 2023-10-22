@@ -1,6 +1,5 @@
 import 'package:flame_audio/flame_audio.dart';
 import 'package:provider/provider.dart';
-import 'package:team_hurricane_hockey/data/shared_prefences.dart';
 import 'package:team_hurricane_hockey/providers/my_provider.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
 
@@ -113,14 +112,12 @@ import 'package:team_hurricane_hockey/router/base_navigator.dart';
 //   }
 // }
 
-final prefs = AppSharedPreferences.instance;
-
 const bgMusic = 'bg_music.mp3';
 const sfx = 'menu_select.mp3';
 const paddleSfx = 'paddle.mp3';
 const wallSfx = 'wall.mp3';
 const goalSfx = 'goal.mp3';
-// const goalWhistle = 'goal_whistle.mp3';
+
 const finalWhistle = 'final_whistle.mp3';
 
 class SoundControl {
@@ -135,10 +132,10 @@ class SoundControl {
 
   Future<void> toggleBgMusic() async {
     if (!p.isMusicPlaying) {
-      FlameAudio.bgm.resume();
+      FlameAudio.bgm.play(bgMusic);
       p.updateBgMusicState(true);
     } else {
-      FlameAudio.bgm.pause();
+      FlameAudio.bgm.stop();
       p.updateBgMusicState(false);
     }
   }
@@ -161,7 +158,6 @@ class SoundControl {
 
   void onGoal() {
     FlameAudio.play(goalSfx, volume: p.sfxVolume);
-    // FlameAudio.play(goalWhistle, volume: p.sfxVolume);
   }
 
   void onGameComplete() {
