@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
-import 'package:team_hurricane_hockey/screens/home_menu.dart';
+import 'package:team_hurricane_hockey/screens/home/home_menu.dart';
 
 class SplashScreen extends StatefulWidget {
   static const routeName = "splash";

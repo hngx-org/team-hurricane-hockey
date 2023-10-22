@@ -26,6 +26,8 @@ dependencies:
   cloud_firestore: ^4.9.3
   cupertino_icons: ^1.0.2
   firebase_auth: ^4.10.1
+  dio: ^5.3.3
+  retrofit: ^4.0.3
   firebase_core: ^2.17.0
   flutter:
     sdk: flutter
@@ -39,10 +41,14 @@ dependencies:
   uuid: ^4.1.0
   font_awesome_flutter: ^10.5.0
   flame_audio: ^2.1.2
+  web_socket_channel: ^2.4.0
+
 
 
 dev_dependencies:
   flutter_lints: ^2.0.0
+  build_runner: ^2.4.6
+  retrofit_generator: ^8.0.1
   flutter_test:
     sdk: flutter
 
