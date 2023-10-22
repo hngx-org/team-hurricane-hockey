@@ -262,7 +262,6 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
   }
 
   SoundControl sound = SoundControl();
-  // SoundControl controller = SoundControl();
   final p = Provider.of<MyProvider>(BaseNavigator.currentContext);
   final _vsAI = 'AI';
   final _vsOnline = 'Multiplayer';
@@ -271,32 +270,14 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
-    if (p.isMusicPlaying) sound.startBgMusic();
+    if (p.isMusicPlaying) sound.initialPlayBgMusic();
     sound.loadSfx();
     super.initState();
   }
 
   @override
   void dispose() async {
-    WidgetsBinding.instance.removeObserver(this);
-    // await bgMusic.stop();
-    // bgMusic.dispose();
-    // sfx.dispose();
-    // finalWhistle.dispose();
-    // goalWhistle.dispose();
-    // paddleSfx.dispose();
-
     super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
-      // bgMusic.pause();
-    } else if (state == AppLifecycleState.resumed) {
-      // if (p.isMusicPlaying) bgMusic.resume();
-    }
   }
 
   @override
@@ -344,7 +325,6 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                           duration: const Duration(milliseconds: 200),
                           child: TextButton(
                             onPressed: () {
-                              // controller.playSfx();
                               sound.onButtonPressed();
                               BaseNavigator.pushNamed(GameModeScreen.routeName);
                               p.updateVsMode(_vsAI);
@@ -420,7 +400,6 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                           child: TextButton(
                             onPressed: () {
                               sound.onButtonPressed();
-                              // controller.playSfx();
                               BaseNavigator.pushNamed(GameModeScreen.routeName);
                               p.updateVsMode(_vsLocal);
                             },
@@ -436,7 +415,6 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                           child: TextButton(
                             onPressed: () {
                               sound.onButtonPressed();
-                              // controller.playSfx();
                               showDialog(
                                 context: context,
                                 builder: (context) {

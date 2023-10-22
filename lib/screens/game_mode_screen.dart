@@ -51,7 +51,6 @@ class _GameModeScreenState extends State<GameModeScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                //  mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Center(
                     child: FittedBox(
@@ -75,10 +74,10 @@ class _GameModeScreenState extends State<GameModeScreen> {
                       TextButton(
                         onPressed: () {
                           sound.onButtonPressed();
-                          // controller.playSfx();
                           if (p.vsMode == _vsAI) {
                             BaseNavigator.pushNamed(DifficultyScreen.routeName);
                           } else if (p.vsMode == _vsLocal) {
+                            sound.stopBgm();
                             BaseNavigator.pushNamed(
                               GameScreen.routeName,
                               args: {
@@ -110,10 +109,10 @@ class _GameModeScreenState extends State<GameModeScreen> {
                       TextButton(
                         onPressed: () {
                           sound.onButtonPressed();
-                          // controller.playSfx();
                           if (p.vsMode == _vsAI) {
                             BaseNavigator.pushNamed(DifficultyScreen.routeName);
                           } else if (p.vsMode == _vsLocal) {
+                            sound.stopBgm();
                             BaseNavigator.pushNamed(
                               GameScreen.routeName,
                               args: {
@@ -144,10 +143,10 @@ class _GameModeScreenState extends State<GameModeScreen> {
                       TextButton(
                         onPressed: () {
                           sound.onButtonPressed();
-                          // controller.playSfx();
                           if (p.vsMode == _vsAI) {
                             BaseNavigator.pushNamed(DifficultyScreen.routeName);
                           } else if (p.vsMode == _vsLocal) {
+                            sound.stopBgm();
                             BaseNavigator.pushNamed(
                               GameScreen.routeName,
                               args: {
@@ -198,7 +197,6 @@ class _GameModeScreenState extends State<GameModeScreen> {
                             ),
                             onTap: () {
                               sound.onButtonPressed();
-                              // controller.playSfx();
                               BaseNavigator.pop();
                             }),
                       ),

@@ -42,7 +42,6 @@ class _DifficultyScreenState extends State<DifficultyScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                //  mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Center(
                     child: FittedBox(
@@ -66,7 +65,7 @@ class _DifficultyScreenState extends State<DifficultyScreen> {
                       TextButton(
                         onPressed: () {
                           sound.onButtonPressed();
-                          // controller.playSfx();
+                          sound.stopBgm();
                           BaseNavigator.pushNamedAndReplace(
                             GameScreen.routeName,
                             args: {
@@ -85,8 +84,8 @@ class _DifficultyScreenState extends State<DifficultyScreen> {
                       ),
                       TextButton(
                         onPressed: () {
+                          sound.stopBgm();
                           sound.onButtonPressed();
-                          // controller.playSfx();
                           BaseNavigator.pushNamedAndReplace(
                             GameScreen.routeName,
                             args: {
@@ -106,7 +105,7 @@ class _DifficultyScreenState extends State<DifficultyScreen> {
                       TextButton(
                         onPressed: () {
                           sound.onButtonPressed();
-                          // controller.playSfx();
+                          sound.stopBgm();
                           BaseNavigator.pushNamedAndReplace(
                             GameScreen.routeName,
                             args: {
@@ -146,7 +145,6 @@ class _DifficultyScreenState extends State<DifficultyScreen> {
                             ),
                             onTap: () {
                               sound.onButtonPressed();
-                              // controller.playSfx();
                               BaseNavigator.pop();
                             }),
                       ),
