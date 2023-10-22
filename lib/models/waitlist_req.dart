@@ -5,8 +5,8 @@ class Waitlist {
   final String? name;
   final String? gameId;
   final bool? isReady;
-  final bool? isAccepted;
-  final String? accepterId;
+  final String? accepted;
+  final String? request;
 
   Waitlist({
     this.image,
@@ -15,8 +15,8 @@ class Waitlist {
     this.name,
     this.gameId,
     this.isReady,
-    this.isAccepted,
-    this.accepterId,
+    this.accepted,
+    this.request,
   });
 
   factory Waitlist.fromJson(Map<String, dynamic> json) => Waitlist(
@@ -26,8 +26,8 @@ class Waitlist {
         name: json["name"],
         gameId: json["gameId"],
         isReady: json["isReady"],
-        isAccepted: json["isAccepted"],
-        accepterId: json["accepterId"],
+        accepted: json["accepted"],
+        request: json["request"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -37,7 +37,7 @@ class Waitlist {
         "name": name,
         "gameId": gameId,
         "isReady": isReady,
-        "isAccepted": isAccepted,
-        "accepterId": accepterId,
+        "accepted": accepted,
+        "request": request,
       };
 }
