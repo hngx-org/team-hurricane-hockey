@@ -37,7 +37,7 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
   final _vsAI = 'AI';
   final _vsOnline = 'Multiplayer';
   final _vsLocal = 'Player2';
-  bool multiPlayerPressed = false;
+  ValueNotifier multiPlayerPressed = ValueNotifier(false);
 
   @override
   void initState() {
@@ -178,41 +178,57 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                           ),
                         ),
                         SizedBox(height: 24.0.h),
-                        FadeInRightBig(
-                          duration: const Duration(milliseconds: 400),
-                          child: TextButton(
-                            onPressed: () async {
-                              print(multiPlayerPressed);
-                              if (multiPlayerPressed) {
-                                return;
-                              } else {
-                                multiPlayerPressed = true;
-                                setState(() {});
-                                Waitlist waitlist = Waitlist(
-                                  name: user?.name,
-                                  id: user?.id,
-                                  image: user?.image,
-                                  email: user?.email,
-                                  isReady: true,
-                                );
-                                if (user == null) {
-                                  final data = await googleLogin();
-                                  if (data != null) {
-                                    multiplayerProcess(waitlist);
+                        ValueListenableBuilder(
+                          valueListenable: multiPlayerPressed,
+                          builder: (context, pressed, _) {
+                            if (pressed) {
+                              return FadeInRightBig(
+                                duration: const Duration(milliseconds: 400),
+                                child: TextButton(
+                                  onPressed: () async {},
+                                  child: Text(
+                                    'MULTIPLAYER',
+                                    style: Theme.of(context).textTheme.labelMedium,
+                                  ),
+                                ),
+                              );
+                            }
+                            return FadeInRightBig(
+                              duration: const Duration(milliseconds: 400),
+                              child: TextButton(
+                                onPressed: () async {
+                                  if (pressed) {
+                                    return;
+                                  } else {
+                                    multiPlayerPressed.value = true;
+                                    setState(() {});
+                                    Waitlist waitlist = Waitlist(
+                                      name: user?.name,
+                                      id: user?.id,
+                                      image: user?.image,
+                                      email: user?.email,
+                                      isReady: true,
+                                    );
+                                    if (user == null) {
+                                      final data = await googleLogin();
+                                      if (data != null) {
+                                        multiplayerProcess(waitlist);
+                                      }
+                                    } else {
+                                      multiplayerProcess(waitlist);
+                                    }
+                                    p.updateVsMode(_vsOnline);
+                                    multiPlayerPressed.value = false;
+                                    setState(() {});
                                   }
-                                } else {
-                                  multiplayerProcess(waitlist);
-                                }
-                                p.updateVsMode(_vsOnline);
-                                multiPlayerPressed = false;
-                                setState(() {});
-                              }
-                            },
-                            child: Text(
-                              'MULTIPLAYER',
-                              style: Theme.of(context).textTheme.labelMedium,
-                            ),
-                          ),
+                                },
+                                child: Text(
+                                  'MULTIPLAYER',
+                                  style: Theme.of(context).textTheme.labelMedium,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                         SizedBox(height: 24.0.h),
                         FadeInRightBig(

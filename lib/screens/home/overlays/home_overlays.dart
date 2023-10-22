@@ -198,8 +198,7 @@ class HomeOverlays {
                                               data.id!,
                                             );
 
-                                            // final s = await _gameDioRepo.createGame();
-                                            const s = 20;
+                                            final s = await _gameDioRepo.createGame();
                                             if (s != null) {
                                               final gameCreation = await GameService.instance.createGame(
                                                 s.toString(),

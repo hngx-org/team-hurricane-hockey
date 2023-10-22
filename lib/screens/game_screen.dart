@@ -152,18 +152,12 @@ class _MyHomePageState extends State<GameScreen> {
             receivingBallData(ev);
           },
           // On error received from the socket connection
-          (error) async {
-            print("error: $error");
-          },
+          (error) async {},
           // On error received from the socket connection when it is cancelled
-          () async {
-            print("socket closed");
-          },
+          () async {},
         );
       }
-    } catch (e) {
-      print(e);
-    }
+    } catch (_) {}
   }
 
   // player 1 & 2 and ball variables
