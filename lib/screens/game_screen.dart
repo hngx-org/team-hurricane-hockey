@@ -1,7 +1,10 @@
+// ignore_for_file: prefer_conditional_assignment, use_build_context_synchronously
+
+import 'dart:async';
+import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:math';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -11,7 +14,7 @@ import 'package:team_hurricane_hockey/enums.dart';
 import 'package:team_hurricane_hockey/models/game.dart';
 import 'package:team_hurricane_hockey/models/player.dart';
 import 'package:team_hurricane_hockey/models/puck.dart';
-import 'package:team_hurricane_hockey/models/server/game_event.dart' as Event;
+import 'package:team_hurricane_hockey/models/server/game_event.dart' as m_event;
 import 'package:team_hurricane_hockey/providers/my_provider.dart';
 import 'package:team_hurricane_hockey/router/base_navigator.dart';
 import 'package:team_hurricane_hockey/screens/home/home_menu.dart';
@@ -30,6 +33,7 @@ class GameScreen extends StatefulWidget {
   final String? playerId;
   final String? opponentId;
   final double? speed;
+  final bool? isPlayer2;
 
   const GameScreen({
     Key? key,
@@ -38,6 +42,7 @@ class GameScreen extends StatefulWidget {
     this.playerId,
     this.opponentId,
     this.speed,
+    this.isPlayer2,
   }) : super(key: key);
   static const routeName = 'gameScreen';
 
@@ -49,6 +54,14 @@ class _MyHomePageState extends State<GameScreen> {
   Game? game;
   final sound = SoundControl();
   final p = Provider.of<MyProvider>(BaseNavigator.currentContext);
+  m_event.GameEvent? event;
+  @override
+  void dispose() {
+    if (widget.gameMode == GameMode.multiplayer) {
+      SocketService.instance.closeConnection();
+    }
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -81,17 +94,28 @@ class _MyHomePageState extends State<GameScreen> {
         color: paddleColorProvider.player2Color,
       );
     } else {
-      player1 = Player(
-        name: "Player 1",
-        color: paddleColorProvider.player1Color,
-      );
+      if (widget.isPlayer2 == true) {
+        player1 = Player(
+          name: widget.opponentId!,
+          color: paddleColorProvider.player1Color,
+        );
 
-      player2 = Player(
-        name: "Player 2",
-        color: paddleColorProvider.player2Color,
-      );
+        player2 = Player(
+          name: widget.playerId!,
+          color: paddleColorProvider.player2Color,
+        );
+      } else {
+        player1 = Player(
+          name: widget.opponentId!,
+          color: paddleColorProvider.player1Color,
+        );
+
+        player2 = Player(
+          name: widget.playerId!,
+          color: paddleColorProvider.player2Color,
+        );
+      }
     }
-
     ball = Puck(
       name: paddleColorProvider.puckColor.toString(),
       color: paddleColorProvider.puckColor,
@@ -102,32 +126,43 @@ class _MyHomePageState extends State<GameScreen> {
   }
 
   getGameDetails() async {
-    if (widget.gameId == null) {
-      return;
-    }
-    if (widget.gameMode == GameMode.multiplayer) {
-      final serverGame = await GameService.instance.getGame(widget.gameId!);
+    try {
+      if (widget.gameId == null) {
+        return;
+      }
+      if (widget.gameMode == GameMode.multiplayer) {
+        final serverGame = await GameService.instance.getGame(widget.gameId!);
 
-      if (serverGame != null) {
-        game = serverGame;
-      } else {
-        game = Game(
-          players: Players(),
+        if (serverGame != null) {
+          game = serverGame;
+        } else {
+          game = Game(
+            players: Players(),
+          );
+        }
+
+        await SocketService.instance.initSocketConnection(widget.gameId!);
+        SocketService.instance.connectAndListen(
+          // On data received from the socket connection
+          (data) async {
+            final decoded = jsonDecode(data);
+            final ev = m_event.GameEvent.fromJson(decoded["data"]);
+            event = ev;
+            receivingData(ev);
+            receivingBallData(ev);
+          },
+          // On error received from the socket connection
+          (error) async {
+            print("error: $error");
+          },
+          // On error received from the socket connection when it is cancelled
+          () async {
+            print("socket closed");
+          },
         );
       }
-
-      await SocketService.instance.initSocketConnection("8");
-      SocketService.instance.connectAndListen(
-        // On data received from the socket connection
-        (data) async {
-          final event = Event.GameEvent.fromJson(data);
-          print(event.toJson());
-        },
-        // On error received from the socket connection
-        (error) async {},
-        // On error received from the socket connection when it is cancelled
-        () async {},
-      );
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -140,6 +175,9 @@ class _MyHomePageState extends State<GameScreen> {
     name: "Player 2",
     color: Colors.blue,
   );
+
+  double player1MutiplayerScore = 0;
+  double player2MutiplayerScore = 0;
 
   Puck ball = Puck(
     name: "ball",
@@ -158,42 +196,171 @@ class _MyHomePageState extends State<GameScreen> {
   double lastKnownX = 0;
   double lastKnownY = 0;
 
+  double lastKnownBallX = 0;
+  double lastKnownBallY = 0;
+
   double lastKnownOppX = 0;
   double lastKnownOppY = 0;
 
   final goalWidth = 160.0.w;
 
-  gridSizingFunction({
-    required double left,
-    required double top,
-    required double minY,
-    required double maxY,
-  }) async {
-    final gridX = ((MediaQuery.of(context).size.width - 14.w) / 5).ceilToDouble();
-    final gridY = ((MediaQuery.of(context).size.height - 14.w) / 11).ceilToDouble();
-    /**
-     * Get grid to send to DB 
-     */
-    final verticalGrid = (top / gridY).ceilToDouble();
-    final horizontalGrid = (left / gridX).ceilToDouble();
+  double accumulatedX = 0.0;
+  double accumulatedY = 0.0;
 
-    if (!(lastKnownX == horizontalGrid.toDouble() && lastKnownY == verticalGrid.toDouble())) {
+  double accumulatedBallMovementX = 0.0;
+  double accumulatedBallMovementY = 0.0;
+
+  Timer? sendTimer;
+  Timer? ballTimer;
+
+  Future transferBallMovement({
+    required double dx,
+    required double dy,
+  }) async {
+    if (!(lastKnownBallX == dy.toDouble() && lastKnownBallY == dy.toDouble())) {
       if (widget.gameId != null && widget.gameMode == GameMode.multiplayer) {
-        GameService.instance.updatePaddleMovement(
-          widget.gameId!,
-          widget.playerId!,
-          horizontalGrid,
-          verticalGrid,
-        );
+        if (game?.players?.playerId1?.id == widget.playerId) {
+          //If I'm player 1 from the firebase db
+          m_event.GameEvent event = m_event.GameEvent(
+            events: m_event.Events(
+              ballPosition: m_event.Position(
+                x: dx.toInt(),
+                y: dy.toInt(),
+              ),
+              player1Position: m_event.Position(
+                x: lastKnownX.toInt(),
+                y: lastKnownY.toInt(),
+              ),
+              player2Position: m_event.Position(
+                x: lastKnownOppX.toInt(),
+                y: lastKnownOppY.toInt(),
+              ),
+              gameStatus: "playing",
+              player1: m_event.Player(
+                id: 1,
+                name: game?.players?.playerId1?.id,
+                score: player1MutiplayerScore.toInt(),
+              ),
+              player2: m_event.Player(
+                id: 2,
+                name: game?.players?.playerId2?.id,
+                score: player2MutiplayerScore.toInt(),
+              ),
+              gameRule: 10,
+            ),
+          );
+          await SocketService.instance.sendData(event);
+        } else {
+          //If I'm player 2 from the firebase db
+          m_event.GameEvent event = m_event.GameEvent(
+            events: m_event.Events(
+              ballPosition: m_event.Position(
+                x: dx.toInt(),
+                y: dy.toInt(),
+              ),
+              player1Position: m_event.Position(
+                x: lastKnownOppX.toInt(),
+                y: lastKnownOppY.toInt(),
+              ),
+              player2Position: m_event.Position(
+                x: lastKnownX.toInt(),
+                y: lastKnownY.toInt(),
+              ),
+              gameStatus: "playing",
+              player1: m_event.Player(
+                id: 1,
+                name: game?.players?.playerId1?.id,
+                score: player1MutiplayerScore.toInt(),
+              ),
+              player2: m_event.Player(
+                id: 2,
+                name: game?.players?.playerId2?.id,
+                score: player2MutiplayerScore.toInt(),
+              ),
+              gameRule: 10,
+            ),
+          );
+          await SocketService.instance.sendData(event);
+        }
       }
     }
-    lastKnownX = horizontalGrid.toDouble();
-    lastKnownY = verticalGrid.toDouble();
-    /**
-     * On getting the grid, multiply the (phoneWidth -14.w / 5).toCeiling on X and (phoneHeight -14.w / 11).toCeiling on Y
-     * On getting on other phone
-     * 11 - verticalGrid
-     * */
+    lastKnownBallX = dx.toDouble();
+    lastKnownBallY = dy.toDouble();
+  }
+
+  transfer({
+    required double dx,
+    required double dy,
+  }) async {
+    if (!(lastKnownX == dy.toDouble() && lastKnownY == dy.toDouble())) {
+      if (widget.gameId != null && widget.gameMode == GameMode.multiplayer) {
+        if (game?.players?.playerId1?.id == widget.playerId) {
+          //If I'm player 1 from the firebase db
+          m_event.GameEvent event = m_event.GameEvent(
+            events: m_event.Events(
+              ballPosition: m_event.Position(
+                x: lastKnownBallX.toInt(),
+                y: lastKnownBallY.toInt(),
+              ),
+              player1Position: m_event.Position(
+                x: dx.toInt(),
+                y: dy.toInt(),
+              ),
+              player2Position: m_event.Position(
+                x: lastKnownOppX.toInt(),
+                y: lastKnownOppY.toInt(),
+              ),
+              gameStatus: showStartText == true ? "Waiting" : "playing",
+              player1: m_event.Player(
+                id: 1,
+                name: game?.players?.playerId1?.id,
+                score: player1MutiplayerScore.toInt(),
+              ),
+              player2: m_event.Player(
+                id: 2,
+                name: game?.players?.playerId2?.id,
+                score: player2MutiplayerScore.toInt(),
+              ),
+              gameRule: 10,
+            ),
+          );
+          SocketService.instance.sendData(event);
+        } else {
+          //If I'm player 2 from the firebase db
+          m_event.GameEvent event = m_event.GameEvent(
+            events: m_event.Events(
+              ballPosition: m_event.Position(
+                x: lastKnownBallX.toInt(),
+                y: lastKnownBallY.toInt(),
+              ),
+              player1Position: m_event.Position(
+                x: lastKnownOppX.toInt(),
+                y: lastKnownOppY.toInt(),
+              ),
+              player2Position: m_event.Position(
+                x: dx.toInt(),
+                y: dy.toInt(),
+              ),
+              gameStatus: showStartText == true ? "Waiting" : "playing",
+              player1: m_event.Player(
+                id: 1,
+                name: game?.players?.playerId1?.id,
+                score: player1MutiplayerScore.toInt(),
+              ),
+              player2: m_event.Player(
+                id: 2,
+                name: game?.players?.playerId2?.id,
+                score: player2MutiplayerScore.toInt(),
+              ),
+              gameRule: 10,
+            ),
+          );
+          SocketService.instance.sendData(event);
+        }
+      }
+    }
+    lastKnownX = dx.toDouble();
+    lastKnownY = dy.toDouble();
   }
 
   // table attributes
@@ -241,28 +408,176 @@ class _MyHomePageState extends State<GameScreen> {
     double dx,
     double dy,
   ) async {
-    if (lastKnownOppX == dx && lastKnownOppY == dy) {
-      return;
+    if (mounted) {
+      player.left += dx;
+      if (player.left <= 7.w) {
+        player.left = 7.w;
+      } else {
+        player.left = player.left;
+      }
+      player.left = player.left < (tableWidth - (playerSize.w + 7.w)) ? player.left : (tableWidth - (playerSize.w + 7.w));
+      player.top += dy;
+      if (player.top <= 7.w) {
+        player.top = 7.w;
+      } else {
+        player.top = player.top;
+      }
+
+      if (player.top > tableHeight / 2 - (playerSize.w + 7.w)) {
+        player.top = tableHeight / 2 - (playerSize.w + 7.w);
+      } else {
+        player.top = player.top;
+      }
+    }
+  }
+
+  moveMeMp(
+    Player player,
+    double dx,
+    double dy,
+  ) async {
+    if (mounted) {
+      player.left += dx;
+      if (player.left <= 7.w) {
+        player.left = 7.w;
+      } else {
+        player.left = player.left;
+      }
+      player.left = player.left < (tableWidth - (playerSize.w + 7.w)) ? player.left : (tableWidth - (playerSize.w + 7.w));
+      player.top += dy;
+      if (player.top <= 7.w) {
+        player.top = 7.w;
+      } else {
+        player.top = player.top;
+      }
+      if (player.top > tableHeight / 2 && player.top >= tableHeight - (playerSize.w + 7.w)) {
+        player.top = tableHeight - (playerSize.w + 7.w);
+      } else if (player.top > tableHeight / 2) {
+        player.top = player2.top;
+      } else {
+        player.top = tableHeight / 2;
+      }
+    }
+  }
+
+  moveBallMultiplayer(
+    double dx,
+    double dy,
+  ) async {
+    if (mounted) {
+      accumulatedBallMovementX += dx;
+      accumulatedBallMovementY += dy;
+
+      if (ballTimer == null) {
+        ballTimer = Timer(
+          const Duration(milliseconds: 100),
+          () async {
+            await transferBallMovement(
+              dx: accumulatedBallMovementX,
+              dy: accumulatedBallMovementY,
+            ).then((value) async {
+              ball.left += accumulatedBallMovementX;
+              ball.top += accumulatedBallMovementY;
+            });
+
+            accumulatedBallMovementX = 0.0;
+            accumulatedBallMovementY = 0.0;
+            ballTimer = null;
+          },
+        );
+      }
+    }
+  }
+
+  movePlayer2Multiplayer(
+    Player player,
+    double dx,
+    double dy,
+  ) async {
+    if (mounted) {
+      accumulatedX += dx;
+      accumulatedY += dy;
+      if (sendTimer == null) {
+        sendTimer = Timer(
+          const Duration(milliseconds: 250),
+          () async {
+            await transfer(
+              dx: accumulatedX,
+              dy: accumulatedY,
+            );
+            accumulatedX = 0.0;
+            accumulatedY = 0.0;
+            sendTimer = null;
+          },
+        );
+      }
+    }
+  }
+
+  moveBall(
+    Puck ball,
+    double dx,
+    double dy,
+  ) async {
+    if (mounted) {
+      if (turn != widget.playerId) {
+        ball.left += dx;
+        ball.top += dy;
+      }
+    }
+  }
+
+  receivingBallData(m_event.GameEvent event) async {
+    if (event.events?.gameStatus == "playing") {
+      showStartText = false;
+      setState(() {});
     }
 
-    final gridX = ((tableWidth - 14.w) / 5).ceilToDouble();
-    final gridY = ((tableHeight - 14.w) / 11).ceilToDouble();
-    const xGrids = 5;
-    const yGrids = 11;
-    lastKnownOppX = dx;
-    lastKnownOppY = dy;
-
-    player.left = gridX * (xGrids - dx);
-    player.left = player.left <= 7.w ? 7.w : player.left;
-    player.left = player.left < (tableWidth - playerSize.w + 7.w) ? player.left : (tableWidth - playerSize.w + 7.w);
-
-    player.top = (gridY * (yGrids - dy));
-    player.top = player.top > 7.w ? player.top : 7.w;
-    if (player.top == gridY) {
-      player.top = 7.w;
+    if (turn != widget.playerId) {
+      moveBall(
+        ball,
+        -event.events!.ballPosition!.x!.toDouble().w,
+        -event.events!.ballPosition!.y!.toDouble().h,
+      );
     } else {
-      player.top = player.top > (tableHeight / 2 - (playerSize.w + 7.w)) ? (tableHeight / 2 - (playerSize.w + 7.w)) : player1.top;
+      ball.left += event.events!.ballPosition!.x!.toDouble().w;
+      ball.top += event.events!.ballPosition!.y!.toDouble().h;
     }
+
+    setState(() {});
+  }
+
+  receivingData(m_event.GameEvent event) async {
+    if (event.events?.player1?.name == widget.playerId) {
+      /// I'm player 1 on server so move player 2 on my device
+      moveMeMp(
+        player2,
+        event.events!.player1Position!.x!.toDouble().w,
+        event.events!.player1Position!.y!.toDouble().h,
+      );
+
+      /// opponent is player 2 on server so I move player 1 on my device
+      movePlayer1Multiplayer(
+        player1,
+        -event.events!.player2Position!.x!.toDouble().w,
+        -event.events!.player2Position!.y!.toDouble().h,
+      );
+    } else {
+      /// I'm player 2 on server so move player 2 on my device
+      moveMeMp(
+        player2,
+        event.events!.player2Position!.x!.toDouble().w,
+        event.events!.player2Position!.y!.toDouble().h,
+      );
+
+      /// opponent is player 1 on server so I move player 1 on my device
+      movePlayer1Multiplayer(
+        player1,
+        -event.events!.player1Position!.x!.toDouble().w,
+        -event.events!.player1Position!.y!.toDouble().h,
+      );
+    }
+    setState(() {});
   }
 
   movePlayer2(
@@ -291,13 +606,6 @@ class _MyHomePageState extends State<GameScreen> {
       } else {
         player.top = tableHeight / 2;
       }
-
-      gridSizingFunction(
-        left: player.left,
-        top: player.top,
-        minY: tableHeight / 2,
-        maxY: tableHeight - (playerSize.h + 7.w),
-      );
     }
   }
 
@@ -400,8 +708,6 @@ class _MyHomePageState extends State<GameScreen> {
                 player1.top = playerSize * 1.2;
                 player2.left = tableWidth / 2 - playerRadius;
                 player2.top = tableHeight - (playerSize * 2.5);
-                // textStartLeft = tableWidth / 2 - textStartWidth / 2;
-                // textStartTop = tableHeight / 2 - textStartHeight / 2;
                 ball.left = tableWidth / 2 - ballRadius;
                 ball.top = tableHeight / 2 - ballRadius;
                 turn = math.Random().nextBool() ? player1.name : player2.name;
@@ -473,6 +779,62 @@ class _MyHomePageState extends State<GameScreen> {
 
   void blowFinalWhistle() {
     sound.onGameFinished();
+  }
+
+  void doTheMathWorkMultiplayer() async {
+    player1.right = player1.left + playerSize;
+    player1.bottom = player1.top + playerSize;
+    player1.centerX = player1.left + playerRadius;
+    player1.centerY = player1.top + playerRadius;
+    player2.right = player2.left + playerSize;
+    player2.bottom = player2.top + playerSize;
+    player2.centerX = player2.left + playerRadius;
+    player2.centerY = player2.top + playerRadius;
+    ball.right = ball.left + ball.size;
+    ball.bottom = ball.top + ball.size;
+    ball.centerX = ball.left + ballRadius;
+    ball.centerY = ball.top + ballRadius;
+
+    // Calculate the left and right bounds of the goalpost.
+    double goalLeft1 = (tableWidth - goalWidth) / 2;
+    double goalRight1 = goalLeft1 + goalWidth;
+    double goalLeft2 = tableWidth / 2 - goalWidth / 2;
+    double goalRight2 = goalLeft2 + goalWidth;
+    if (ball.top <= -20 || ball.bottom >= tableHeight + 20) {
+      playGoalSound(); // Play a sound when the ball passes the left goalpost
+    }
+
+    // Check if the ball has crossed the right goalpost
+    // if (ball.left <= goalRight1 &&
+    //     ball.right >= goalRight1 &&
+    //     (ball.top <= player1.top || ball.bottom >= player1.bottom)) {
+    //   playGoalSound(); // Play a sound when the ball passes the right goalpost
+    // }
+    // Check if the ball is inside the goalpost area.
+    if ((ball.top <= 0 || ball.bottom >= tableHeight) &&
+        ((ball.centerX >= goalLeft1 && ball.centerX <= goalRight1) || (ball.centerX >= goalLeft2 && ball.centerX <= goalRight2))) {
+    } else if (ball.top <= 0 || ball.bottom >= tableHeight) {
+      ySpeed = -ySpeed;
+    } else {
+      distanceBall2P1 = pythagoras(
+        ball.centerX - player1.centerX,
+        ball.centerY - player1.centerY,
+      );
+      distanceBall2P2 = pythagoras(
+        ball.centerX - player2.centerX,
+        ball.centerY - player2.centerY,
+      );
+
+      // Player1 (top player) calculations
+      if (distanceBall2P1 <= playerRadius + ballRadius) {
+        handlePaddleCollision(player1);
+      }
+
+      // Player2 (bottom player) calculations
+      else if (distanceBall2P2 <= playerRadius + ballRadius) {
+        handlePaddleCollision(player2);
+      }
+    }
   }
 
   void doTheMathWork() async {
@@ -628,8 +990,8 @@ class _MyHomePageState extends State<GameScreen> {
     if (!gameIsStarted) {
       player1.score = 0;
       player2.score = 0;
-      tableWidth = sWidth - 3.w;
-      tableHeight = sHeight - 3.w;
+      tableWidth = sWidth - 14.w;
+      tableHeight = sHeight - 14.w;
       player1.left = sWidth / 2 - playerRadius;
       player1.top = playerSize * 1.2;
       player2.left = sWidth / 2 - playerRadius;
@@ -638,7 +1000,17 @@ class _MyHomePageState extends State<GameScreen> {
       textStartTop = tableHeight / 2 - textStartHeight / 2;
       ball.left = sWidth / 2 - ballRadius;
       ball.top = sHeight / 2 - ballRadius;
-      turn = math.Random().nextBool() ? player1.name : player2.name;
+      if (widget.gameMode == GameMode.multiplayer) {
+        if (event == null) {
+          if (widget.isPlayer2 == true) {
+            turn = player1.name;
+          } else {
+            turn = player2.name;
+          }
+        } else {}
+      } else {
+        turn = math.Random().nextBool() ? player1.name : player2.name;
+      }
       gameIsStarted = true;
     } else {
       if (widget.gameMode == GameMode.ai && !isPaused) {
@@ -674,7 +1046,6 @@ class _MyHomePageState extends State<GameScreen> {
                   ],
                 ),
               ),
-
               // Goal Area Container with Borders
               Positioned(
                 left: 0, // Align to the left edge of the table
@@ -713,16 +1084,25 @@ class _MyHomePageState extends State<GameScreen> {
               // player2 (bottom player)
               !gameIsFinished
                   ? AnimatedPositioned(
-                      duration: const Duration(milliseconds: 80),
+                      duration: Duration(milliseconds: widget.gameMode == GameMode.multiplayer ? 200 : 80),
                       left: player2.left,
                       top: player2.top,
                       child: GestureDetector(
                         onPanUpdate: (details) {
-                          movePlayer2(
-                            player2,
-                            details.delta.dx,
-                            details.delta.dy,
-                          );
+                          if (widget.gameMode == GameMode.multiplayer) {
+                            movePlayer2Multiplayer(
+                              player2,
+                              details.delta.dx.h,
+                              details.delta.dy.w,
+                            );
+                          } else {
+                            movePlayer2(
+                              player2,
+                              details.delta.dx,
+                              details.delta.dy,
+                            );
+                          }
+
                           setState(() {});
                         },
                         onPanEnd: (details) {
@@ -730,9 +1110,11 @@ class _MyHomePageState extends State<GameScreen> {
                           player2.shotY = 0;
                           setState(() {});
                         },
-                        child: PlayerChip(
-                          player: player2,
-                        ),
+                        child: Builder(builder: (context) {
+                          return PlayerChip(
+                            player: player2,
+                          );
+                        }),
                       ),
                     )
                   : const SizedBox.shrink(),
@@ -740,7 +1122,7 @@ class _MyHomePageState extends State<GameScreen> {
               // player1 (top player)
               !gameIsFinished
                   ? AnimatedPositioned(
-                      duration: const Duration(milliseconds: 100),
+                      duration: Duration(milliseconds: widget.gameMode == GameMode.multiplayer ? 200 : 100),
                       left: player1.left,
                       top: player1.top,
                       child: Builder(
@@ -764,39 +1146,6 @@ class _MyHomePageState extends State<GameScreen> {
                                 player: player1,
                               ),
                             );
-                          }
-                          if (widget.gameMode == GameMode.multiplayer) {
-                            // movePlayer1Multiplayer(
-                            //   player1,
-                            //   game.player2Position!.x!.toDouble(),
-                            //   game.player2Position!.y!.toDouble(),
-                            // );
-
-                            return PlayerChip(
-                              player: player1,
-                            );
-                            // return StreamBuilder(
-                            //   stream: FirebaseFirestore.instance.collection("playing").doc(widget.gameId).snapshots(),
-                            //   builder: (context, snapshot) {
-                            //     if (snapshot.hasData) {
-                            //       final game = Game.fromJson(snapshot.data!.data() ?? {});
-                            //       if (game.players?.playerId1?.id == widget.playerId) {
-                            //         WidgetsBinding.instance.addPostFrameCallback((t) {
-                            //           setState(() {});
-                            //         });
-                            //       } else if (game.players?.playerId2?.id == widget.playerId) {
-                            //         WidgetsBinding.instance.addPostFrameCallback((t) {
-                            //           // movePlayer1Multiplayer(
-                            //           //   player1,
-                            //           //   game.player1Position!.x!.toDouble(),
-                            //           //   game.player1Position!.y!.toDouble(),
-                            //           // );
-                            //           setState(() {});
-                            //         });
-                            //       }
-                            //     }
-                            //   },
-                            // );
                           }
                           return PlayerChip(
                             player: player1,
@@ -873,7 +1222,12 @@ class _MyHomePageState extends State<GameScreen> {
               ),
               !gameIsFinished
                   ? AnimatedPositioned(
-                      duration: const Duration(milliseconds: 15),
+                      duration: Duration(
+                          milliseconds: widget.gameMode == GameMode.multiplayer
+                              ? turn != widget.playerId
+                                  ? 30
+                                  : 80
+                              : 30),
                       left: ball.left,
                       top: ball.top,
                       child: Container(
@@ -924,60 +1278,118 @@ class _MyHomePageState extends State<GameScreen> {
                         if (gameIsFinished) {
                           return;
                         }
-                        xSpeed = math.Random().nextBool() ? 1.2 : -1.2;
-                        ySpeed = turn == player1.name ? 1.2 : -1.2;
-                        showStartText = false;
-                        while (mounted) {
-                          ball.left += xSpeed;
-                          ball.top += ySpeed;
 
-                          if (ball.left <= 0 || ball.right >= tableWidth || ball.top <= 0 || ball.bottom >= tableHeight) {
-                            // Check if the ball is rolling through the top or bottom
+                        if (widget.gameMode == GameMode.multiplayer) {
+                          if (turn != widget.playerId) {
+                            return;
+                          }
+                          xSpeed = math.Random().nextBool() ? 1.2 : -1.2;
+                          ySpeed = turn == widget.opponentId ? 1.2 : -1.2;
 
-                            bool isRollingThroughTop = ball.top <= 0 && ySpeed < 0;
-                            bool isRollingThroughBottom = ball.bottom >= tableHeight && ySpeed > 0;
+                          while (mounted) {
+                            if (turn == widget.playerId) {
+                              await moveBallMultiplayer(
+                                xSpeed,
+                                ySpeed,
+                              );
 
-                            if (isRollingThroughTop || isRollingThroughBottom) {
-                            } else {
-                              playWallSound(); // Play a sound when the ball hits the border
+                              if (ball.left <= 0 || ball.right >= tableWidth || ball.top <= 0 || ball.bottom >= tableHeight) {
+                                // Check if the ball is rolling through the top or bottom
+
+                                bool isRollingThroughTop = ball.top <= 0 && ySpeed < 0;
+                                bool isRollingThroughBottom = ball.bottom >= tableHeight && ySpeed > 0;
+
+                                if (isRollingThroughTop || isRollingThroughBottom) {
+                                } else {
+                                  playWallSound(); // Play a sound when the ball hits the border
+                                }
+                              }
+
+                              if (ball.left > (tableWidth - ballSize)) {
+                                xSpeed = (-1) * (xSpeed.abs());
+                              } else if (ball.left <= 7.w) {
+                                xSpeed = (xSpeed.abs());
+                              }
+
+                              if (ball.top > tableHeight - ballSize / 3) {
+                                player1.left = sWidth / 2 - playerRadius;
+                                player1.top = playerSize * 1.2;
+                                player2.left = sWidth / 2 - playerRadius;
+                                player2.top = sHeight - (playerSize * 2.5);
+                                ball.left = sWidth / 2 - ballRadius;
+                                ball.top = (sHeight / 2) - ballRadius - 50;
+                                setState(() {});
+                                nextRound(player1.name);
+                                break;
+                              } else if (ball.top <= 0 - ballSize * 2 / 3) {
+                                player1.left = sWidth / 2 - playerRadius;
+                                player1.top = playerSize * 1.2;
+                                player2.left = sWidth / 2 - playerRadius;
+                                player2.top = sHeight - (playerSize * 2.5);
+                                ball.left = sWidth / 2 - ballRadius;
+                                ball.top = (sHeight / 2) - ballRadius - 50;
+                                nextRound(player2.name);
+                                break;
+                              }
+
+                              doTheMathWork();
+                              await Future.delayed(const Duration(milliseconds: 1));
+                              if (mounted) {
+                                setState(() {});
+                              }
                             }
                           }
+                        } else {
+                          xSpeed = math.Random().nextBool() ? 1.2 : -1.2;
+                          ySpeed = turn == player1.name ? 1.2 : -1.2;
+                          showStartText = false;
+                          while (mounted) {
+                            ball.left += xSpeed;
+                            ball.top += ySpeed;
 
-                          if (ball.left > tableWidth - ballSize) {
-                            xSpeed = (-1) * (xSpeed.abs());
-                          } else if (ball.left <= 0) {
-                            xSpeed = xSpeed.abs();
-                          }
-                          if (ball.top > tableHeight - ballSize / 3) {
-                            player1.left = sWidth / 2 - playerRadius;
-                            player1.top = playerSize * 1.2;
-                            player2.left = sWidth / 2 - playerRadius;
-                            player2.top = sHeight - (playerSize * 2.5);
-                            ball.left = sWidth / 2 - ballRadius;
-                            ball.top = (sHeight / 2) - ballRadius - 50;
-                            setState(() {});
-                            nextRound(player1.name);
-                            break;
-                          } else if (ball.top <= 0 - ballSize * 2 / 3) {
-                            player1.left = sWidth / 2 - playerRadius;
-                            player1.top = playerSize * 1.2;
-                            player2.left = sWidth / 2 - playerRadius;
-                            player2.top = sHeight - (playerSize * 2.5);
-                            ball.left = sWidth / 2 - ballRadius;
-                            ball.top = (sHeight / 2) - ballRadius - 50;
-                            nextRound(player2.name);
-                            break;
-                          }
-                          // if (ball.left == 0 ||
-                          //     ball.right == tableWidth ||
-                          //     ball.top == 0 ||
-                          //     ball.bottom == tableHeight) {
-                          //   playWallSound();
-                          // }
-                          doTheMathWork();
-                          await Future.delayed(const Duration(milliseconds: 1));
-                          if (mounted) {
-                            setState(() {});
+                            if (ball.left <= 0 || ball.right >= tableWidth || ball.top <= 0 || ball.bottom >= tableHeight) {
+                              // Check if the ball is rolling through the top or bottom
+
+                              bool isRollingThroughTop = ball.top <= 0 && ySpeed < 0;
+                              bool isRollingThroughBottom = ball.bottom >= tableHeight && ySpeed > 0;
+
+                              if (isRollingThroughTop || isRollingThroughBottom) {
+                              } else {
+                                playWallSound(); // Play a sound when the ball hits the border
+                              }
+                            }
+
+                            if (ball.left > tableWidth - ballSize) {
+                              xSpeed = (-1) * (xSpeed.abs());
+                            } else if (ball.left <= 0) {
+                              xSpeed = xSpeed.abs();
+                            }
+                            if (ball.top > tableHeight - ballSize / 3) {
+                              player1.left = sWidth / 2 - playerRadius;
+                              player1.top = playerSize * 1.2;
+                              player2.left = sWidth / 2 - playerRadius;
+                              player2.top = sHeight - (playerSize * 2.5);
+                              ball.left = sWidth / 2 - ballRadius;
+                              ball.top = (sHeight / 2) - ballRadius - 50;
+                              setState(() {});
+                              nextRound(player1.name);
+                              break;
+                            } else if (ball.top <= 0 - ballSize * 2 / 3) {
+                              player1.left = sWidth / 2 - playerRadius;
+                              player1.top = playerSize * 1.2;
+                              player2.left = sWidth / 2 - playerRadius;
+                              player2.top = sHeight - (playerSize * 2.5);
+                              ball.left = sWidth / 2 - ballRadius;
+                              ball.top = (sHeight / 2) - ballRadius - 50;
+                              nextRound(player2.name);
+                              break;
+                            }
+
+                            doTheMathWork();
+                            await Future.delayed(const Duration(milliseconds: 1));
+                            if (mounted) {
+                              setState(() {});
+                            }
                           }
                         }
                       },

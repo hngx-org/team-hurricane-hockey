@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:team_hurricane_hockey/models/server/game_event.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -25,17 +27,17 @@ class SocketService {
     Function() onDone,
   ) async {
     socket.stream.listen(
-      (event) async => data,
-      onError: (error) async => await error,
+      (event) async => data(event),
+      onError: (err) async => await error(err),
       onDone: () async => onDone,
     );
   }
 
   sendData(GameEvent event) {
-    socket.sink.add(event.toJson());
+    socket.sink.add(jsonEncode(event));
   }
 
-  closeConnection(GameEvent event) {
+  closeConnection() {
     socket.sink.close(status.goingAway);
   }
 }

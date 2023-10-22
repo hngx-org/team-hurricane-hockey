@@ -37,6 +37,7 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
   final _vsAI = 'AI';
   final _vsOnline = 'Multiplayer';
   final _vsLocal = 'Player2';
+  bool multiPlayerPressed = false;
 
   @override
   void initState() {
@@ -105,17 +106,18 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
     if (s) {
       final s = await HomeOverlays().wailistDialog(user!);
       WaitlistQuery.instance.deleteUserOnWaitlist(user!.id!);
-      if (s != null) {
-        await Future.delayed(const Duration(milliseconds: 10));
-        BaseNavigator.pushNamed(
-          GameScreen.routeName,
-          args: {
-            "gameId": s["gameId"],
-            "mode": GameMode.multiplayer,
-            "opponentId": s["opponentId"],
-            "playerId": user!.id!,
-          },
-        );
+      if (mounted) {
+        if (s != null) {
+          await Future.delayed(const Duration(milliseconds: 100)).then((value) async {
+            Navigator.pushNamed(context, GameScreen.routeName, arguments: {
+              "gameId": s["gameId"],
+              "mode": GameMode.multiplayer,
+              "opponentId": s["opponentId"],
+              "playerId": user!.id!,
+              "isPlayer2": s["player2"],
+            });
+          });
+        }
       }
     }
   }
@@ -180,22 +182,31 @@ class _HomeMenuState extends State<HomeMenu> with WidgetsBindingObserver {
                           duration: const Duration(milliseconds: 400),
                           child: TextButton(
                             onPressed: () async {
-                              Waitlist waitlist = Waitlist(
-                                name: user?.name,
-                                id: user?.id,
-                                image: user?.image,
-                                email: user?.email,
-                                isReady: true,
-                              );
-                              if (user == null) {
-                                final data = await googleLogin();
-                                if (data != null) {
+                              print(multiPlayerPressed);
+                              if (multiPlayerPressed) {
+                                return;
+                              } else {
+                                multiPlayerPressed = true;
+                                setState(() {});
+                                Waitlist waitlist = Waitlist(
+                                  name: user?.name,
+                                  id: user?.id,
+                                  image: user?.image,
+                                  email: user?.email,
+                                  isReady: true,
+                                );
+                                if (user == null) {
+                                  final data = await googleLogin();
+                                  if (data != null) {
+                                    multiplayerProcess(waitlist);
+                                  }
+                                } else {
                                   multiplayerProcess(waitlist);
                                 }
-                              } else {
-                                multiplayerProcess(waitlist);
+                                p.updateVsMode(_vsOnline);
+                                multiPlayerPressed = false;
+                                setState(() {});
                               }
-                              p.updateVsMode(_vsOnline);
                             },
                             child: Text(
                               'MULTIPLAYER',

@@ -105,10 +105,10 @@ class HomeOverlays {
                             }
 
                             if (userWaitlist != null) {
-                              if (userWaitlist!.gameId != null) {
+                              if (userWaitlist!.gameId != null && data.accepted == user.id) {
                                 BaseNavigator.pop({
                                   "status": true,
-                                  "gameId": data.gameId,
+                                  "gameId": userWaitlist!.gameId,
                                   "opponentId": data.id,
                                   "opponentName": data.name,
                                   "player2": true,
@@ -128,12 +128,16 @@ class HomeOverlays {
                                   data.id!,
                                 );
                               },
-                              leading: ClipRRect(
-                                borderRadius: BorderRadius.circular(1000),
-                                child: Image.network(
-                                  data.image ?? "",
-                                  height: 36,
-                                  width: 36,
+                              leading: SizedBox(
+                                height: 36,
+                                width: 36,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(1000),
+                                  child: Image.network(
+                                    data.image ?? "",
+                                    height: 36,
+                                    width: 36,
+                                  ),
                                 ),
                               ),
                               title: Text(
@@ -194,10 +198,11 @@ class HomeOverlays {
                                               data.id!,
                                             );
 
-                                            final s = await _gameDioRepo.createGame();
+                                            // final s = await _gameDioRepo.createGame();
+                                            const s = 20;
                                             if (s != null) {
                                               final gameCreation = await GameService.instance.createGame(
-                                                s,
+                                                s.toString(),
                                                 data.id!,
                                                 data.name!,
                                                 user.id!,
@@ -205,10 +210,10 @@ class HomeOverlays {
                                               );
 
                                               if (gameCreation) {
-                                                final sendCode = await WaitlistQuery.instance.sendGameId(data.id!, s);
+                                                final sendCode = await WaitlistQuery.instance.sendGameId(data.id!, s.toString());
                                                 if (sendCode) {
                                                   BaseNavigator.pop({
-                                                    "status": true,
+                                                    "status": false,
                                                     "gameId": s,
                                                     "opponentId": data.id,
                                                     "opponentName": data.name,
