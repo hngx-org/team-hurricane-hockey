@@ -8,6 +8,7 @@ class MyProvider extends ChangeNotifier {
   final prefs = AppSharedPreferences.instance;
 
   double sfxVolume = 1.0;
+  
 
   int gameEndsAt = 0;
 

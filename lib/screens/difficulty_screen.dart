@@ -16,7 +16,7 @@ class DifficultyScreen extends StatefulWidget {
 }
 
 class _DifficultyScreenState extends State<DifficultyScreen> {
-  SoundControl controller = SoundControl();
+  SoundControl sound = SoundControl();
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion(
@@ -65,7 +65,8 @@ class _DifficultyScreenState extends State<DifficultyScreen> {
                     children: [
                       TextButton(
                         onPressed: () {
-                          controller.playSfx();
+                          sound.onButtonPressed();
+                          // controller.playSfx();
                           BaseNavigator.pushNamedAndReplace(
                             GameScreen.routeName,
                             args: {
@@ -84,7 +85,8 @@ class _DifficultyScreenState extends State<DifficultyScreen> {
                       ),
                       TextButton(
                         onPressed: () {
-                          controller.playSfx();
+                          sound.onButtonPressed();
+                          // controller.playSfx();
                           BaseNavigator.pushNamedAndReplace(
                             GameScreen.routeName,
                             args: {
@@ -103,7 +105,8 @@ class _DifficultyScreenState extends State<DifficultyScreen> {
                       ),
                       TextButton(
                         onPressed: () {
-                          controller.playSfx();
+                          sound.onButtonPressed();
+                          // controller.playSfx();
                           BaseNavigator.pushNamedAndReplace(
                             GameScreen.routeName,
                             args: {
@@ -142,7 +145,8 @@ class _DifficultyScreenState extends State<DifficultyScreen> {
                               ],
                             ),
                             onTap: () {
-                              controller.playSfx();
+                              sound.onButtonPressed();
+                              // controller.playSfx();
                               BaseNavigator.pop();
                             }),
                       ),

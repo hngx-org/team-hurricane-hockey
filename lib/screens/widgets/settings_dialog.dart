@@ -14,7 +14,7 @@ class SettingsDialog extends StatefulWidget {
 }
 
 class _SettingsDialogState extends State<SettingsDialog> {
-  SoundControl controller = SoundControl();
+  SoundControl sound = SoundControl();
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +49,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 ),
               ),
               onPressed: () async {
-                controller.playSfx();
-                controller.toggleBgMusic();
+                sound.onButtonPressed();
+                sound.toggleBgMusic();
               },
               label: Text(
                 'BG MUSIC',
@@ -79,8 +79,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 ),
               ),
               onPressed: () {
-                controller.playSfx();
-                controller.toggleSfx();
+                sound.toggleSfx();
+                sound.onButtonPressed();
               },
               label: Text(
                 'SFX',
@@ -111,7 +111,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   ),
                 ),
               ),
-              onPressed: () {},
+              onPressed: () {
+                sound.onButtonPressed();
+              },
               child: FittedBox(
                 child: Text(
                   'SYNC WITH GOOGLE',
@@ -135,6 +137,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 ),
               ),
               onPressed: () {
+                sound.onButtonPressed();
                 BaseNavigator.pushNamed(PaddlesAndPuckScreen.routeName);
               },
               child: FittedBox(
@@ -160,7 +163,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 ),
               ),
               onPressed: () {
-                controller.playSfx();
+                sound.onButtonPressed();
                 BaseNavigator.pop();
               },
               label: Text(
