@@ -51,12 +51,6 @@ class _MyHomePageState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
-
-    // sound.initGoalSfx();
-    // sound.initPaddleSfx();
-    // sound.initWallSfx();
-    // sound.initFinalWhistle();
-
     final paddleColorProvider =
         Provider.of<PaddleColorProvider>(context, listen: false);
     if (widget.gameMode == GameMode.ai) {
@@ -471,6 +465,7 @@ class _MyHomePageState extends State<GameScreen> {
               ),
               onPressed: () {
                 sound.onButtonPressed();
+                sound.startBgm();
                 BaseNavigator.pushNamedAndclear(HomeMenu.routeName);
               },
               label: Text(
@@ -495,22 +490,6 @@ class _MyHomePageState extends State<GameScreen> {
   double pythagoras(double a, double b) {
     return math.sqrt(math.pow(a, 2).toDouble() + math.pow(b, 2).toDouble());
   }
-
-  // void playWallSound() {
-  //   sound.onWallCollision();
-  // }
-
-  // void playPaddleSound() {
-  //   sound.onPaddleCollision();
-  // }
-
-  // void playGoalSound() {
-  //   sound.onGoal();
-  // }
-
-  // void blowFinalWhistle() {
-  //   sound.onGameFinished();
-  // }
 
   void doTheMathWork() async {
     player1.right = player1.left + playerSize;
@@ -1099,6 +1078,7 @@ class _MyHomePageState extends State<GameScreen> {
                             ),
                             onTap: () {
                               sound.onButtonPressed();
+                              sound.startBgm();
                               BaseNavigator.pushNamedAndclear(
                                   HomeMenu.routeName);
                             },
